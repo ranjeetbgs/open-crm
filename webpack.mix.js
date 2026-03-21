@@ -16,10 +16,10 @@ const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 
-mix.js('resources/src/main.js', 'public')
-    .js('resources/src/login.js', 'public')
-    .js('resources/src/customer-display.js', 'public')
-    .vue()
+mix.js('resources/src/main.js', 'public/js')
+   .js('resources/src/login.js', 'public/js')
+   .js('resources/src/customer-display.js', 'public/js')
+   .vue();
 
     mix.webpackConfig({
         resolve: {
@@ -30,11 +30,7 @@ mix.js('resources/src/main.js', 'public')
         stats: {
             children: true
         },
-        output: {
-          
-            filename:'js/[name].min.js',
-            chunkFilename: 'js/bundle/[name].[hash].js',
-          },
+        
         module: {
             rules: [
                 {

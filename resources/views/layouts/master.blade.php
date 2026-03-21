@@ -33,7 +33,7 @@
 
     </div>
 
-<script src="{{ mix('js/main.min.js') }}"></script>
+<script src="{{ mix('js/main.js') }}"></script>
     <!-- <script src="/js/main.min.js?v=5.4&v={{ time() }}"></script> -->
 
   </body>
