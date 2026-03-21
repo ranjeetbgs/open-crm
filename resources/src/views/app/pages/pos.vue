@@ -83,6 +83,7 @@
           :filterable="true"
           :filter-by="filterCustomerByPhone"
           :clearable="true"
+          @search="onCustomerSearch"
           @input="onClientSelected(selectedClientId)"
         />
         <!-- Add Customer in POS (controlled by quick_add_customer toggle) -->
@@ -218,7 +219,7 @@
               v-if="offlineSalesCount > 0"
               class="offline-badge"
             >
-              {{ offlineSalesCount }}
+              {{ offlineSalesCount }} 
             </span>
           </button>
           <div class="dropdown action-btn-icon" v-if="show_language && isOnline">
@@ -443,7 +444,7 @@
                 </div>
               </div>
               <div class="charge-row no-border-bottom">
-                <label>{{$t('Shipping')}}</label>
+                <label>{{$t('Loyalty Card')}}</label>
                 <div class="charge-input-group">
                   <input v-model.number="sale.shipping" type="text" placeholder="0" @keyup="keyup_Shipping" class="flat-input" />
                   <span class="input-suffix">{{ currentUser.currency }}</span>
@@ -514,7 +515,7 @@
                 <span class="total-value discount-value">-{{ formatPriceWithCurrentCurrency(getCurrentSaleDiscountAmount(), 2) }}</span>
               </div>
               <div class="total-row">
-          <span class="total-label">{{$t('pos.Shipping')}}</span>
+          <span class="total-label">{{$t('pos.Loyalty_Card')}}</span>
                 <span class="total-value">{{ formatPriceWithCurrentCurrency(sale.shipping, 2) }}</span>
               </div>
               <div class="summary-divider"></div>
@@ -627,14 +628,16 @@
                       <br v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null">
                       <span v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null ">{{$t('IMEI_SN')}} : {{detail_invoice.imei_number}}</span>
                       <br>
-                      <span>{{formatNumber(detail_invoice.quantity,2)}} {{detail_invoice.unit_sale}} x {{ formatPriceDisplay(detail_invoice.total/detail_invoice.quantity,2) }}</span>
+                      <span>{{formatNumber(detail_invoice.quantity,2)}} {{detail_invoice.unit_sale}} X {{ formatPriceDisplay(detail_invoice.total/detail_invoice.quantity)}}</span>
                     </td>
                     <td style="text-align:right;vertical-align:bottom">
-                      {{ formatPriceDisplay(detail_invoice.total,2) }}
+                      {{ formatPriceDisplay(detail_invoice.total) }}
                     </td>
                   </tr>
 
-                  <!-- Subtotal (before tax/discount/shipping) -->
+                  
+
+                  <!-- Subtotal (before discount/shipping) -->
                   <tr style="margin-top:10px">
                     <td colspan="3" class="total">{{$t('pos.Subtotal')}}</td>
                     <td style="text-align:right;" class="total">
@@ -642,15 +645,10 @@
                     </td>
                   </tr>
 
-                  <tr style="margin-top:10px" v-show="pos_settings.show_tax">
-                    <td colspan="3" class="total">{{$t('OrderTax')}}</td>
-                    <td style="text-align:right;" class="total">
-                      {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.taxe ,2) }} ({{formatNumber(invoice_pos.sale.tax_rate,2)}} %)
-                    </td>
-                  </tr>
+                 
 
-                  <tr style="margin-top:10px" v-show="pos_settings.show_discount">
-                    <td colspan="3" class="total">{{$t('Discount')}}</td>
+                  <tr style="margin-top:10px" v-show="pos_settings.show_discount && calculatedManualDiscountAmount">
+                    <td colspan="3" class="total">{{$t('Discount')}} </td>
                     <td style="text-align:right;" class="total">
                       <!-- If percentage: show percent value AND discount amount; else amount only -->
                       <template v-if="String(invoice_pos.sale.discount_Method || '2') === '1'">
@@ -668,10 +666,28 @@
                     </td>
                   </tr>
 
-                  <tr style="margin-top:10px" v-show="pos_settings.show_shipping">
-                    <td colspan="3" class="total">{{$t('Shipping')}}</td>
+                  <tr style="margin-top:10px" v-show="pos_settings.show_shipping" v-if="+invoice_pos.sale.shipping">
+                    <td colspan="3" class="total">{{$t('Loyalty Card')}}</td>
                     <td style="text-align:right;" class="total">
                       {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.shipping ,2) }}
+                    </td>
+                  </tr>
+
+                   <!-- IGST and CGST -->
+                  <tr style="margin-top:10px" v-show="pos_settings.show_tax">
+                    <td colspan="3" class="total">{{$t('IGST')}}</td>
+                    <td style="text-align:right;" class="total">
+                      
+                     {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                    </td>
+                  </tr>
+                  
+                  <tr style="margin-top:10px" v-show="pos_settings.show_tax">
+                    <td colspan="3" class="total">{{$t('CGST')}}</td>
+                    <td style="text-align:right;" class="total">
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                      <!-- {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.taxe ,2) }} ({{formatNumber(invoice_pos.sale.tax_rate,2)}} %) -->
+                       
                     </td>
                   </tr>
 
@@ -845,7 +861,7 @@
                     </td>
                   </tr>
                   <tr v-show="pos_settings.show_shipping">
-                    <td class="total">{{$t('Shipping')}}</td>
+                    <td class="total">{{$t('Loyalty Card')}}</td>
                     <td style="text-align:right" class="total">
                       {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.shipping ,2) }}
                     </td>
@@ -1005,7 +1021,7 @@
                     </td>
                   </tr>
                   <tr v-show="pos_settings.show_shipping">
-                    <td class="total">{{$t('Shipping')}}</td>
+                    <td class="total">{{$t('Loyalty Card')}}</td>
                     <td style="text-align:right;" class="total">
                       {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.shipping ,2) }}
                     </td>
@@ -1564,8 +1580,16 @@
                 <p class="product-stock" v-if="product.product_type !== 'is_service' && pos_settings.show_stock_quantity">
                   {{ formatNumber(product.qte_sale, 2) }} {{ product.unitSale }}
                 </p>
+               
+                <div class="product-footer" v-if="product.discount">
+                  <del><span class="product-price">{{ formatPriceWithCurrentCurrency(product.Unit_price, 2) }} </span></del>
+                
+                  
+                </div>
+
                 <div class="product-footer">
-                  <span class="product-price">{{ formatPriceWithCurrentCurrency(product.Net_price, 2) }}</span>
+                
+                  <span class="product-price"> {{ formatPriceWithCurrentCurrency(product.Total_price, 2) }}</span>
                   <button class="add-to-cart-btn" @click.stop="handleProductClick(product)" :disabled="product.product_type !== 'is_service' && product.qte_sale <= 0" :title="$t('pos.Add_to_cart')">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path>
@@ -1819,7 +1843,7 @@ export default {
         page: 1,
         perPage: 10
       },
-
+      searchPhone: "",
       client_name:'',
       paymentLines: [
         { 
@@ -2065,7 +2089,7 @@ export default {
     // Customer options for v-select with phone search capability
     customerOptions() {
       return this.clients.map(client => ({
-        label: client.name,
+        label: client.name + " ("+client.phone+")" ,
         value: client.id,
         phone: client.phone || '',
         name: client.name || ''
@@ -2131,7 +2155,8 @@ export default {
         
         if (discountMethod === '1') {
           // Percentage discount on subtotal (manual discount only, no points)
-          return parseFloat((subtotal * (discountValue / 100)).toFixed(2));
+          return parseInt(subtotal * (discountValue / 100));
+          // return parseFloat((subtotal * (discountValue / 100)).toFixed(2));
         } else {
           // Fixed discount (manual discount only, no points)
           return parseFloat(Math.min(discountValue, subtotal).toFixed(2));
@@ -2346,6 +2371,11 @@ export default {
     this.paginate_products(this.product_perPage, 0);
   },
   methods: {
+
+    onCustomerSearch(search) {
+    if (search && search.trim() !== "") this.searchPhone = search
+    
+  },
     // Custom filter function for customer v-select to search by name and phone
     filterCustomerByPhone(option, label, search) {
       if (!search) return true;
@@ -3075,7 +3105,7 @@ export default {
         const pointsAmount = parseFloat(
           Math.min(Number(this.discount_from_points || 0), remainingAfterPercent).toFixed(2)
         );
-        discountAmount = percentAmount + pointsAmount;
+        discountAmount = parseInt(percentAmount + pointsAmount);
       } else {
         // Fixed discount: apply both manual discount and points discount separately
         const manualDiscount = parseFloat(Math.min(discountValue, this.total).toFixed(2));
@@ -3083,7 +3113,7 @@ export default {
         const pointsDiscount = parseFloat(
           Math.min(Number(this.discount_from_points || 0), remainingAfterManual).toFixed(2)
         );
-        discountAmount = manualDiscount + pointsDiscount;
+        discountAmount = parseInt(manualDiscount + pointsDiscount);
       }
       
       const total_without_discount = parseFloat(
@@ -5150,7 +5180,7 @@ export default {
         id: "",
         name: "",
         email: "",
-        phone: "",
+        phone: this.searchPhone,
         country: "",
         city: "",
         tax_number: "",

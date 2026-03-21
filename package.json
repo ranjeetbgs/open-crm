@@ -31,7 +31,7 @@
         "es6-promise": "^4.2.8",
         "jspdf": "^3.0.3",
         "jspdf-autotable": "^5.0.2",
-        "laravel-mix": "^6.0.41",
+        "laravel-mix": "^6.0.49",
         "lodash.orderby": "^4.6.0",
         "mini-css-extract-plugin": "^2.5.3",
         "mobile-device-detect": "^0.4.3",
@@ -66,6 +66,8 @@
         "vuedraggable": "^2.24.3",
         "vuejs-datepicker": "^1.6.2",
         "vuex": "^3.6.2",
+        "webpack": "^5.105.4",
+        "webpack-cli": "^6.0.1",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
     },
     "devDependencies": {
@@ -80,7 +82,6 @@
         "sass-loader": "^8.0.2",
         "vue-template-compiler": "^2.7.16",
         "webpack-bundle-analyzer": "^4.5.0",
-        "webpack-cli": "^4.9.2",
         "webpack-i18n-extractor-plugin": "^2.0.7"
     }
 }
