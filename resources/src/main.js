@@ -257,7 +257,7 @@ Vue.component("breadcumb", Breadcumb);
 
 Vue.config.productionTip = true;
 Vue.config.silent = true;
-Vue.config.devtools = false;
+Vue.config.devtools = true;
 
 import { loadI18n } from './plugins/i18n.loader';
 import { setupGlobalOfflineSync } from './utils/globalOfflineSync';

@@ -95,7 +95,9 @@
           :title="$t('Quick_Add_Customer')" 
           v-if="isQuickAddCustomerEnabled && isOnline"
         >
-          <i class="i-Add-User"></i>
+          
+           <i class="i-Pen-2" v-if="this.selectedClientId"></i>
+           <i class="i-Add-User" v-else></i>
         </button>
         
         <!-- Today's Sales -->
@@ -2047,6 +2049,9 @@ export default {
   },
   computed: {
     ...mapGetters(["currentUser", "currentUserPermissions","show_language"]),
+
+
+    
 
     // Receipt subtotal (sum of invoice detail totals; before order tax/discount/shipping)
     invoiceSubtotal() {
@@ -5172,8 +5177,9 @@ export default {
       this.$bvModal.show("New_Customer");
     },
     Quick_Add_Client() {
-      this.reset_Form_client();
+     // this.reset_Form_client();
       this.$bvModal.show("Quick_Add_Customer");
+      console.log(this.client);
     },
     reset_Form_client() {
       this.client = {
@@ -8037,10 +8043,8 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   .header-center {
     order: 3;
     width: 100%;
-    height: 40px;
 
     .search-wrapper {
-      height: 40px;
       margin-top: 20px;
       
       > .action-btn-icon {
@@ -8052,16 +8056,11 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   .header-right {
     order: 2;
     width: 100%;
-    height: 40px;
     gap: 6px;
     flex-wrap: wrap;
 
 
-    .user-profile {
-      width: 40px;
-      height: 40px;
-      flex-shrink: 0;
-    }
+    
   }
 
   /* Small size language dropdown toggle (override Bootstrap-Vue) */
@@ -8176,7 +8175,7 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   /* Hide specific header actions on small screens */
-  .header-right .btn-new-customer,
+ 
   .header-right .btn-pos-settings,
   .header-right .btn-fullscreen { display: none !important; }
 
@@ -8214,7 +8213,6 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   .pos-header { padding: 10px 12px; gap: 10px; min-height: auto; }
 
   .header-center {
-    height: 38px;
 
     .search-wrapper {
       height: 38px;
@@ -8233,15 +8231,10 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .header-right {
-    height: 38px;
     gap: 6px;
 
 
-    .user-profile {
-      width: 38px;
-      height: 38px;
-      font-size: 11px;
-    }
+    
   }
 
   .pos-container {
@@ -8275,7 +8268,6 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   /* Hide elements on small screens */
   .header-left { display: none !important; }
-  .header-right .btn-new-customer,
   .header-right .btn-pos-settings,
   .header-right .btn-fullscreen { display: none !important; }
   .card.card-products .card-header > h3 { display: none !important; }
@@ -8339,7 +8331,7 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   .pos-header-mobile .mobile-top .top-icons .btn-offline-status.is-offline { border-color: $color-danger; background: $color-danger; color: #fff; }
   .pos-header-mobile .mobile-top .top-icons .btn-offline-status.is-offline i { color: #fff; }
   .pos-header-mobile .mobile-top .top-icons .btn-offline-status .offline-badge { top: -4px; right: -2px; background: $color-danger; color: #fff; border-radius: 999px; padding: 0 4px; font-size: 10px; line-height: 1.4; }
-  .pos-header-mobile .mobile-top .top-icons .user-profile { width: 40px !important; height: 40px !important; }
+  
   /* Bootstrap-Vue language toggle button size */
   ::v-deep(button#lang-dd-mobile__BV_toggle_) { width: 40px !important; height: 40px !important; min-width: 40px !important; min-height: 40px !important; padding: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
   ::v-deep(button#lang-dd-mobile__BV_toggle_ > a.action-btn-icon),
@@ -8420,11 +8412,7 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     gap: 6px;
 
 
-    .user-profile {
-      width: 36px;
-      height: 36px;
-      font-size: 10px;
-    }
+    
   }
 
   /* Arrange header-right content rows and ordering */
