@@ -93,12 +93,21 @@
           class="action-btn-icon btn-new-customer" 
           @click="Quick_Add_Client" 
           :title="$t('Quick_Add_Customer')" 
-          v-if="isQuickAddCustomerEnabled && isOnline"
+          v-if="isQuickAddCustomerEnabled && isOnline && !this.selectedClientId"
         >
           
-           <i class="i-Pen-2" v-if="this.selectedClientId"></i>
-           <i class="i-Add-User" v-else></i>
+          
+           <i class="i-Add-User" ></i>
         </button>
+
+        <button 
+  class="action-btn-icon btn-edit-customer"
+  v-if="selectedClientId && isOnline"
+  @click="editCustomer"
+  title="Edit Customer"
+>
+  <i class="i-Pen"></i>
+</button>
         
         <!-- Today's Sales -->
         <button class="action-btn-icon" :title="$t('Today_Sales')" @click="get_today_sales" v-if="isOnline">
@@ -356,11 +365,18 @@
     <div class="pos-container" v-if="productsReady">
       <!-- LEFT COLUMN: Summary + Added Products -->
       <div class="pos-column-left">
+
+      
+
+          
+
+
         <!-- CARD: Unified Products & Summary -->
         <div class="card card-unified-checkout">
           <div class="card-header">
             <h3>{{ $t('pos.Checkout') }}</h3>
             <span v-if="details.length > 0" class="badge-count">{{ details.length }} {{$t('pos.items')}}</span>
+             <p v-if="currentClient && currentClient.is_royalty_eligible">Royalty eligibled</p>
           </div>
 
           <!-- Cart Items Section -->
@@ -1389,8 +1405,9 @@
   </validation-observer>
 
   <!-- Quick Add Customer Modal -->
+
   <validation-observer ref="Quick_Add_Customer_Form">
-    <b-modal hide-footer size="lg" id="Quick_Add_Customer" :title="$t('Quick_Add_Customer')">
+    <b-modal hide-footer size="lg" id="Quick_Add_Customer" :title="client.id ? $t('Edit_Customer') : $t('Quick_Add_Customer')">
       <b-form @submit.prevent="Submit_Quick_Add_Customer" class="quick-add-customer-form">
         <b-row>
           <!-- Customer Name -->
@@ -1488,6 +1505,17 @@
                 <h5>{{ $t('Is_Royalty_Eligible') }}</h5>
               </label>
             </div>
+          </b-col>
+
+          <!-- Customer Card Number -->
+          <b-col md="6" sm="12">
+            <b-form-group :label="$t('Card_Number')">
+              <b-form-input
+                label="Card Number"
+                v-model="client.card_number"
+                :placeholder="$t('Card_Number')"
+              ></b-form-input>
+            </b-form-group>
           </b-col>
 
           <!-- Custom Fields (same as CreateCustomer.vue, but for quick add) -->
@@ -1802,7 +1830,6 @@ import { formatPriceDisplay, getPriceFormatSetting } from "../../../utils/priceF
 import { loadStripe } from "@stripe/stripe-js";
 import ModernPaymentModal from "../components/ModernPaymentModal.vue";
 import CustomFieldsForm from "../../../components/CustomFieldsForm.vue";
-
 export default {
   components: {
     vueEasyPrint,
@@ -1963,7 +1990,7 @@ export default {
         tax_rate: 0,
         shipping: 0,
         discount: 0,
-        discount_Method: "2", // "1" for percentage, "2" for fixed (default)
+        discount_Method: "1", // "1" for percentage, "2" for fixed (default)
         TaxNet: 0,
         notes:'',
       },
@@ -1975,6 +2002,7 @@ export default {
         phone: "",
         country: "",
         tax_number: "",
+        card_number: "",
         city: "",
         adresse: "",
         is_royalty_eligible: "",
@@ -2044,14 +2072,25 @@ export default {
       onlineReloadAfterSale: false,
       // When internet comes back and the cart is empty, we auto-sync offline
       // sales and then reload the page once sync succeeds.
-      reloadAfterOfflineSync: false
+      reloadAfterOfflineSync: false,
+
+       showCustomerModal: false,
+    editingCustomer: null
     };
   },
   computed: {
     ...mapGetters(["currentUser", "currentUserPermissions","show_language"]),
 
 
-    
+    currentClient()
+    {
+      const customer = this.clients.find(
+      c => c.id === this.selectedClientId
+    );
+     
+    return customer;
+
+    },
 
     // Receipt subtotal (sum of invoice detail totals; before order tax/discount/shipping)
     invoiceSubtotal() {
@@ -2097,6 +2136,7 @@ export default {
         label: client.name + " ("+client.phone+")" ,
         value: client.id,
         phone: client.phone || '',
+        email: client.email || '',
         name: client.name || ''
       }));
     },
@@ -2377,9 +2417,31 @@ export default {
   },
   methods: {
 
+
+   
     onCustomerSearch(search) {
     if (search && search.trim() !== "") this.searchPhone = search
     
+  },
+
+  editCustomer() {
+    const customer = this.clients.find(
+      c => c.id === this.selectedClientId
+    );
+     
+
+    if (!customer) return;
+
+    // open same modal used for add
+    this.$bvModal.show('Quick_Add_Customer');
+
+    this.client = {...customer
+      };
+
+    // pass data
+    // this.editingCustomer = { ...customer };
+
+    // this.isEditMode = true;
   },
     // Custom filter function for customer v-select to search by name and phone
     filterCustomerByPhone(option, label, search) {
@@ -5115,18 +5177,27 @@ export default {
           );
           return;
         }
-        axios
-          .post("clients", {
-            name: this.client.name,
-            email: this.client.email || '',
-            phone: this.client.phone || '',
-            tax_number: this.client.tax_number || '',
-            country: this.client.country || '',
-            city: this.client.city || '',
-            adresse: this.client.adresse || '',
-            is_royalty_eligible: this.client.is_royalty_eligible || false
-          })
-          .then(response => {
+
+          if(this.client.id) axios
+          .put(`clients/${this.client.id}`, 
+            this.client
+          ).then(response => {
+              NProgress.done();
+              this.SubmitProcessing = false;
+              this.makeToast(
+                "success",
+                this.$t("Successfully_Updated"),
+                this.$t("Success")
+              );
+              
+              this.$bvModal.hide("Quick_Add_Customer");
+            }
+          );
+
+          else axios
+          .post("clients", 
+            this.client
+          ).then(response => {
             const newClient = response.data;
 
             // If there are custom field values from the quick-add form, persist them
@@ -5177,7 +5248,7 @@ export default {
       this.$bvModal.show("New_Customer");
     },
     Quick_Add_Client() {
-     // this.reset_Form_client();
+      this.reset_Form_client();
       this.$bvModal.show("Quick_Add_Customer");
       console.log(this.client);
     },

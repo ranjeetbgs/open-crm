@@ -1687,7 +1687,7 @@ class PosController extends BaseController
     public function GetELementPos(Request $request)
     {
         $this->authorizeForUser($request->user('api'), 'Sales_pos', Sale::class);
-        $clients = Client::where('deleted_at', '=', null)->get(['id', 'name', 'phone']);
+        $clients = Client::where('deleted_at', '=', null)->get();
         $settings = Setting::where('deleted_at', '=', null)->with('Client')->first();
         $accounts = Account::where('deleted_at', '=', null)->orderBy('id', 'desc')->get(['id', 'account_name']);
 

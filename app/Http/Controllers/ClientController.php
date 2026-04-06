@@ -231,6 +231,7 @@ class ClientController extends BaseController
             'country' => ['nullable', 'string', 'max:100'],
             'city' => ['nullable', 'string', 'max:100'],
             'tax_number' => ['nullable', 'string', 'max:100'],
+            'card_number' => ['nullable', 'string', 'max:100'],
 
             // EcommerceClient-specific (optional)
             'username' => [
@@ -258,6 +259,7 @@ class ClientController extends BaseController
                 'country' => $request->input('country'),
                 'city' => $request->input('city'),
                 'tax_number' => $request->input('tax_number'),
+                'card_number' => $request->input('card_number'),
                 'is_royalty_eligible' => $isRoyaltyEligible,
                 'credit_limit' => $request->input('credit_limit', 0),
             ]);

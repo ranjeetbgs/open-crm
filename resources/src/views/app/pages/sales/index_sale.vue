@@ -722,123 +722,126 @@
               </p>
             </div>
 
-            <table style="width: 100%;">
-              <tbody>
-                <tr v-for="detail_invoice in invoice_pos.details">
-                  <td colspan="3">
-                    {{detail_invoice.name}}
-                    <br v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null">
-                    <span v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null ">
-                      {{$t('IMEI_SN')}} : {{detail_invoice.imei_number}}
-                    </span>
-                    <br>
-                    <span>
-                      {{formatNumber(detail_invoice.quantity,2)}} {{detail_invoice.unit_sale}}
-                      x
-                      {{ formatPriceDisplay(detail_invoice.total/detail_invoice.quantity,2) }}
-                    </span>
-                  </td>
-                  <td style="text-align:right;vertical-align:bottom">
-                    {{ formatPriceDisplay(detail_invoice.total,2) }}
-                  </td>
-                </tr>
+             <table class="table_data" style=" width: 100%; ">
+                <tbody>
+                  <tr v-for="detail_invoice in invoice_pos.details">
+                    <td colspan="3">
+                      {{detail_invoice.name}}
+                      <br v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null">
+                      <span v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null ">{{$t('IMEI_SN')}} : {{detail_invoice.imei_number}}</span>
+                      <br>
+                      <span>{{formatNumber(detail_invoice.quantity,2)}} {{detail_invoice.unit_sale}} X {{ formatPriceDisplay(detail_invoice.total/detail_invoice.quantity)}}</span>
+                    </td>
+                    <td style="text-align:right;vertical-align:bottom">
+                      {{ formatPriceDisplay(detail_invoice.total) }}
+                    </td>
+                  </tr>
 
-                <!-- Subtotal (before tax/discount/shipping) -->
-                <tr style="margin-top:10px">
-                  <td colspan="3" class="total">{{$t('pos.Subtotal')}}</td>
-                  <td style="text-align:right;" class="total">
-                    {{ formatPriceWithSymbol(invoice_pos.symbol, invoiceSubtotal, 2) }}
-                  </td>
-                </tr>
+                  
 
-                <tr style="margin-top:10px" v-show="pos_settings.show_tax">
-                  <td colspan="3" class="total">{{$t('OrderTax')}}</td>
-                  <td style="text-align:right;" class="total">
-                    {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.taxe ,2) }}
-                    ({{formatNumber(invoice_pos.sale.tax_rate,2)}} %)
-                  </td>
-                </tr>
+                  <!-- Subtotal (before discount/shipping) -->
+                  <tr style="margin-top:10px">
+                    <td colspan="3" class="total">{{$t('pos.Subtotal')}}</td>
+                    <td style="text-align:right;" class="total">
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, invoiceSubtotal, 2) }}
+                    </td>
+                  </tr>
 
-                <tr style="margin-top:10px" v-show="pos_settings.show_discount">
-                  <td colspan="3" class="total">{{$t('Discount')}}</td>
-                  <td style="text-align:right;" class="total">
-                    <!-- If percentage: show percent value AND manual discount amount; else amount only -->
-                    <template v-if="String(invoice_pos.sale.discount_Method || '2') === '1'">
-                      {{ formatNumber(invoice_pos.sale.discount, 2) }}%
-                      ({{ formatPriceWithSymbol(invoice_pos.symbol, manualSaleDiscountAmount ,2) }})
-                    </template>
-                    <template v-else>
-                      {{ formatPriceWithSymbol(invoice_pos.symbol, manualSaleDiscountAmount ,2) }}
-                    </template>
-                  </td>
-                </tr>
+                 
 
-                <tr
-                  style="margin-top:2px"
-                  v-show="pos_settings.show_discount && invoice_pos.sale.discount_from_points && Number(invoice_pos.sale.discount_from_points) > 0"
-                >
-                  <td colspan="3" class="total">{{$t('Discount_from_Points')}}</td>
-                  <td style="text-align:right;" class="total">
-                    {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.discount_from_points ,2) }}
-                  </td>
-                </tr>
+                  <tr style="margin-top:10px" v-show="pos_settings.show_discount && calculatedManualDiscountAmount">
+                    <td colspan="3" class="total">{{$t('Discount')}} </td>
+                    <td style="text-align:right;" class="total">
+                      <!-- If percentage: show percent value AND discount amount; else amount only -->
+                      <template v-if="String(invoice_pos.sale.discount_Method || '2') === '1'">
+                        {{ formatNumber(invoice_pos.sale.discount, 2) }}% ({{ formatPriceWithSymbol(invoice_pos.symbol, calculatedManualDiscountAmount ,2) }})
+                      </template>
+                      <template v-else>
+                        {{ formatPriceWithSymbol(invoice_pos.symbol, calculatedManualDiscountAmount ,2) }}
+                      </template>
+                    </td>
+                  </tr>
+                  <tr v-show="pos_settings.show_discount && invoice_pos.sale.discount_from_points && Number(invoice_pos.sale.discount_from_points) > 0">
+                    <td colspan="3" class="total">{{$t('Discount_from_Points')}}</td>
+                    <td style="text-align:right;" class="total">
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.discount_from_points ,2) }}
+                    </td>
+                  </tr>
 
-                <tr style="margin-top:10px" v-show="pos_settings.show_shipping">
-                  <td colspan="3" class="total">{{$t('Shipping')}}</td>
-                  <td style="text-align:right;" class="total">
-                    {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.shipping ,2) }}
-                  </td>
-                </tr>
+                  <tr style="margin-top:10px" v-show="pos_settings.show_shipping" v-if="+invoice_pos.sale.shipping">
+                    <td colspan="3" class="total">{{$t('Loyalty Card')}}</td>
+                    <td style="text-align:right;" class="total">
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.shipping ,2) }}
+                    </td>
+                  </tr>
 
-                <tr style="margin-top:10px">
-                  <td colspan="3" class="total">{{$t('Total')}}</td>
-                  <td style="text-align:right;" class="total">
-                    {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.GrandTotal ,2) }}
-                  </td>
-                </tr>
+                   <!-- IGST and CGST -->
+                  <tr style="margin-top:10px" v-show="pos_settings.show_tax">
+                    <td colspan="3" class="total">{{$t('IGST')}}</td>
+                    <td style="text-align:right;" class="total">
+                      
+                     {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                    </td>
+                  </tr>
+                  
+                  <tr style="margin-top:10px" v-show="pos_settings.show_tax">
+                    <td colspan="3" class="total">{{$t('CGST')}}</td>
+                    <td style="text-align:right;" class="total">
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                      <!-- {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.taxe ,2) }} ({{formatNumber(invoice_pos.sale.tax_rate,2)}} %) -->
+                       
+                    </td>
+                  </tr>
 
-                <tr v-show="pos_settings.show_paid !== 0">
-                  <td colspan="3" class="total">{{$t('Paid')}}</td>
-                  <td style="text-align:right;" class="total">
-                    {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.paid_amount ,2) }}
-                  </td>
-                </tr>
+                  <tr style="margin-top:10px">
+                    <td colspan="3" class="total">{{$t('Total')}}</td>
+                    <td style="text-align:right;" class="total">
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.GrandTotal ,2) }}
+                    </td>
+                  </tr>
 
-                <tr v-show="pos_settings.show_due !== 0">
-                  <td colspan="3" class="total">{{$t('Due')}}</td>
-                  <td style="text-align:right;" class="total">
-                    {{ formatPriceWithSymbol(invoice_pos.symbol, (invoice_pos.sale.GrandTotal - invoice_pos.sale.paid_amount), 2) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  <tr v-show="pos_settings.show_paid !== 0">
+                    <td colspan="3" class="total">{{$t('Paid')}}</td>
+                    <td style="text-align:right;" class="total">
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.paid_amount ,2) }}
+                    </td>
+                  </tr>
 
-            <table
-              class="change mt-3"
-              style="font-size: 10px;width: 100%;"
-              v-show="pos_settings.show_payments !== 0 && invoice_pos.sale.paid_amount > 0"
-            >
-              <thead>
-                <tr style="background: #eee;">
-                  <th style="text-align: left;" colspan="1">{{$t('PayeBy')}}:</th>
-                  <th style="text-align: center;" colspan="2">{{$t('Amount')}}:</th>
-                  <th style="text-align: right;" colspan="1">{{$t('Change')}}:</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="payment_pos in payments">
-                  <td style="text-align: left;" colspan="1">
-                    {{payment_pos.payment_method?payment_pos.payment_method.name:'---'}}
-                  </td>
-                  <td style="text-align: center;" colspan="2">
-                    {{ formatPriceDisplay(payment_pos.montant ,2) }}
-                  </td>
-                  <td style="text-align: right;" colspan="1">
-                    {{ formatPriceDisplay(payment_pos.change ,2) }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  <tr v-show="pos_settings.show_due !== 0">
+                    <td colspan="3" class="total">{{$t('Due')}}</td>
+                    <td style="text-align:right;" class="total">
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, (invoice_pos.sale.GrandTotal - invoice_pos.sale.paid_amount), 2) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <table
+                class="change mt-3"
+                style=" font-size: 10px;width: 100%;"
+                v-show="pos_settings.show_payments !== 0 && invoice_pos.sale.paid_amount > 0"
+              >
+                <thead>
+                  <tr style="background: #eee; ">
+                    <th style="text-align: left;" colspan="1">{{$t('PayeBy')}}:</th>
+                    <th style="text-align: center;" colspan="2">{{$t('Amount')}}:</th>
+                    <th style="text-align: right;" colspan="1">{{$t('Change')}}:</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr v-for="payment_pos in payments">
+                    <td style="text-align: left;" colspan="1">{{payment_pos.payment_method?payment_pos.payment_method.name:'---'}}</td>
+                    <td style="text-align: center;" colspan="2">
+                      {{ formatPriceDisplay(payment_pos.montant ,2) }}
+                    </td>
+                    <td style="text-align: right;" colspan="1">
+                      {{ formatPriceDisplay(payment_pos.change ,2) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
 
             <div id="legalcopy" class="ml-2">
               <p class="legal" v-show="pos_settings.show_note">
