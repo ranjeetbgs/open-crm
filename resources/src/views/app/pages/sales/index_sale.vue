@@ -749,6 +749,7 @@
 
                  
 
+                 
                   <tr style="margin-top:10px" v-show="pos_settings.show_discount && calculatedManualDiscountAmount">
                     <td colspan="3" class="total">{{$t('Discount')}} </td>
                     <td style="text-align:right;" class="total">
@@ -761,6 +762,7 @@
                       </template>
                     </td>
                   </tr>
+                  
                   <tr v-show="pos_settings.show_discount && invoice_pos.sale.discount_from_points && Number(invoice_pos.sale.discount_from_points) > 0">
                     <td colspan="3" class="total">{{$t('Discount_from_Points')}}</td>
                     <td style="text-align:right;" class="total">
@@ -779,15 +781,14 @@
                   <tr style="margin-top:10px" v-show="pos_settings.show_tax">
                     <td colspan="3" class="total">{{$t('IGST')}}</td>
                     <td style="text-align:right;" class="total">
-                      
-                     {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                     {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-(calculatedManualDiscountAmount ?? 0))*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
                     </td>
                   </tr>
                   
                   <tr style="margin-top:10px" v-show="pos_settings.show_tax">
                     <td colspan="3" class="total">{{$t('CGST')}}</td>
                     <td style="text-align:right;" class="total">
-                      {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-(calculatedManualDiscountAmount ?? 0))*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
                       <!-- {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.taxe ,2) }} ({{formatNumber(invoice_pos.sale.tax_rate,2)}} %) -->
                        
                     </td>
@@ -1497,6 +1498,28 @@ export default {
         : 1;
       const n = Number(raw) || 1;
       return [1, 2, 3].includes(n) ? n : 1;
+    },
+
+
+    calculatedManualDiscountAmount() {
+      try {
+        // For invoice_pos (receipt display), use invoice_pos data
+        const saleData = this.invoice_pos && this.invoice_pos.sale ? this.invoice_pos.sale : this.sale;
+        const discountMethod = String(saleData.discount_Method || '2'); // Default to fixed for backward compatibility
+        const discountValue = Number(saleData.discount || 0);
+        const subtotal = this.invoiceSubtotal || this.total || 0;
+        
+        if (discountMethod === '1') {
+          // Percentage discount on subtotal (manual discount only, no points)
+          return parseInt(subtotal * (discountValue / 100));
+          // return parseFloat((subtotal * (discountValue / 100)).toFixed(2));
+        } else {
+          // Fixed discount (manual discount only, no points)
+          return parseFloat(Math.min(discountValue, subtotal).toFixed(2));
+        }
+      } catch (e) {
+        return 0;
+      }
     },
 
     // Calculate order-level discount amount for invoice display based on discount_Method
@@ -2974,11 +2997,4 @@ export default {
 };
 </script>
 
-<style>
-  .total{
-    font-weight: bold;
-    font-size: 14px;
-    /* text-transform: uppercase;
-    height: 50px; */
-  }
-</style>
+

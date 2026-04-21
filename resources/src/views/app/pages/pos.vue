@@ -376,7 +376,7 @@
           <div class="card-header">
             <h3>{{ $t('pos.Checkout') }}</h3>
             <span v-if="details.length > 0" class="badge-count">{{ details.length }} {{$t('pos.items')}}</span>
-             <p v-if="currentClient && currentClient.is_royalty_eligible">Royalty eligibled</p>
+             <p v-if="currentClient && currentClient.is_royalty_eligible" class="blink text-success">Royalty eligibled</p>
           </div>
 
           <!-- Cart Items Section -->
@@ -669,6 +669,7 @@
                     <td colspan="3" class="total">{{$t('Discount')}} </td>
                     <td style="text-align:right;" class="total">
                       <!-- If percentage: show percent value AND discount amount; else amount only -->
+                       
                       <template v-if="String(invoice_pos.sale.discount_Method || '2') === '1'">
                         {{ formatNumber(invoice_pos.sale.discount, 2) }}% ({{ formatPriceWithSymbol(invoice_pos.symbol, calculatedManualDiscountAmount ,2) }})
                       </template>
@@ -1508,7 +1509,7 @@
           </b-col>
 
           <!-- Customer Card Number -->
-          <b-col md="6" sm="12">
+          <b-col md="6" sm="12" v-if="client.is_royalty_eligible">
             <b-form-group :label="$t('Card_Number')">
               <b-form-input
                 label="Card Number"
@@ -2087,10 +2088,15 @@ export default {
       const customer = this.clients.find(
       c => c.id === this.selectedClientId
     );
+
+    if(customer.is_royalty_eligible)this.sale.discount = 20;
      
     return customer;
 
     },
+
+    
+
 
     // Receipt subtotal (sum of invoice detail totals; before order tax/discount/shipping)
     invoiceSubtotal() {
@@ -6334,6 +6340,22 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: none;
 }
 
+/*
+Source - https://stackoverflow.com/a/16344389
+Posted by Mr. Alien, modified by community. See post 'Timeline' for change history
+Retrieved 2026-04-13, License - CC BY-SA 4.0
+*/
+
+.blink {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
 .header-left {
   display: flex;
   align-items: center;
@@ -9339,6 +9361,8 @@ $transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   .keypad {
     grid-template-columns: repeat(3, 1fr);
   }
+
+ 
 
   .checkout-footer {
     flex-direction: column;
