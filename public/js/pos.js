@@ -1661,7 +1661,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         card_number: "",
         city: "",
         adresse: "",
-        is_royalty_eligible: ""
+        is_royalty_eligible: false
       },
       quickAddCustomFieldValues: {},
       category_id: "",
