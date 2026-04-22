@@ -1,1 +1,641 @@
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[2634],{55338(e,t,r){r.r(t),r.d(t,{default:()=>f});var a=r(95353),s=r(5947),n=r.n(s);function i(e){return i="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},i(e)}function o(e,t){var r=Object.keys(e);if(Object.getOwnPropertySymbols){var a=Object.getOwnPropertySymbols(e);t&&(a=a.filter(function(t){return Object.getOwnPropertyDescriptor(e,t).enumerable})),r.push.apply(r,a)}return r}function l(e){for(var t=1;t<arguments.length;t++){var r=null!=arguments[t]?arguments[t]:{};t%2?o(Object(r),!0).forEach(function(t){d(e,t,r[t])}):Object.getOwnPropertyDescriptors?Object.defineProperties(e,Object.getOwnPropertyDescriptors(r)):o(Object(r)).forEach(function(t){Object.defineProperty(e,t,Object.getOwnPropertyDescriptor(r,t))})}return e}function d(e,t,r){return(t=function(e){var t=function(e,t){if("object"!=i(e)||!e)return e;var r=e[Symbol.toPrimitive];if(void 0!==r){var a=r.call(e,t||"default");if("object"!=i(a))return a;throw new TypeError("@@toPrimitive must return a primitive value.")}return("string"===t?String:Number)(e)}(e,"string");return"symbol"==i(t)?t:t+""}(t))in e?Object.defineProperty(e,t,{value:r,enumerable:!0,configurable:!0,writable:!0}):e[t]=r,e}const c={metaInfo:{title:"Mail Settings"},data:function(){return{isLoading:!0,isTesting:!1,server:{host:"",port:"",username:"",password:"",encryption:"",sender_name:"",sender_email:"",mail_mailer:""}}},methods:l(l({},(0,a.i0)(["refreshUserPermissions"])),{},{Submit_config_mail:function(){var e=this;this.$refs.form_config_mail.validate().then(function(t){t?e.Update_config_mail():e.makeToast("danger",e.$t("Please_fill_the_form_correctly"),e.$t("Failed"))})},makeToast:function(e,t,r){this.$root.$bvToast.toast(t,{title:r,variant:e,solid:!0})},getValidationState:function(e){var t=e.dirty,r=e.validated,a=e.valid;return t||r?void 0===a?null:a:null},Update_config_mail:function(){var e=this,t=arguments.length>0&&void 0!==arguments[0]&&arguments[0];return n().start(),n().set(.1),axios.put("update_config_mail/"+this.server.id,{mail_mailer:this.server.mail_mailer,host:this.server.host,port:this.server.port,sender_name:this.server.sender_name,sender_email:this.server.sender_email,username:this.server.username,password:this.server.password,encryption:this.server.encryption}).then(function(r){return Fire.$emit("Event_Smtp"),t||e.makeToast("success",e.$t("Successfully_Updated"),e.$t("Success")),n().done(),r}).catch(function(r){throw n().done(),t||e.makeToast("danger",e.$t("InvalidData"),e.$t("Failed")),r})},get_config_mail:function(){var e=this;axios.get("get_config_mail").then(function(t){e.server=t.data.server,e.isLoading=!1}).catch(function(t){e.isLoading=!1})},Test_config_mail:function(){var e=this;this.isTesting||this.$refs.form_config_mail.validate().then(function(t){t?(e.isTesting=!0,n().start(),n().set(.1),e.Update_config_mail(!0).then(function(){return axios.post("test_config_mail")}).then(function(t){var r=t.data&&(t.data.message||t.data.msg)||e.$t("Successfully_Updated");e.makeToast("success",r,e.$t("Success"))}).catch(function(t){var r=t.response&&t.response.data&&(t.response.data.message||t.response.data.errors)||e.$t("InvalidData");e.makeToast("danger",r,e.$t("Failed"))}).finally(function(){e.isTesting=!1,n().done()})):e.makeToast("danger",e.$t("Please_fill_the_form_correctly"),e.$t("Failed"))})}}),created:function(){var e=this;this.get_config_mail(),Fire.$on("Event_Smtp",function(){e.get_config_mail()})}},u=c;var m=(0,r(14486).A)(u,function(){var e=this,t=e._self._c;return t("div",{staticClass:"main-content"},[t("breadcumb",{attrs:{page:e.$t("mail_settings"),folder:e.$t("Settings")}}),e._v(" "),e.isLoading?t("div",{staticClass:"loading_page spinner spinner-primary mr-3"}):e._e(),e._v(" "),e.isLoading?e._e():t("validation-observer",{ref:"form_config_mail"},[t("b-form",{on:{submit:function(t){return t.preventDefault(),e.Submit_config_mail.apply(null,arguments)}}},[t("b-row",{staticClass:"mt-5"},[t("b-col",{attrs:{lg:"12",md:"12",sm:"12"}},[t("b-card",{attrs:{"no-body":"",header:e.$t("mail_settings")}},[t("b-card-body",[t("b-row",[t("b-col",{attrs:{lg:"4",md:"4",sm:"12"}},[t("validation-provider",{attrs:{name:"MAIL_MAILER",rules:{required:!0}},scopedSlots:e._u([{key:"default",fn:function(r){return[t("b-form-group",{attrs:{label:"MAIL_MAILER *"}},[t("b-form-input",{attrs:{state:e.getValidationState(r),"aria-describedby":"MAIL_MAILER-feedback",label:"MAIL_MAILER",placeholder:"MAIL_MAILER"},model:{value:e.server.mail_mailer,callback:function(t){e.$set(e.server,"mail_mailer",t)},expression:"server.mail_mailer"}}),e._v(" "),t("b-form-invalid-feedback",{attrs:{id:"MAIL_MAILER-feedback"}},[e._v(e._s(r.errors[0]))])],1),e._v(" "),t("p",{staticClass:"text-danger"},[e._v('Supported: "smtp", "sendmail", "mailgun", "ses","postmark", "log"')])]}}],null,!1,182575745)})],1),e._v(" "),t("b-col",{attrs:{lg:"4",md:"4",sm:"12"}},[t("validation-provider",{attrs:{name:"HOST",rules:{required:!0}},scopedSlots:e._u([{key:"default",fn:function(r){return[t("b-form-group",{attrs:{label:"MAIL_HOST *"}},[t("b-form-input",{attrs:{state:e.getValidationState(r),"aria-describedby":"HOST-feedback",label:"HOST",placeholder:"MAIL_HOST"},model:{value:e.server.host,callback:function(t){e.$set(e.server,"host",t)},expression:"server.host"}}),e._v(" "),t("b-form-invalid-feedback",{attrs:{id:"HOST-feedback"}},[e._v(e._s(r.errors[0]))])],1)]}}],null,!1,2154685413)})],1),e._v(" "),t("b-col",{attrs:{lg:"4",md:"4",sm:"12"}},[t("validation-provider",{attrs:{name:"PORT",rules:{required:!0}},scopedSlots:e._u([{key:"default",fn:function(r){return[t("b-form-group",{attrs:{label:"MAIL_PORT *"}},[t("b-form-input",{attrs:{state:e.getValidationState(r),"aria-describedby":"PORT-feedback",label:"PORT",placeholder:"MAIL_PORT"},model:{value:e.server.port,callback:function(t){e.$set(e.server,"port",t)},expression:"server.port"}}),e._v(" "),t("b-form-invalid-feedback",{attrs:{id:"PORT-feedback"}},[e._v(e._s(r.errors[0]))])],1)]}}],null,!1,2677611045)})],1),e._v(" "),t("b-col",{attrs:{lg:"4",md:"4",sm:"12"}},[t("validation-provider",{attrs:{name:"sender",rules:{required:!0}},scopedSlots:e._u([{key:"default",fn:function(r){return[t("b-form-group",{attrs:{label:"Sender Name *"}},[t("b-form-input",{attrs:{state:e.getValidationState(r),"aria-describedby":"sender-feedback",label:"Sender",placeholder:"Sender Name"},model:{value:e.server.sender_name,callback:function(t){e.$set(e.server,"sender_name",t)},expression:"server.sender_name"}}),e._v(" "),t("b-form-invalid-feedback",{attrs:{id:"sender-feedback"}},[e._v(e._s(r.errors[0]))])],1)]}}],null,!1,1175008349)})],1),e._v(" "),t("b-col",{attrs:{lg:"4",md:"4",sm:"12"}},[t("validation-provider",{attrs:{name:"sender_email",rules:{required:!0,email:!0}},scopedSlots:e._u([{key:"default",fn:function(r){return[t("b-form-group",{attrs:{label:"Sender Email *"}},[t("b-form-input",{attrs:{type:"email",state:e.getValidationState(r),"aria-describedby":"sender_email-feedback",label:"Sender Email",placeholder:"Sender Email"},model:{value:e.server.sender_email,callback:function(t){e.$set(e.server,"sender_email",t)},expression:"server.sender_email"}}),e._v(" "),t("b-form-invalid-feedback",{attrs:{id:"sender_email-feedback"}},[e._v(e._s(r.errors[0]))])],1)]}}],null,!1,2780983512)})],1),e._v(" "),t("b-col",{attrs:{lg:"4",md:"4",sm:"12"}},[t("validation-provider",{attrs:{name:"Username",rules:{required:!0}},scopedSlots:e._u([{key:"default",fn:function(r){return[t("b-form-group",{attrs:{label:"MAIL_USERNAME *"}},[t("b-form-input",{attrs:{state:e.getValidationState(r),"aria-describedby":"Username-feedback",label:"Username",placeholder:"MAIL_USERNAME"},model:{value:e.server.username,callback:function(t){e.$set(e.server,"username",t)},expression:"server.username"}}),e._v(" "),t("b-form-invalid-feedback",{attrs:{id:"Username-feedback"}},[e._v(e._s(r.errors[0]))])],1)]}}],null,!1,2612387141)})],1),e._v(" "),t("b-col",{attrs:{lg:"4",md:"4",sm:"12"}},[t("validation-provider",{attrs:{name:"Password",rules:{required:!0}},scopedSlots:e._u([{key:"default",fn:function(r){return[t("b-form-group",{attrs:{label:"MAIL_PASSWORD *"}},[t("b-form-input",{attrs:{state:e.getValidationState(r),"aria-describedby":"Password-feedback",label:"Password",placeholder:"MAIL_PASSWORD"},model:{value:e.server.password,callback:function(t){e.$set(e.server,"password",t)},expression:"server.password"}}),e._v(" "),t("b-form-invalid-feedback",{attrs:{id:"Password-feedback"}},[e._v(e._s(r.errors[0]))])],1)]}}],null,!1,3181211589)})],1),e._v(" "),t("b-col",{attrs:{lg:"4",md:"4",sm:"12"}},[t("validation-provider",{attrs:{name:"encryption",rules:{required:!0}},scopedSlots:e._u([{key:"default",fn:function(r){return[t("b-form-group",{attrs:{label:"MAIL_ENCRYPTION *"}},[t("b-form-input",{attrs:{state:e.getValidationState(r),"aria-describedby":"encryption-feedback",label:"encryption",placeholder:"MAIL_ENCRYPTION"},model:{value:e.server.encryption,callback:function(t){e.$set(e.server,"encryption",t)},expression:"server.encryption"}}),e._v(" "),t("b-form-invalid-feedback",{attrs:{id:"encryption-feedback"}},[e._v(e._s(r.errors[0]))])],1)]}}],null,!1,1149673509)})],1),e._v(" "),t("b-col",{attrs:{md:"12"}},[t("b-form-group",{staticClass:"d-flex align-items-center"},[t("b-button",{attrs:{variant:"primary",type:"submit"}},[t("i",{staticClass:"i-Yes me-2 font-weight-bold"}),e._v(" "+e._s(e.$t("submit"))+"\n                    ")]),e._v(" "),t("b-button",{staticClass:"ml-2",attrs:{variant:"outline-secondary",disabled:e.isTesting},on:{click:function(t){return t.preventDefault(),e.Test_config_mail.apply(null,arguments)}}},[e.isTesting?t("span",[e._v("\n                        "+e._s(e.$t("Loading"))+"...\n                      ")]):t("span",[e._v("\n                        Save & Test Mail\n                      ")])])],1)],1)],1)],1)],1)],1)],1)],1)],1)],1)},[],!1,null,null,null);const f=m.exports}}]);
+"use strict";
+(self["webpackChunk"] = self["webpackChunk"] || []).push([["mail_settings"],{
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=script&lang=js"
+/*!**********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=script&lang=js ***!
+  \**********************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var nprogress__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! nprogress */ "./node_modules/nprogress/nprogress.js");
+/* harmony import */ var nprogress__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(nprogress__WEBPACK_IMPORTED_MODULE_1__);
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  metaInfo: {
+    title: "Mail Settings"
+  },
+  data: function data() {
+    return {
+      isLoading: true,
+      isTesting: false,
+      server: {
+        host: "",
+        port: "",
+        username: "",
+        password: "",
+        encryption: "",
+        sender_name: "",
+        sender_email: "",
+        mail_mailer: ""
+      }
+    };
+  },
+  methods: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapActions)(["refreshUserPermissions"])), {}, {
+    //------------- Submit Validation SMTP
+    Submit_config_mail: function Submit_config_mail() {
+      var _this = this;
+      this.$refs.form_config_mail.validate().then(function (success) {
+        if (!success) {
+          _this.makeToast("danger", _this.$t("Please_fill_the_form_correctly"), _this.$t("Failed"));
+        } else {
+          _this.Update_config_mail();
+        }
+      });
+    },
+    //------ Toast
+    makeToast: function makeToast(variant, msg, title) {
+      this.$root.$bvToast.toast(msg, {
+        title: title,
+        variant: variant,
+        solid: true
+      });
+    },
+    getValidationState: function getValidationState(_ref) {
+      var dirty = _ref.dirty,
+        validated = _ref.validated,
+        _ref$valid = _ref.valid,
+        valid = _ref$valid === void 0 ? null : _ref$valid;
+      return dirty || validated ? valid : null;
+    },
+    //---------------------------------- Update SMTP ----------------\\
+    Update_config_mail: function Update_config_mail() {
+      var _this2 = this;
+      var silent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      nprogress__WEBPACK_IMPORTED_MODULE_1___default().start();
+      nprogress__WEBPACK_IMPORTED_MODULE_1___default().set(0.1);
+      return axios.put("update_config_mail/" + this.server.id, {
+        mail_mailer: this.server.mail_mailer,
+        host: this.server.host,
+        port: this.server.port,
+        sender_name: this.server.sender_name,
+        sender_email: this.server.sender_email,
+        username: this.server.username,
+        password: this.server.password,
+        encryption: this.server.encryption
+      }).then(function (response) {
+        Fire.$emit("Event_Smtp");
+        if (!silent) {
+          _this2.makeToast("success", _this2.$t("Successfully_Updated"), _this2.$t("Success"));
+        }
+        nprogress__WEBPACK_IMPORTED_MODULE_1___default().done();
+        return response;
+      })["catch"](function (error) {
+        nprogress__WEBPACK_IMPORTED_MODULE_1___default().done();
+        if (!silent) {
+          _this2.makeToast("danger", _this2.$t("InvalidData"), _this2.$t("Failed"));
+        }
+        throw error;
+      });
+    },
+    //---------------------------------- GET SMTP ----------------\\ 
+    get_config_mail: function get_config_mail() {
+      var _this3 = this;
+      axios.get("get_config_mail").then(function (response) {
+        _this3.server = response.data.server;
+        _this3.isLoading = false;
+      })["catch"](function (error) {
+        _this3.isLoading = false;
+      });
+    },
+    //---------------------------------- TEST SMTP ----------------\\
+    Test_config_mail: function Test_config_mail() {
+      var _this4 = this;
+      if (this.isTesting) return;
+
+      // First validate the form
+      this.$refs.form_config_mail.validate().then(function (success) {
+        if (!success) {
+          _this4.makeToast("danger", _this4.$t("Please_fill_the_form_correctly"), _this4.$t("Failed"));
+          return;
+        }
+
+        // Save first, then test
+        _this4.isTesting = true;
+        nprogress__WEBPACK_IMPORTED_MODULE_1___default().start();
+        nprogress__WEBPACK_IMPORTED_MODULE_1___default().set(0.1);
+
+        // Save settings first (silently, without showing success toast)
+        _this4.Update_config_mail(true).then(function () {
+          // After saving, test the mail
+          return axios.post("test_config_mail");
+        }).then(function (response) {
+          var msg = response.data && (response.data.message || response.data.msg) || _this4.$t("Successfully_Updated");
+          _this4.makeToast("success", msg, _this4.$t("Success"));
+        })["catch"](function (error) {
+          var msg = error.response && error.response.data && (error.response.data.message || error.response.data.errors) || _this4.$t("InvalidData");
+          _this4.makeToast("danger", msg, _this4.$t("Failed"));
+        })["finally"](function () {
+          _this4.isTesting = false;
+          nprogress__WEBPACK_IMPORTED_MODULE_1___default().done();
+        });
+      });
+    }
+  }),
+  //end Methods
+
+  //----------------------------- Created function-------------------
+
+  created: function created() {
+    var _this5 = this;
+    this.get_config_mail();
+    Fire.$on("Event_Smtp", function () {
+      _this5.get_config_mail();
+    });
+  }
+});
+
+/***/ },
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=template&id=3f2acb48"
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=template&id=3f2acb48 ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* binding */ render),
+/* harmony export */   staticRenderFns: () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("div", {
+    staticClass: "main-content"
+  }, [_c("breadcumb", {
+    attrs: {
+      page: _vm.$t("mail_settings"),
+      folder: _vm.$t("Settings")
+    }
+  }), _vm._v(" "), _vm.isLoading ? _c("div", {
+    staticClass: "loading_page spinner spinner-primary mr-3"
+  }) : _vm._e(), _vm._v(" "), !_vm.isLoading ? _c("validation-observer", {
+    ref: "form_config_mail"
+  }, [_c("b-form", {
+    on: {
+      submit: function submit($event) {
+        $event.preventDefault();
+        return _vm.Submit_config_mail.apply(null, arguments);
+      }
+    }
+  }, [_c("b-row", {
+    staticClass: "mt-5"
+  }, [_c("b-col", {
+    attrs: {
+      lg: "12",
+      md: "12",
+      sm: "12"
+    }
+  }, [_c("b-card", {
+    attrs: {
+      "no-body": "",
+      header: _vm.$t("mail_settings")
+    }
+  }, [_c("b-card-body", [_c("b-row", [_c("b-col", {
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("validation-provider", {
+    attrs: {
+      name: "MAIL_MAILER",
+      rules: {
+        required: true
+      }
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function fn(validationContext) {
+        return [_c("b-form-group", {
+          attrs: {
+            label: "MAIL_MAILER *"
+          }
+        }, [_c("b-form-input", {
+          attrs: {
+            state: _vm.getValidationState(validationContext),
+            "aria-describedby": "MAIL_MAILER-feedback",
+            label: "MAIL_MAILER",
+            placeholder: "MAIL_MAILER"
+          },
+          model: {
+            value: _vm.server.mail_mailer,
+            callback: function callback($$v) {
+              _vm.$set(_vm.server, "mail_mailer", $$v);
+            },
+            expression: "server.mail_mailer"
+          }
+        }), _vm._v(" "), _c("b-form-invalid-feedback", {
+          attrs: {
+            id: "MAIL_MAILER-feedback"
+          }
+        }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1), _vm._v(" "), _c("p", {
+          staticClass: "text-danger"
+        }, [_vm._v('Supported: "smtp", "sendmail", "mailgun", "ses","postmark", "log"')])];
+      }
+    }], null, false, 182575745)
+  })], 1), _vm._v(" "), _c("b-col", {
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("validation-provider", {
+    attrs: {
+      name: "HOST",
+      rules: {
+        required: true
+      }
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function fn(validationContext) {
+        return [_c("b-form-group", {
+          attrs: {
+            label: "MAIL_HOST *"
+          }
+        }, [_c("b-form-input", {
+          attrs: {
+            state: _vm.getValidationState(validationContext),
+            "aria-describedby": "HOST-feedback",
+            label: "HOST",
+            placeholder: "MAIL_HOST"
+          },
+          model: {
+            value: _vm.server.host,
+            callback: function callback($$v) {
+              _vm.$set(_vm.server, "host", $$v);
+            },
+            expression: "server.host"
+          }
+        }), _vm._v(" "), _c("b-form-invalid-feedback", {
+          attrs: {
+            id: "HOST-feedback"
+          }
+        }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
+      }
+    }], null, false, 2154685413)
+  })], 1), _vm._v(" "), _c("b-col", {
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("validation-provider", {
+    attrs: {
+      name: "PORT",
+      rules: {
+        required: true
+      }
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function fn(validationContext) {
+        return [_c("b-form-group", {
+          attrs: {
+            label: "MAIL_PORT *"
+          }
+        }, [_c("b-form-input", {
+          attrs: {
+            state: _vm.getValidationState(validationContext),
+            "aria-describedby": "PORT-feedback",
+            label: "PORT",
+            placeholder: "MAIL_PORT"
+          },
+          model: {
+            value: _vm.server.port,
+            callback: function callback($$v) {
+              _vm.$set(_vm.server, "port", $$v);
+            },
+            expression: "server.port"
+          }
+        }), _vm._v(" "), _c("b-form-invalid-feedback", {
+          attrs: {
+            id: "PORT-feedback"
+          }
+        }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
+      }
+    }], null, false, 2677611045)
+  })], 1), _vm._v(" "), _c("b-col", {
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("validation-provider", {
+    attrs: {
+      name: "sender",
+      rules: {
+        required: true
+      }
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function fn(validationContext) {
+        return [_c("b-form-group", {
+          attrs: {
+            label: "Sender Name *"
+          }
+        }, [_c("b-form-input", {
+          attrs: {
+            state: _vm.getValidationState(validationContext),
+            "aria-describedby": "sender-feedback",
+            label: "Sender",
+            placeholder: "Sender Name"
+          },
+          model: {
+            value: _vm.server.sender_name,
+            callback: function callback($$v) {
+              _vm.$set(_vm.server, "sender_name", $$v);
+            },
+            expression: "server.sender_name"
+          }
+        }), _vm._v(" "), _c("b-form-invalid-feedback", {
+          attrs: {
+            id: "sender-feedback"
+          }
+        }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
+      }
+    }], null, false, 1175008349)
+  })], 1), _vm._v(" "), _c("b-col", {
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("validation-provider", {
+    attrs: {
+      name: "sender_email",
+      rules: {
+        required: true,
+        email: true
+      }
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function fn(validationContext) {
+        return [_c("b-form-group", {
+          attrs: {
+            label: "Sender Email *"
+          }
+        }, [_c("b-form-input", {
+          attrs: {
+            type: "email",
+            state: _vm.getValidationState(validationContext),
+            "aria-describedby": "sender_email-feedback",
+            label: "Sender Email",
+            placeholder: "Sender Email"
+          },
+          model: {
+            value: _vm.server.sender_email,
+            callback: function callback($$v) {
+              _vm.$set(_vm.server, "sender_email", $$v);
+            },
+            expression: "server.sender_email"
+          }
+        }), _vm._v(" "), _c("b-form-invalid-feedback", {
+          attrs: {
+            id: "sender_email-feedback"
+          }
+        }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
+      }
+    }], null, false, 2780983512)
+  })], 1), _vm._v(" "), _c("b-col", {
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("validation-provider", {
+    attrs: {
+      name: "Username",
+      rules: {
+        required: true
+      }
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function fn(validationContext) {
+        return [_c("b-form-group", {
+          attrs: {
+            label: "MAIL_USERNAME *"
+          }
+        }, [_c("b-form-input", {
+          attrs: {
+            state: _vm.getValidationState(validationContext),
+            "aria-describedby": "Username-feedback",
+            label: "Username",
+            placeholder: "MAIL_USERNAME"
+          },
+          model: {
+            value: _vm.server.username,
+            callback: function callback($$v) {
+              _vm.$set(_vm.server, "username", $$v);
+            },
+            expression: "server.username"
+          }
+        }), _vm._v(" "), _c("b-form-invalid-feedback", {
+          attrs: {
+            id: "Username-feedback"
+          }
+        }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
+      }
+    }], null, false, 2612387141)
+  })], 1), _vm._v(" "), _c("b-col", {
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("validation-provider", {
+    attrs: {
+      name: "Password",
+      rules: {
+        required: true
+      }
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function fn(validationContext) {
+        return [_c("b-form-group", {
+          attrs: {
+            label: "MAIL_PASSWORD *"
+          }
+        }, [_c("b-form-input", {
+          attrs: {
+            state: _vm.getValidationState(validationContext),
+            "aria-describedby": "Password-feedback",
+            label: "Password",
+            placeholder: "MAIL_PASSWORD"
+          },
+          model: {
+            value: _vm.server.password,
+            callback: function callback($$v) {
+              _vm.$set(_vm.server, "password", $$v);
+            },
+            expression: "server.password"
+          }
+        }), _vm._v(" "), _c("b-form-invalid-feedback", {
+          attrs: {
+            id: "Password-feedback"
+          }
+        }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
+      }
+    }], null, false, 3181211589)
+  })], 1), _vm._v(" "), _c("b-col", {
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("validation-provider", {
+    attrs: {
+      name: "encryption",
+      rules: {
+        required: true
+      }
+    },
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function fn(validationContext) {
+        return [_c("b-form-group", {
+          attrs: {
+            label: "MAIL_ENCRYPTION *"
+          }
+        }, [_c("b-form-input", {
+          attrs: {
+            state: _vm.getValidationState(validationContext),
+            "aria-describedby": "encryption-feedback",
+            label: "encryption",
+            placeholder: "MAIL_ENCRYPTION"
+          },
+          model: {
+            value: _vm.server.encryption,
+            callback: function callback($$v) {
+              _vm.$set(_vm.server, "encryption", $$v);
+            },
+            expression: "server.encryption"
+          }
+        }), _vm._v(" "), _c("b-form-invalid-feedback", {
+          attrs: {
+            id: "encryption-feedback"
+          }
+        }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
+      }
+    }], null, false, 1149673509)
+  })], 1), _vm._v(" "), _c("b-col", {
+    attrs: {
+      md: "12"
+    }
+  }, [_c("b-form-group", {
+    staticClass: "d-flex align-items-center"
+  }, [_c("b-button", {
+    attrs: {
+      variant: "primary",
+      type: "submit"
+    }
+  }, [_c("i", {
+    staticClass: "i-Yes me-2 font-weight-bold"
+  }), _vm._v(" " + _vm._s(_vm.$t("submit")) + "\n                    ")]), _vm._v(" "), _c("b-button", {
+    staticClass: "ml-2",
+    attrs: {
+      variant: "outline-secondary",
+      disabled: _vm.isTesting
+    },
+    on: {
+      click: function click($event) {
+        $event.preventDefault();
+        return _vm.Test_config_mail.apply(null, arguments);
+      }
+    }
+  }, [!_vm.isTesting ? _c("span", [_vm._v("\n                        Save & Test Mail\n                      ")]) : _c("span", [_vm._v("\n                        " + _vm._s(_vm.$t("Loading")) + "...\n                      ")])])], 1)], 1)], 1)], 1)], 1)], 1)], 1)], 1)], 1) : _vm._e()], 1);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/settings/mail_settings.vue"
+/*!******************************************************************!*\
+  !*** ./resources/src/views/app/pages/settings/mail_settings.vue ***!
+  \******************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _mail_settings_vue_vue_type_template_id_3f2acb48__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./mail_settings.vue?vue&type=template&id=3f2acb48 */ "./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=template&id=3f2acb48");
+/* harmony import */ var _mail_settings_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./mail_settings.vue?vue&type=script&lang=js */ "./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=script&lang=js");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _mail_settings_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _mail_settings_vue_vue_type_template_id_3f2acb48__WEBPACK_IMPORTED_MODULE_0__.render,
+  _mail_settings_vue_vue_type_template_id_3f2acb48__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "resources/src/views/app/pages/settings/mail_settings.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=script&lang=js"
+/*!******************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=script&lang=js ***!
+  \******************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_mail_settings_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./mail_settings.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=script&lang=js");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_mail_settings_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=template&id=3f2acb48"
+/*!************************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=template&id=3f2acb48 ***!
+  \************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_mail_settings_vue_vue_type_template_id_3f2acb48__WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   staticRenderFns: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_mail_settings_vue_vue_type_template_id_3f2acb48__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_mail_settings_vue_vue_type_template_id_3f2acb48__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./mail_settings.vue?vue&type=template&id=3f2acb48 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/mail_settings.vue?vue&type=template&id=3f2acb48");
+
+
+/***/ }
+
+}]);

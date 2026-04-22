@@ -1,1 +1,601 @@
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[7047],{11487(t,e,r){function s(t){return s="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},s(t)}function n(t,e){return function(t){if(Array.isArray(t))return t}(t)||function(t,e){var r=null==t?null:"undefined"!=typeof Symbol&&t[Symbol.iterator]||t["@@iterator"];if(null!=r){var s,n,a,i,o=[],c=!0,l=!1;try{if(a=(r=r.call(t)).next,0===e){if(Object(r)!==r)return;c=!1}else for(;!(c=(s=a.call(r)).done)&&(o.push(s.value),o.length!==e);c=!0);}catch(t){l=!0,n=t}finally{try{if(!c&&null!=r.return&&(i=r.return(),Object(i)!==i))return}finally{if(l)throw n}}return o}}(t,e)||function(t,e){if(t){if("string"==typeof t)return a(t,e);var r={}.toString.call(t).slice(8,-1);return"Object"===r&&t.constructor&&(r=t.constructor.name),"Map"===r||"Set"===r?Array.from(t):"Arguments"===r||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r)?a(t,e):void 0}}(t,e)||function(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}()}function a(t,e){(null==e||e>t.length)&&(e=t.length);for(var r=0,s=Array(e);r<e;r++)s[r]=t[r];return s}r.d(e,{FI:()=>l,hd:()=>c,zt:()=>_});var i={comma_dot:{thousands:",",decimal:"."},dot_comma:{thousands:".",decimal:","},space_comma:{thousands:" ",decimal:","}};function o(t){if(!t)return null;var e=String(t).trim();if(i[e])return e;var r={"1,234.56 (thousand , decimal .)":"comma_dot","1.234,56 (thousand . decimal ,)":"dot_comma","1 234,56 (thousand space, decimal ,)":"space_comma"};return r[e]?r[e]:null}function c(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:2,r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:null,s=Number.isInteger(e)?e:0,a=Number(t),c=Number.isFinite(a)?a:0,l=o(r);if(!l)try{return c.toLocaleString("en-US",{minimumFractionDigits:s,maximumFractionDigits:s})}catch(t){var _=c.toFixed(s).split("."),u=_[0],d=_[1]||"",v=u.replace(/\B(?=(\d{3})+(?!\d))/g,",");return s>0?"".concat(v,".").concat(d):v}var m=i[l],f=n(c.toFixed(s).split("."),2),p=f[0],b=f[1],h=void 0===b?"":b;return p=p.replace(/\B(?=(\d{3})+(?!\d))/g,m.thousands),s<=0?p:(h.length<s&&(h=h.padEnd(s,"0")),"".concat(p).concat(m.decimal).concat(h))}function l(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:{},e=t.settings,r=void 0===e?null:e,n=t.store,a=void 0===n?null:n;if(r&&r.price_format){var i=o(r.price_format);if(i)return i}if(a&&"object"===s(a.getters)&&a.getters.getPriceFormat)try{var c=o(a.getters.getPriceFormat);if(c)return c}catch(t){}return null}function _(t){var e=o(t);if(e&&"undefined"!=typeof window&&window.localStorage)try{window.localStorage.setItem("app_price_format",e)}catch(t){}}},551(t,e,r){r.r(e),r.d(e,{default:()=>c});var s=r(95353),n=r(5947),a=r.n(n),i=r(11487);const o={computed:(0,s.L8)(["currentUserPermissions","currentUser"]),metaInfo:{title:"Detail Sale Return"},data:function(){return{isLoading:!0,sale_return:{},details:[],company:{},email:{},price_format_key:null}},methods:{Return_PDF:function(){var t=this;a().start(),a().set(.1);var e=this.$route.params.id;axios.get("return_sale_pdf/".concat(e),{responseType:"blob",headers:{"Content-Type":"application/json"}}).then(function(e){var r=window.URL.createObjectURL(new Blob([e.data])),s=document.createElement("a");s.href=r,s.setAttribute("download","Sale_Return-"+t.sale_return.Ref+".pdf"),document.body.appendChild(s),s.click(),setTimeout(function(){return a().done()},500)}).catch(function(){setTimeout(function(){return a().done()},500)})},print:function(){this.$htmlToPaper("print_Invoice")},makeToast:function(t,e,r){this.$root.$bvToast.toast(e,{title:r,variant:t,solid:!0})},formatNumber:function(t,e){var r=("string"==typeof t?t:t.toString()).split(".");if(e<=0)return r[0];var s=r[1]||"";if(s.length>e)return"".concat(r[0],".").concat(s.substr(0,e));for(;s.length<e;)s+="0";return"".concat(r[0],".").concat(s)},formatPriceDisplay:function(t,e){try{var r=Number.isInteger(e)?e:0,s=this.price_format_key||(0,i.FI)({store:this.$store});s&&(this.price_format_key=s);var n=s||null;return(0,i.hd)(t,r,n)}catch(r){return this.formatNumber(t,e)}},formatPriceWithSymbol:function(t,e,r){var s=t||"",n=this.formatPriceDisplay(e,r);return s?"".concat(s," ").concat(n):n},Get_Details:function(){var t=this,e=this.$route.params.id;axios.get("returns/sale/".concat(e)).then(function(e){t.sale_return=e.data.sale_Return,t.details=e.data.details,t.company=e.data.company,t.isLoading=!1}).catch(function(e){setTimeout(function(){t.isLoading=!1},500)})},Delete_Return:function(){var t=this,e=this.$route.params.id;this.$swal({title:this.$t("Delete_Title"),text:this.$t("Delete_Text"),type:"warning",showCancelButton:!0,confirmButtonColor:"#3085d6",cancelButtonColor:"#d33",cancelButtonText:this.$t("Delete_cancelButtonText"),confirmButtonText:this.$t("Delete_confirmButtonText")}).then(function(r){r.value&&axios.delete("returns/sale/"+e).then(function(){t.$swal(t.$t("Delete_Deleted"),t.$t("Deleted_in_successfully"),"success"),t.$router.push({name:"index_sale_return"})}).catch(function(){t.$swal(t.$t("Delete_Failed"),t.$t("Delete_Therewassomethingwronge"),"warning")})})}},created:function(){this.Get_Details()}};const c=(0,r(14486).A)(o,function(){var t=this,e=t._self._c;return e("div",{staticClass:"main-content"},[e("breadcumb",{attrs:{page:t.$t("ReturnDetail"),folder:t.$t("ListReturns")}}),t._v(" "),t.isLoading?e("div",{staticClass:"loading_page spinner spinner-primary mr-3"}):t._e(),t._v(" "),t.isLoading?t._e():e("b-card",[e("b-row",[e("b-col",{staticClass:"mb-5",attrs:{md:"12"}},[t.currentUserPermissions&&t.currentUserPermissions.includes("Sale_Returns_edit")?e("router-link",{staticClass:"btn btn-success btn-icon ripple btn-sm",attrs:{title:"Edit",to:"/app/sale_return/edit/"+t.$route.params.id+"/"+t.sale_return.sale_id}},[e("i",{staticClass:"i-Edit"}),t._v(" "),e("span",[t._v(t._s(t.$t("EditReturn")))])]):t._e(),t._v(" "),e("button",{staticClass:"btn btn-primary btn-icon ripple btn-sm",on:{click:function(e){return t.Return_PDF()}}},[e("i",{staticClass:"i-File-TXT"}),t._v(" PDF\n        ")]),t._v(" "),e("button",{staticClass:"btn btn-warning btn-icon ripple btn-sm",on:{click:function(e){return t.print()}}},[e("i",{staticClass:"i-Billing"}),t._v("\n          "+t._s(t.$t("print"))+"\n        ")]),t._v(" "),t.currentUserPermissions&&t.currentUserPermissions.includes("Sale_Returns_delete")?e("button",{staticClass:"btn btn-danger btn-icon ripple btn-sm",on:{click:function(e){return t.Delete_Return()}}},[e("i",{staticClass:"i-Close-Window"}),t._v("\n          "+t._s(t.$t("Del"))+"\n        ")]):t._e()],1)],1),t._v(" "),e("div",{staticClass:"invoice",attrs:{id:"print_Invoice"}},[e("div",{staticClass:"invoice-print"},[e("b-row",{staticClass:"justify-content-md-center"},[e("h4",{staticClass:"font-weight-bold"},[t._v(t._s(t.$t("ReturnDetail"))+" : "+t._s(t.sale_return.Ref))])]),t._v(" "),e("hr"),t._v(" "),e("b-row",{staticClass:"mt-5"},[e("b-col",{staticClass:"mb-4",attrs:{lg:"4",md:"4",sm:"12"}},[e("h5",{staticClass:"font-weight-bold"},[t._v(t._s(t.$t("Customer_Info")))]),t._v(" "),e("div",[t._v(t._s(t.sale_return.client_name))]),t._v(" "),e("div",[t._v(t._s(t.sale_return.client_email))]),t._v(" "),e("div",[t._v(t._s(t.sale_return.client_phone))]),t._v(" "),e("div",[t._v(t._s(t.sale_return.client_adr))])]),t._v(" "),e("b-col",{staticClass:"mb-4",attrs:{lg:"4",md:"4",sm:"12"}},[e("h5",{staticClass:"font-weight-bold"},[t._v(t._s(t.$t("Company_Info")))]),t._v(" "),e("div",[t._v(t._s(t.company.CompanyName))]),t._v(" "),e("div",[t._v(t._s(t.company.email))]),t._v(" "),e("div",[t._v(t._s(t.company.CompanyPhone))]),t._v(" "),e("div",[t._v(t._s(t.company.CompanyAdress))])]),t._v(" "),e("b-col",{staticClass:"mb-4",attrs:{lg:"4",md:"4",sm:"12"}},[e("h5",{staticClass:"font-weight-bold"},[t._v(t._s(t.$t("Return_Info")))]),t._v(" "),e("div",[t._v(t._s(t.$t("Reference"))+" : "+t._s(t.sale_return.Ref))]),t._v(" "),e("div",[t._v(t._s(t.$t("Sale_Ref"))+" : "+t._s(t.sale_return.sale_ref))]),t._v(" "),e("div",[t._v("\n              "+t._s(t.$t("PaymentStatus"))+" :\n              "),"paid"==t.sale_return.payment_status?e("span",{staticClass:"badge badge-outline-success"},[t._v(t._s(t.$t("Paid")))]):"partial"==t.sale_return.payment_status?e("span",{staticClass:"badge badge-outline-primary"},[t._v(t._s(t.$t("partial")))]):e("span",{staticClass:"badge badge-outline-warning"},[t._v(t._s(t.$t("Unpaid")))])]),t._v(" "),e("div",[t._v(t._s(t.$t("warehouse"))+" : "+t._s(t.sale_return.warehouse))]),t._v(" "),e("div",[t._v("\n              "+t._s(t.$t("Status"))+" :\n              "),"received"==t.sale_return.statut?e("span",{staticClass:"badge badge-outline-success"},[t._v(t._s(t.$t("Received")))]):e("span",{staticClass:"badge badge-outline-info"},[t._v(t._s(t.$t("Pending")))])])])],1),t._v(" "),e("b-row",{staticClass:"mt-3"},[e("b-col",{attrs:{md:"12"}},[e("h5",{staticClass:"font-weight-bold"},[t._v(t._s(t.$t("list_product_returns")))]),t._v(" "),e("div",{staticClass:"alert alert-danger"},[t._v(t._s(t.$t("products_refunded_alert")))]),t._v(" "),e("div",{staticClass:"table-responsive"},[e("table",{staticClass:"table table-hover table-md"},[e("thead",{staticClass:"bg-gray-300"},[e("tr",[e("th",{attrs:{scope:"col"}},[t._v(t._s(t.$t("ProductName")))]),t._v(" "),e("th",{attrs:{scope:"col"}},[t._v(t._s(t.$t("Net_Unit_Price")))]),t._v(" "),e("th",{attrs:{scope:"col"}},[t._v(t._s(t.$t("Qty_return")))]),t._v(" "),e("th",{attrs:{scope:"col"}},[t._v(t._s(t.$t("UnitPrice")))]),t._v(" "),e("th",{attrs:{scope:"col"}},[t._v(t._s(t.$t("Discount")))]),t._v(" "),e("th",{attrs:{scope:"col"}},[t._v(t._s(t.$t("Tax")))]),t._v(" "),e("th",{attrs:{scope:"col"}},[t._v(t._s(t.$t("SubTotal")))])])]),t._v(" "),e("tbody",t._l(t.details,function(r){return e("tr",[e("td",[e("span",[t._v(t._s(r.code)+" ("+t._s(r.name)+")")]),t._v(" "),e("p",{directives:[{name:"show",rawName:"v-show",value:r.is_imei&&null!==r.imei_number,expression:"detail.is_imei && detail.imei_number !==null "}]},[t._v(t._s(t.$t("IMEI_SN"))+" : "+t._s(r.imei_number))])]),t._v(" "),e("td",[t._v(t._s(t.currentUser.currency)+" "+t._s(t.formatNumber(r.Net_price,3)))]),t._v(" "),e("td",[t._v(t._s(t.formatNumber(r.quantity,2))+" "+t._s(r.unit_sale))]),t._v(" "),e("td",[t._v(t._s(t.currentUser.currency)+" "+t._s(t.formatNumber(r.price,2)))]),t._v(" "),e("td",[t._v(t._s(t.currentUser.currency)+" "+t._s(t.formatNumber(r.DiscountNet,2)))]),t._v(" "),e("td",[t._v(t._s(t.currentUser.currency)+" "+t._s(t.formatNumber(r.taxe,2)))]),t._v(" "),e("td",[t._v(t._s(t.currentUser.currency)+" "+t._s(r.total.toFixed(2)))])])}),0)])])]),t._v(" "),e("div",{staticClass:"offset-md-9 col-md-3 mt-4"},[e("table",{staticClass:"table table-striped table-sm"},[e("tbody",[e("tr",[e("td",[t._v(t._s(t.$t("OrderTax")))]),t._v(" "),e("td",[e("span",[t._v(t._s(t.formatPriceWithSymbol(t.currentUser.currency,t.sale_return.TaxNet,2))+" ("+t._s(t.formatNumber(t.sale_return.tax_rate,2))+" %)")])])]),t._v(" "),e("tr",[e("td",[t._v(t._s(t.$t("Discount")))]),t._v(" "),e("td",[t._v(t._s(t.formatPriceWithSymbol(t.currentUser.currency,t.sale_return.discount,2)))])]),t._v(" "),e("tr",[e("td",[t._v(t._s(t.$t("Shipping")))]),t._v(" "),e("td",[t._v(t._s(t.formatPriceWithSymbol(t.currentUser.currency,t.sale_return.shipping,2)))])]),t._v(" "),e("tr",[e("td",[e("span",{staticClass:"font-weight-bold"},[t._v(t._s(t.$t("Total")))])]),t._v(" "),e("td",[e("span",{staticClass:"font-weight-bold"},[t._v(t._s(t.formatPriceWithSymbol(t.currentUser.currency,t.sale_return.GrandTotal,2)))])])]),t._v(" "),e("tr",[e("td",[e("span",{staticClass:"font-weight-bold"},[t._v(t._s(t.$t("Paid")))])]),t._v(" "),e("td",[e("span",{staticClass:"font-weight-bold"},[t._v(t._s(t.formatPriceWithSymbol(t.currentUser.currency,t.sale_return.paid_amount,2)))])])]),t._v(" "),e("tr",[e("td",[e("span",{staticClass:"font-weight-bold"},[t._v(t._s(t.$t("Due")))])]),t._v(" "),e("td",[e("span",{staticClass:"font-weight-bold"},[t._v(t._s(t.formatPriceWithSymbol(t.currentUser.currency,t.sale_return.due,2)))])])])])])])],1),t._v(" "),e("hr",{directives:[{name:"show",rawName:"v-show",value:t.sale_return.note,expression:"sale_return.note"}]}),t._v(" "),e("b-row",{staticClass:"mt-4"},[e("b-col",{attrs:{md:"12"}},[e("p",[t._v(t._s(t.sale_return.note))])])],1)],1)])],1)],1)},[],!1,null,null,null).exports}}]);
+"use strict";
+(self["webpackChunk"] = self["webpackChunk"] || []).push([["detail_sale_return"],{
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=script&lang=js"
+/*!******************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=script&lang=js ***!
+  \******************************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var nprogress__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! nprogress */ "./node_modules/nprogress/nprogress.js");
+/* harmony import */ var nprogress__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(nprogress__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _utils_priceFormat__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../utils/priceFormat */ "./resources/src/utils/priceFormat.js");
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  computed: (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapGetters)(["currentUserPermissions", "currentUser"]),
+  metaInfo: {
+    title: "Detail Sale Return"
+  },
+  data: function data() {
+    return {
+      isLoading: true,
+      sale_return: {},
+      details: [],
+      company: {},
+      email: {},
+      // Optional price format key for frontend display (loaded from system settings/localStorage)
+      price_format_key: null
+    };
+  },
+  methods: {
+    //-----------------------------------  Sale Return PDF -------------------------\\
+    Return_PDF: function Return_PDF() {
+      var _this = this;
+      // Start the progress bar.
+      nprogress__WEBPACK_IMPORTED_MODULE_1___default().start();
+      nprogress__WEBPACK_IMPORTED_MODULE_1___default().set(0.1);
+      var id = this.$route.params.id;
+      axios.get("return_sale_pdf/".concat(id), {
+        responseType: "blob",
+        // important
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }).then(function (response) {
+        var url = window.URL.createObjectURL(new Blob([response.data]));
+        var link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "Sale_Return-" + _this.sale_return.Ref + ".pdf");
+        document.body.appendChild(link);
+        link.click();
+        // Complete the animation of the  progress bar.
+        setTimeout(function () {
+          return nprogress__WEBPACK_IMPORTED_MODULE_1___default().done();
+        }, 500);
+      })["catch"](function () {
+        // Complete the animation of the  progress bar.
+        setTimeout(function () {
+          return nprogress__WEBPACK_IMPORTED_MODULE_1___default().done();
+        }, 500);
+      });
+    },
+    //------------------------------ Print -------------------------\\
+    print: function print() {
+      this.$htmlToPaper('print_Invoice');
+    },
+    //------ Toast
+    makeToast: function makeToast(variant, msg, title) {
+      this.$root.$bvToast.toast(msg, {
+        title: title,
+        variant: variant,
+        solid: true
+      });
+    },
+    //------------------------------Formetted Numbers -------------------------\\
+    formatNumber: function formatNumber(number, dec) {
+      var value = (typeof number === "string" ? number : number.toString()).split(".");
+      if (dec <= 0) return value[0];
+      var formated = value[1] || "";
+      if (formated.length > dec) return "".concat(value[0], ".").concat(formated.substr(0, dec));
+      while (formated.length < dec) formated += "0";
+      return "".concat(value[0], ".").concat(formated);
+    },
+    // Price formatting for display only (does NOT affect calculations or stored values)
+    // Uses the global/system price_format setting when available; otherwise falls back
+    // to the existing formatNumber helper to preserve current behavior.
+    formatPriceDisplay: function formatPriceDisplay(number, dec) {
+      try {
+        var decimals = Number.isInteger(dec) ? dec : 0;
+        var key = this.price_format_key || (0,_utils_priceFormat__WEBPACK_IMPORTED_MODULE_2__.getPriceFormatSetting)({
+          store: this.$store
+        });
+        if (key) {
+          this.price_format_key = key;
+        }
+        var effectiveKey = key || null;
+        return (0,_utils_priceFormat__WEBPACK_IMPORTED_MODULE_2__.formatPriceDisplay)(number, decimals, effectiveKey);
+      } catch (e) {
+        return this.formatNumber(number, dec);
+      }
+    },
+    formatPriceWithSymbol: function formatPriceWithSymbol(symbol, number, dec) {
+      var safeSymbol = symbol || "";
+      var value = this.formatPriceDisplay(number, dec);
+      return safeSymbol ? "".concat(safeSymbol, " ").concat(value) : value;
+    },
+    //----------------------------------- Get Details Sale Return ------------------------------\\
+    Get_Details: function Get_Details() {
+      var _this2 = this;
+      var id = this.$route.params.id;
+      axios.get("returns/sale/".concat(id)).then(function (response) {
+        _this2.sale_return = response.data.sale_Return;
+        _this2.details = response.data.details;
+        _this2.company = response.data.company;
+        _this2.isLoading = false;
+      })["catch"](function (response) {
+        setTimeout(function () {
+          _this2.isLoading = false;
+        }, 500);
+      });
+    },
+    //---------------------  Delete Return ------------------------\\
+    Delete_Return: function Delete_Return() {
+      var _this3 = this;
+      var id = this.$route.params.id;
+      this.$swal({
+        title: this.$t("Delete_Title"),
+        text: this.$t("Delete_Text"),
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        cancelButtonText: this.$t("Delete_cancelButtonText"),
+        confirmButtonText: this.$t("Delete_confirmButtonText")
+      }).then(function (result) {
+        if (result.value) {
+          axios["delete"]("returns/sale/" + id).then(function () {
+            _this3.$swal(_this3.$t("Delete_Deleted"), _this3.$t("Deleted_in_successfully"), "success");
+            _this3.$router.push({
+              name: "index_sale_return"
+            });
+          })["catch"](function () {
+            _this3.$swal(_this3.$t("Delete_Failed"), _this3.$t("Delete_Therewassomethingwronge"), "warning");
+          });
+        }
+      });
+    }
+  },
+  //end Methods
+
+  //----------------------------- Created function-------------------
+
+  created: function created() {
+    this.Get_Details();
+  }
+});
+
+/***/ },
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=template&id=43f55e1e"
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=template&id=43f55e1e ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* binding */ render),
+/* harmony export */   staticRenderFns: () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("div", {
+    staticClass: "main-content"
+  }, [_c("breadcumb", {
+    attrs: {
+      page: _vm.$t("ReturnDetail"),
+      folder: _vm.$t("ListReturns")
+    }
+  }), _vm._v(" "), _vm.isLoading ? _c("div", {
+    staticClass: "loading_page spinner spinner-primary mr-3"
+  }) : _vm._e(), _vm._v(" "), !_vm.isLoading ? _c("b-card", [_c("b-row", [_c("b-col", {
+    staticClass: "mb-5",
+    attrs: {
+      md: "12"
+    }
+  }, [_vm.currentUserPermissions && _vm.currentUserPermissions.includes("Sale_Returns_edit") ? _c("router-link", {
+    staticClass: "btn btn-success btn-icon ripple btn-sm",
+    attrs: {
+      title: "Edit",
+      to: "/app/sale_return/edit/" + _vm.$route.params.id + "/" + _vm.sale_return.sale_id
+    }
+  }, [_c("i", {
+    staticClass: "i-Edit"
+  }), _vm._v(" "), _c("span", [_vm._v(_vm._s(_vm.$t("EditReturn")))])]) : _vm._e(), _vm._v(" "), _c("button", {
+    staticClass: "btn btn-primary btn-icon ripple btn-sm",
+    on: {
+      click: function click($event) {
+        return _vm.Return_PDF();
+      }
+    }
+  }, [_c("i", {
+    staticClass: "i-File-TXT"
+  }), _vm._v(" PDF\n        ")]), _vm._v(" "), _c("button", {
+    staticClass: "btn btn-warning btn-icon ripple btn-sm",
+    on: {
+      click: function click($event) {
+        return _vm.print();
+      }
+    }
+  }, [_c("i", {
+    staticClass: "i-Billing"
+  }), _vm._v("\n          " + _vm._s(_vm.$t("print")) + "\n        ")]), _vm._v(" "), _vm.currentUserPermissions && _vm.currentUserPermissions.includes("Sale_Returns_delete") ? _c("button", {
+    staticClass: "btn btn-danger btn-icon ripple btn-sm",
+    on: {
+      click: function click($event) {
+        return _vm.Delete_Return();
+      }
+    }
+  }, [_c("i", {
+    staticClass: "i-Close-Window"
+  }), _vm._v("\n          " + _vm._s(_vm.$t("Del")) + "\n        ")]) : _vm._e()], 1)], 1), _vm._v(" "), _c("div", {
+    staticClass: "invoice",
+    attrs: {
+      id: "print_Invoice"
+    }
+  }, [_c("div", {
+    staticClass: "invoice-print"
+  }, [_c("b-row", {
+    staticClass: "justify-content-md-center"
+  }, [_c("h4", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.$t("ReturnDetail")) + " : " + _vm._s(_vm.sale_return.Ref))])]), _vm._v(" "), _c("hr"), _vm._v(" "), _c("b-row", {
+    staticClass: "mt-5"
+  }, [_c("b-col", {
+    staticClass: "mb-4",
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("h5", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.$t("Customer_Info")))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.sale_return.client_name))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.sale_return.client_email))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.sale_return.client_phone))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.sale_return.client_adr))])]), _vm._v(" "), _c("b-col", {
+    staticClass: "mb-4",
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("h5", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.$t("Company_Info")))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.company.CompanyName))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.company.email))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.company.CompanyPhone))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.company.CompanyAdress))])]), _vm._v(" "), _c("b-col", {
+    staticClass: "mb-4",
+    attrs: {
+      lg: "4",
+      md: "4",
+      sm: "12"
+    }
+  }, [_c("h5", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.$t("Return_Info")))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.$t("Reference")) + " : " + _vm._s(_vm.sale_return.Ref))]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.$t("Sale_Ref")) + " : " + _vm._s(_vm.sale_return.sale_ref))]), _vm._v(" "), _c("div", [_vm._v("\n              " + _vm._s(_vm.$t("PaymentStatus")) + " :\n              "), _vm.sale_return.payment_status == "paid" ? _c("span", {
+    staticClass: "badge badge-outline-success"
+  }, [_vm._v(_vm._s(_vm.$t("Paid")))]) : _vm.sale_return.payment_status == "partial" ? _c("span", {
+    staticClass: "badge badge-outline-primary"
+  }, [_vm._v(_vm._s(_vm.$t("partial")))]) : _c("span", {
+    staticClass: "badge badge-outline-warning"
+  }, [_vm._v(_vm._s(_vm.$t("Unpaid")))])]), _vm._v(" "), _c("div", [_vm._v(_vm._s(_vm.$t("warehouse")) + " : " + _vm._s(_vm.sale_return.warehouse))]), _vm._v(" "), _c("div", [_vm._v("\n              " + _vm._s(_vm.$t("Status")) + " :\n              "), _vm.sale_return.statut == "received" ? _c("span", {
+    staticClass: "badge badge-outline-success"
+  }, [_vm._v(_vm._s(_vm.$t("Received")))]) : _c("span", {
+    staticClass: "badge badge-outline-info"
+  }, [_vm._v(_vm._s(_vm.$t("Pending")))])])])], 1), _vm._v(" "), _c("b-row", {
+    staticClass: "mt-3"
+  }, [_c("b-col", {
+    attrs: {
+      md: "12"
+    }
+  }, [_c("h5", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.$t("list_product_returns")))]), _vm._v(" "), _c("div", {
+    staticClass: "alert alert-danger"
+  }, [_vm._v(_vm._s(_vm.$t("products_refunded_alert")))]), _vm._v(" "), _c("div", {
+    staticClass: "table-responsive"
+  }, [_c("table", {
+    staticClass: "table table-hover table-md"
+  }, [_c("thead", {
+    staticClass: "bg-gray-300"
+  }, [_c("tr", [_c("th", {
+    attrs: {
+      scope: "col"
+    }
+  }, [_vm._v(_vm._s(_vm.$t("ProductName")))]), _vm._v(" "), _c("th", {
+    attrs: {
+      scope: "col"
+    }
+  }, [_vm._v(_vm._s(_vm.$t("Net_Unit_Price")))]), _vm._v(" "), _c("th", {
+    attrs: {
+      scope: "col"
+    }
+  }, [_vm._v(_vm._s(_vm.$t("Qty_return")))]), _vm._v(" "), _c("th", {
+    attrs: {
+      scope: "col"
+    }
+  }, [_vm._v(_vm._s(_vm.$t("UnitPrice")))]), _vm._v(" "), _c("th", {
+    attrs: {
+      scope: "col"
+    }
+  }, [_vm._v(_vm._s(_vm.$t("Discount")))]), _vm._v(" "), _c("th", {
+    attrs: {
+      scope: "col"
+    }
+  }, [_vm._v(_vm._s(_vm.$t("Tax")))]), _vm._v(" "), _c("th", {
+    attrs: {
+      scope: "col"
+    }
+  }, [_vm._v(_vm._s(_vm.$t("SubTotal")))])])]), _vm._v(" "), _c("tbody", _vm._l(_vm.details, function (detail) {
+    return _c("tr", [_c("td", [_c("span", [_vm._v(_vm._s(detail.code) + " (" + _vm._s(detail.name) + ")")]), _vm._v(" "), _c("p", {
+      directives: [{
+        name: "show",
+        rawName: "v-show",
+        value: detail.is_imei && detail.imei_number !== null,
+        expression: "detail.is_imei && detail.imei_number !==null "
+      }]
+    }, [_vm._v(_vm._s(_vm.$t("IMEI_SN")) + " : " + _vm._s(detail.imei_number))])]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.currentUser.currency) + " " + _vm._s(_vm.formatNumber(detail.Net_price, 3)))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.formatNumber(detail.quantity, 2)) + " " + _vm._s(detail.unit_sale))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.currentUser.currency) + " " + _vm._s(_vm.formatNumber(detail.price, 2)))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.currentUser.currency) + " " + _vm._s(_vm.formatNumber(detail.DiscountNet, 2)))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.currentUser.currency) + " " + _vm._s(_vm.formatNumber(detail.taxe, 2)))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.currentUser.currency) + " " + _vm._s(detail.total.toFixed(2)))])]);
+  }), 0)])])]), _vm._v(" "), _c("div", {
+    staticClass: "offset-md-9 col-md-3 mt-4"
+  }, [_c("table", {
+    staticClass: "table table-striped table-sm"
+  }, [_c("tbody", [_c("tr", [_c("td", [_vm._v(_vm._s(_vm.$t("OrderTax")))]), _vm._v(" "), _c("td", [_c("span", [_vm._v(_vm._s(_vm.formatPriceWithSymbol(_vm.currentUser.currency, _vm.sale_return.TaxNet, 2)) + " (" + _vm._s(_vm.formatNumber(_vm.sale_return.tax_rate, 2)) + " %)")])])]), _vm._v(" "), _c("tr", [_c("td", [_vm._v(_vm._s(_vm.$t("Discount")))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.formatPriceWithSymbol(_vm.currentUser.currency, _vm.sale_return.discount, 2)))])]), _vm._v(" "), _c("tr", [_c("td", [_vm._v(_vm._s(_vm.$t("Shipping")))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.formatPriceWithSymbol(_vm.currentUser.currency, _vm.sale_return.shipping, 2)))])]), _vm._v(" "), _c("tr", [_c("td", [_c("span", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.$t("Total")))])]), _vm._v(" "), _c("td", [_c("span", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.formatPriceWithSymbol(_vm.currentUser.currency, _vm.sale_return.GrandTotal, 2)))])])]), _vm._v(" "), _c("tr", [_c("td", [_c("span", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.$t("Paid")))])]), _vm._v(" "), _c("td", [_c("span", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.formatPriceWithSymbol(_vm.currentUser.currency, _vm.sale_return.paid_amount, 2)))])])]), _vm._v(" "), _c("tr", [_c("td", [_c("span", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.$t("Due")))])]), _vm._v(" "), _c("td", [_c("span", {
+    staticClass: "font-weight-bold"
+  }, [_vm._v(_vm._s(_vm.formatPriceWithSymbol(_vm.currentUser.currency, _vm.sale_return.due, 2)))])])])])])])], 1), _vm._v(" "), _c("hr", {
+    directives: [{
+      name: "show",
+      rawName: "v-show",
+      value: _vm.sale_return.note,
+      expression: "sale_return.note"
+    }]
+  }), _vm._v(" "), _c("b-row", {
+    staticClass: "mt-4"
+  }, [_c("b-col", {
+    attrs: {
+      md: "12"
+    }
+  }, [_c("p", [_vm._v(_vm._s(_vm.sale_return.note))])])], 1)], 1)])], 1) : _vm._e()], 1);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ },
+
+/***/ "./resources/src/utils/priceFormat.js"
+/*!********************************************!*\
+  !*** ./resources/src/utils/priceFormat.js ***!
+  \********************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PRICE_FORMATS: () => (/* binding */ PRICE_FORMATS),
+/* harmony export */   cachePriceFormat: () => (/* binding */ cachePriceFormat),
+/* harmony export */   formatPriceDisplay: () => (/* binding */ formatPriceDisplay),
+/* harmony export */   getPriceFormatSetting: () => (/* binding */ getPriceFormatSetting),
+/* harmony export */   normalizePriceFormatKey: () => (/* binding */ normalizePriceFormatKey)
+/* harmony export */ });
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+// Price formatting helper for frontend display (e.g., POS)
+// This helper is purely presentational and does NOT affect calculations or stored values.
+
+// Internal map of supported formats:
+// - 'comma_dot'   => 1,234.56 (thousand ',', decimal '.')
+// - 'dot_comma'   => 1.234,56 (thousand '.', decimal ',')
+// - 'space_comma' => 1 234,56 (thousand ' ', decimal ',')
+var PRICE_FORMATS = {
+  comma_dot: {
+    thousands: ',',
+    decimal: '.'
+  },
+  dot_comma: {
+    thousands: '.',
+    decimal: ','
+  },
+  space_comma: {
+    thousands: ' ',
+    decimal: ','
+  }
+};
+
+// Normalize a stored value/label into one of our internal keys
+function normalizePriceFormatKey(input) {
+  if (!input) return null;
+  var raw = String(input).trim();
+
+  // Direct key
+  if (PRICE_FORMATS[raw]) {
+    return raw;
+  }
+
+  // Allow matching by exact label text (for safety if something stored the label)
+  var labelMap = {
+    "1,234.56 (thousand , decimal .)": "comma_dot",
+    "1.234,56 (thousand . decimal ,)": "dot_comma",
+    "1 234,56 (thousand space, decimal ,)": "space_comma"
+  };
+  if (labelMap[raw]) {
+    return labelMap[raw];
+  }
+  return null;
+}
+
+// Format a numeric value according to the selected price format.
+// - value: number or numeric-like
+// - decimals: integer number of decimal places
+// - formatKey: one of PRICE_FORMATS keys or label text; if falsy/unknown, falls back to legacy formatting
+function formatPriceDisplay(value) {
+  var decimals = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 2;
+  var formatKey = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var d = Number.isInteger(decimals) ? decimals : 0;
+  var n = Number(value);
+  var safe = Number.isFinite(n) ? n : 0;
+  var key = normalizePriceFormatKey(formatKey);
+
+  // Fallback: keep current/default behavior (en-US locale style)
+  if (!key) {
+    try {
+      return safe.toLocaleString('en-US', {
+        minimumFractionDigits: d,
+        maximumFractionDigits: d
+      });
+    } catch (e) {
+      var _fixed = safe.toFixed(d);
+      var parts = _fixed.split('.');
+      var _intPart = parts[0];
+      var _fracPart = parts[1] || '';
+      var withCommas = _intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return d > 0 ? "".concat(withCommas, ".").concat(_fracPart) : withCommas;
+    }
+  }
+  var cfg = PRICE_FORMATS[key];
+  var fixed = safe.toFixed(d);
+  var _fixed$split = fixed.split('.'),
+    _fixed$split2 = _slicedToArray(_fixed$split, 2),
+    intPart = _fixed$split2[0],
+    _fixed$split2$ = _fixed$split2[1],
+    fracPart = _fixed$split2$ === void 0 ? '' : _fixed$split2$;
+
+  // Thousands grouping
+  var re = /\B(?=(\d{3})+(?!\d))/g;
+  intPart = intPart.replace(re, cfg.thousands);
+  if (d <= 0) {
+    return intPart;
+  }
+  if (fracPart.length < d) {
+    fracPart = fracPart.padEnd(d, '0');
+  }
+  return "".concat(intPart).concat(cfg.decimal).concat(fracPart);
+}
+
+// Get the selected price format from:
+// - explicit settings object (preferred)
+// - Vuex store getter (getPriceFormat) - from get_user_auth API
+// This helper never throws; it returns null if no valid format is found.
+function getPriceFormatSetting() {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+    _ref$settings = _ref.settings,
+    settings = _ref$settings === void 0 ? null : _ref$settings,
+    _ref$store = _ref.store,
+    store = _ref$store === void 0 ? null : _ref$store;
+  // 1) Explicit settings object (e.g., System Settings API payload)
+  if (settings && settings.price_format) {
+    var key = normalizePriceFormatKey(settings.price_format);
+    if (key) {
+      return key;
+    }
+  }
+
+  // 2) Vuex store getter (from get_user_auth API)
+  if (store && _typeof(store.getters) === 'object' && store.getters.getPriceFormat) {
+    try {
+      var priceFormat = store.getters.getPriceFormat;
+      var _key = normalizePriceFormatKey(priceFormat);
+      if (_key) {
+        return _key;
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // No valid setting => use default behavior (caller should treat null as "legacy" formatting)
+  return null;
+}
+
+// Cache a selected price format key into localStorage for quick frontend access
+function cachePriceFormat(formatKey) {
+  var key = normalizePriceFormatKey(formatKey);
+  if (!key) return;
+  if (typeof window === 'undefined' || !window.localStorage) return;
+  try {
+    window.localStorage.setItem('app_price_format', key);
+  } catch (e) {
+    // ignore quota or storage errors
+  }
+}
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/sale_return/detail_sale_return.vue"
+/*!**************************************************************************!*\
+  !*** ./resources/src/views/app/pages/sale_return/detail_sale_return.vue ***!
+  \**************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _detail_sale_return_vue_vue_type_template_id_43f55e1e__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./detail_sale_return.vue?vue&type=template&id=43f55e1e */ "./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=template&id=43f55e1e");
+/* harmony import */ var _detail_sale_return_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./detail_sale_return.vue?vue&type=script&lang=js */ "./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=script&lang=js");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _detail_sale_return_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _detail_sale_return_vue_vue_type_template_id_43f55e1e__WEBPACK_IMPORTED_MODULE_0__.render,
+  _detail_sale_return_vue_vue_type_template_id_43f55e1e__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "resources/src/views/app/pages/sale_return/detail_sale_return.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=script&lang=js"
+/*!**************************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=script&lang=js ***!
+  \**************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_detail_sale_return_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./detail_sale_return.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=script&lang=js");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_detail_sale_return_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=template&id=43f55e1e"
+/*!********************************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=template&id=43f55e1e ***!
+  \********************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_detail_sale_return_vue_vue_type_template_id_43f55e1e__WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   staticRenderFns: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_detail_sale_return_vue_vue_type_template_id_43f55e1e__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_detail_sale_return_vue_vue_type_template_id_43f55e1e__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./detail_sale_return.vue?vue&type=template&id=43f55e1e */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/sale_return/detail_sale_return.vue?vue&type=template&id=43f55e1e");
+
+
+/***/ }
+
+}]);

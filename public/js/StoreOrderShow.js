@@ -1,2 +1,419 @@
-/*! For license information please see StoreOrderShow.js.LICENSE.txt */
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[6593],{98452(t,e,r){r.r(e),r.d(e,{default:()=>v});var n=r(95353);function o(t){return o="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},o(t)}function s(){var t,e,r="function"==typeof Symbol?Symbol:{},n=r.iterator||"@@iterator",o=r.toStringTag||"@@toStringTag";function i(r,n,o,s){var i=n&&n.prototype instanceof u?n:u,l=Object.create(i.prototype);return a(l,"_invoke",function(r,n,o){var s,a,i,u=0,l=o||[],d=!1,f={p:0,n:0,v:t,a:v,f:v.bind(t,4),d:function(e,r){return s=e,a=0,i=t,f.n=r,c}};function v(r,n){for(a=r,i=n,e=0;!d&&u&&!o&&e<l.length;e++){var o,s=l[e],v=f.p,p=s[2];r>3?(o=p===n)&&(i=s[(a=s[4])?5:(a=3,3)],s[4]=s[5]=t):s[0]<=v&&((o=r<2&&v<s[1])?(a=0,f.v=n,f.n=s[1]):v<p&&(o=r<3||s[0]>n||n>p)&&(s[4]=r,s[5]=n,f.n=p,a=0))}if(o||r>1)return c;throw d=!0,n}return function(o,l,p){if(u>1)throw TypeError("Generator is already running");for(d&&1===l&&v(l,p),a=l,i=p;(e=a<2?t:i)||!d;){s||(a?a<3?(a>1&&(f.n=-1),v(a,i)):f.n=i:f.v=i);try{if(u=2,s){if(a||(o="next"),e=s[o]){if(!(e=e.call(s,i)))throw TypeError("iterator result is not an object");if(!e.done)return e;i=e.value,a<2&&(a=0)}else 1===a&&(e=s.return)&&e.call(s),a<2&&(i=TypeError("The iterator does not provide a '"+o+"' method"),a=1);s=t}else if((e=(d=f.n<0)?i:r.call(n,f))!==c)break}catch(e){s=t,a=1,i=e}finally{u=1}}return{value:e,done:d}}}(r,o,s),!0),l}var c={};function u(){}function l(){}function d(){}e=Object.getPrototypeOf;var f=[][n]?e(e([][n]())):(a(e={},n,function(){return this}),e),v=d.prototype=u.prototype=Object.create(f);function p(t){return Object.setPrototypeOf?Object.setPrototypeOf(t,d):(t.__proto__=d,a(t,o,"GeneratorFunction")),t.prototype=Object.create(v),t}return l.prototype=d,a(v,"constructor",d),a(d,"constructor",l),l.displayName="GeneratorFunction",a(d,o,"GeneratorFunction"),a(v),a(v,o,"Generator"),a(v,n,function(){return this}),a(v,"toString",function(){return"[object Generator]"}),(s=function(){return{w:i,m:p}})()}function a(t,e,r,n){var o=Object.defineProperty;try{o({},"",{})}catch(t){o=0}a=function(t,e,r,n){function s(e,r){a(t,e,function(t){return this._invoke(e,r,t)})}e?o?o(t,e,{value:r,enumerable:!n,configurable:!n,writable:!n}):t[e]=r:(s("next",0),s("throw",1),s("return",2))},a(t,e,r,n)}function i(t,e,r,n,o,s,a){try{var i=t[s](a),c=i.value}catch(t){return void r(t)}i.done?e(c):Promise.resolve(c).then(n,o)}function c(t){return function(){var e=this,r=arguments;return new Promise(function(n,o){var s=t.apply(e,r);function a(t){i(s,n,o,a,c,"next",t)}function c(t){i(s,n,o,a,c,"throw",t)}a(void 0)})}}function u(t,e){var r=Object.keys(t);if(Object.getOwnPropertySymbols){var n=Object.getOwnPropertySymbols(t);e&&(n=n.filter(function(e){return Object.getOwnPropertyDescriptor(t,e).enumerable})),r.push.apply(r,n)}return r}function l(t,e,r){return(e=function(t){var e=function(t,e){if("object"!=o(t)||!t)return t;var r=t[Symbol.toPrimitive];if(void 0!==r){var n=r.call(t,e||"default");if("object"!=o(n))return n;throw new TypeError("@@toPrimitive must return a primitive value.")}return("string"===e?String:Number)(t)}(t,"string");return"symbol"==o(e)?e:e+""}(e))in t?Object.defineProperty(t,e,{value:r,enumerable:!0,configurable:!0,writable:!0}):t[e]=r,t}const d={metaInfo:{title:"Store Order"},props:{id:{type:[String,Number],required:!0}},data:function(){return{loading:!0,actionBusy:!1,order:{items:[],status:"pending"},code:""}},mounted:function(){this.fetch()},computed:function(t){for(var e=1;e<arguments.length;e++){var r=null!=arguments[e]?arguments[e]:{};e%2?u(Object(r),!0).forEach(function(e){l(t,e,r[e])}):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(r)):u(Object(r)).forEach(function(e){Object.defineProperty(t,e,Object.getOwnPropertyDescriptor(r,e))})}return t}({},(0,n.L8)(["currentUser"])),methods:{currency:function(t){var e=this.currentUser.currency;try{return new Intl.NumberFormat(void 0,{style:"currency",currency:e}).format(t||0)}catch(r){return e+" "+Number(t||0).toFixed(2)}},badgeVariant:function(t){return{pending:"warning",confirmed:"success",cancelled:"danger"}[t]||"secondary"},fetch:function(){var t=this;return c(s().m(function e(){var r,n;return s().w(function(e){for(;;)switch(e.p=e.n){case 0:return e.p=0,e.n=1,axios.get("/store/orders/".concat(t.id));case 1:r=e.v,n=r.data,t.order=n||{items:[],status:"pending"},t.code=n&&(n.code||"#".concat(n.id));case 2:return e.p=2,t.loading=!1,e.f(2);case 3:return e.a(2)}},e,null,[[0,,2,3]])}))()},confirmOrder:function(){var t=this;this.order&&"pending"===this.order.status&&this.$swal({title:"Confirm this order?",text:"This will convert the online order into a Sale and deduct stock.",type:"warning",showCancelButton:!0,confirmButtonColor:"#3085d6",cancelButtonColor:"#d33",cancelButtonText:"Cancel",confirmButtonText:"Confirm"}).then(function(){var e=c(s().m(function e(r){var n,o,a,i,c,u,l;return s().w(function(e){for(;;)switch(e.p=e.n){case 0:if(r.value){e.n=1;break}return e.a(2);case 1:return window.NProgress&&(NProgress.start(),NProgress.set(.1)),t.actionBusy=!0,e.p=2,e.n=3,axios.patch("/store/orders/".concat(t.id),{status:"confirmed"});case 3:n=e.v,o=n.data,t.order.status="confirmed",a=o&&o.sale_ref?"Order confirmed as Sale ".concat(o.sale_ref):"Order confirmed",t.$swal("Success",a,"success"),e.n=5;break;case 4:e.p=4,l=e.v,i="Operation failed. Please try again.",(c=l&&l.response&&l.response.data)&&(Array.isArray(c.items)&&c.items.length?(u=c.items.map(function(t){return"".concat(t.name," — 'Available': ").concat(t.available,", 'Required': ").concat(t.required)}),i="Insufficient stock for:\n"+u.join("\n")):(c.error||c.message)&&(i=c.error||c.message)),t.$swal("Error",i,"warning");case 5:return e.p=5,t.actionBusy=!1,window.NProgress&&setTimeout(function(){return NProgress.done()},300),e.f(5);case 6:return e.a(2)}},e,null,[[2,4,5,6]])}));return function(t){return e.apply(this,arguments)}}())},cancelOrder:function(){var t=this;this.order&&"pending"===this.order.status&&this.$swal({title:"Cancel this order?",text:"This will mark the order as cancelled.",type:"warning",showCancelButton:!0,confirmButtonColor:"#3085d6",cancelButtonColor:"#d33",cancelButtonText:"Keep",confirmButtonText:"Cancel"}).then(function(){var e=c(s().m(function e(r){return s().w(function(e){for(;;)switch(e.p=e.n){case 0:if(r.value){e.n=1;break}return e.a(2);case 1:return window.NProgress&&(NProgress.start(),NProgress.set(.1)),t.actionBusy=!0,e.p=2,e.n=3,axios.patch("/store/orders/".concat(t.id),{status:"cancelled"});case 3:t.order.status="cancelled",t.$swal("Success","Order cancelled","success"),e.n=5;break;case 4:e.p=4,e.v,t.$swal("Error","Operation failed. Please try again.","warning");case 5:return e.p=5,t.actionBusy=!1,window.NProgress&&setTimeout(function(){return NProgress.done()},300),e.f(5);case 6:return e.a(2)}},e,null,[[2,4,5,6]])}));return function(t){return e.apply(this,arguments)}}())},toast:function(t,e,r){this.$bvToast&&this.$bvToast.toast?this.$bvToast.toast(r,{title:e,variant:t,autoHideDelay:3e3,solid:!0}):"danger"===t?alert((e||"Error")+": "+r):console.log(e+": "+r)}}},f=d;const v=(0,r(14486).A)(f,function(){var t=this,e=t._self._c;return e("div",{staticClass:"main-content"},[e("breadcumb",{attrs:{page:t.$t("Order"),folder:t.$t("Store")}}),t._v(" "),t.loading?e("div",{staticClass:"loading_page spinner spinner-primary mr-3"}):e("b-card",{staticClass:"wrapper"},[e("div",{staticClass:"d-flex justify-content-between align-items-center mb-3"},[e("h5",{staticClass:"mb-0"},[t._v(t._s(t.code))]),t._v(" "),e("div",{staticClass:"d-flex align-items-center"},[e("b-badge",{staticClass:"mr-2 text-uppercase",attrs:{variant:t.badgeVariant(t.order.status)}},[t._v("\n          "+t._s(t.order.status)+"\n        ")])],1)]),t._v(" "),e("div",{staticClass:"row"},[e("div",{staticClass:"col-md-7"},[e("b-card",{staticClass:"mb-3"},[e("h6",{staticClass:"mb-3"},[t._v(t._s(t.$t("Items")))]),t._v(" "),e("div",{staticClass:"table-responsive"},[e("table",{staticClass:"table table-sm"},[e("thead",[e("tr",[e("th",[t._v(t._s(t.$t("Product")))]),t._v(" "),e("th",[t._v(t._s(t.$t("Qty")))]),t._v(" "),e("th",[t._v(t._s(t.$t("Price")))]),t._v(" "),e("th",{staticClass:"text-right"},[t._v(t._s(t.$t("Total")))])])]),t._v(" "),e("tbody",t._l(t.order.items,function(r){return e("tr",{key:r.id},[e("td",[t._v(t._s(r.name))]),t._v(" "),e("td",[t._v(t._s(r.qty))]),t._v(" "),e("td",[t._v(t._s(t.currency(r.price)))]),t._v(" "),e("td",{staticClass:"text-right"},[t._v(t._s(t.currency(r.price*r.qty)))])])}),0)])])])],1),t._v(" "),e("div",{staticClass:"col-md-5"},[e("b-card",{staticClass:"mb-3"},[e("h6",[t._v("Customer")]),t._v(" "),e("div",{staticClass:"text-muted"},[t._v(t._s(t.order.customer_name))]),t._v(" "),e("div",{staticClass:"text-muted"},[t._v(t._s(t.order.customer_email))]),t._v(" "),e("div",{staticClass:"text-muted"},[t._v(t._s(t.order.customer_phone))])]),t._v(" "),e("b-card",{staticClass:"mb-3"},[e("h6",[t._v(t._s(t.$t("Shipping")))]),t._v(" "),e("div",{staticClass:"text-muted"},[t._v(t._s(t.order.customer_phone||"-"))]),t._v(" "),e("div",{staticClass:"text-muted"},[t._v(t._s(t.order.customer_address||"-"))])]),t._v(" "),e("b-card",{staticClass:"mb-3"},[e("h6",[t._v("Warehouse")]),t._v(" "),e("div",{staticClass:"text-muted"},[t._v("\n            "+t._s(t.order.warehouse_name||"-")+"\n          ")])]),t._v(" "),e("b-card",{staticClass:"mb-3"},[e("h6",[t._v("Summary")]),t._v(" "),e("ul",{staticClass:"list-unstyled mb-0"},[e("li",{staticClass:"d-flex justify-content-between"},[e("span",[t._v("Subtotal")]),t._v(" "),e("strong",[t._v(t._s(t.currency(t.order.subtotal)))])]),t._v(" "),Number(t.order.shipping||0)>0?e("li",{staticClass:"d-flex justify-content-between"},[e("span",[t._v("Shipping")]),t._v(" "),e("strong",[t._v(t._s(t.currency(t.order.shipping||0)))])]):t._e(),t._v(" "),Number(t.order.discount||0)>0?e("li",{staticClass:"d-flex justify-content-between"},[e("span",[t._v("Discount")]),t._v(" "),e("strong",[t._v("-"+t._s(t.currency(t.order.discount||0)))])]):t._e(),t._v(" "),e("li",{staticClass:"d-flex justify-content-between border-top pt-2"},[e("span",[t._v("Total")]),t._v(" "),e("strong",[t._v(t._s(t.currency(t.order.total)))])])])])],1)])])],1)},[],!1,null,null,null).exports}}]);
+"use strict";
+(self["webpackChunk"] = self["webpackChunk"] || []).push([["StoreOrderShow"],{
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/store/OrderShow.vue?vue&type=script&lang=js"
+/*!***************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/store/OrderShow.vue?vue&type=script&lang=js ***!
+  \***************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  metaInfo: {
+    title: 'Store Order'
+  },
+  props: {
+    id: {
+      type: [String, Number],
+      required: true
+    }
+  },
+  data: function data() {
+    return {
+      loading: true,
+      actionBusy: false,
+      order: {
+        items: [],
+        status: 'pending'
+      },
+      code: ''
+    };
+  },
+  mounted: function mounted() {
+    this.fetch();
+  },
+  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapGetters)(["currentUser"])),
+  methods: {
+    currency: function currency(n) {
+      // Prefer currentUser.currency if available
+      var code = this.currentUser.currency;
+      try {
+        return new Intl.NumberFormat(undefined, {
+          style: 'currency',
+          currency: code
+        }).format(n || 0);
+      } catch (e) {
+        // fallback if currency code invalid
+        return code + ' ' + Number(n || 0).toFixed(2);
+      }
+    },
+    badgeVariant: function badgeVariant(s) {
+      return {
+        pending: 'warning',
+        confirmed: 'success',
+        cancelled: 'danger'
+      }[s] || 'secondary';
+    },
+    fetch: function fetch() {
+      var _this = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+        var _yield$axios$get, data;
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.p = _context.n) {
+            case 0:
+              _context.p = 0;
+              _context.n = 1;
+              return axios.get("/store/orders/".concat(_this.id));
+            case 1:
+              _yield$axios$get = _context.v;
+              data = _yield$axios$get.data;
+              _this.order = data || {
+                items: [],
+                status: 'pending'
+              };
+              _this.code = data && (data.code || "#".concat(data.id));
+            case 2:
+              _context.p = 2;
+              _this.loading = false;
+              return _context.f(2);
+            case 3:
+              return _context.a(2);
+          }
+        }, _callee, null, [[0,, 2, 3]]);
+      }))();
+    },
+    confirmOrder: function confirmOrder() {
+      var _this2 = this;
+      if (!this.order || this.order.status !== 'pending') return;
+      this.$swal({
+        title: 'Confirm this order?',
+        text: 'This will convert the online order into a Sale and deduct stock.',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Confirm'
+      }).then(/*#__PURE__*/function () {
+        var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(result) {
+          var _yield$axios$patch, data, msg, _msg, d, lines, _t;
+          return _regenerator().w(function (_context2) {
+            while (1) switch (_context2.p = _context2.n) {
+              case 0:
+                if (result.value) {
+                  _context2.n = 1;
+                  break;
+                }
+                return _context2.a(2);
+              case 1:
+                if (window.NProgress) {
+                  NProgress.start();
+                  NProgress.set(0.1);
+                }
+                _this2.actionBusy = true;
+                _context2.p = 2;
+                _context2.n = 3;
+                return axios.patch("/store/orders/".concat(_this2.id), {
+                  status: 'confirmed'
+                });
+              case 3:
+                _yield$axios$patch = _context2.v;
+                data = _yield$axios$patch.data;
+                _this2.order.status = 'confirmed';
+                msg = data && data.sale_ref ? "Order confirmed as Sale ".concat(data.sale_ref) : 'Order confirmed';
+                _this2.$swal('Success', msg, 'success');
+                _context2.n = 5;
+                break;
+              case 4:
+                _context2.p = 4;
+                _t = _context2.v;
+                // Build a helpful error message (show per-item shortages if backend sent them)
+                _msg = 'Operation failed. Please try again.';
+                d = _t && _t.response && _t.response.data;
+                if (d) {
+                  if (Array.isArray(d.items) && d.items.length) {
+                    lines = d.items.map(function (x) {
+                      return "".concat(x.name, " \u2014 'Available': ").concat(x.available, ", 'Required': ").concat(x.required);
+                    });
+                    _msg = 'Insufficient stock for:' + '\n' + lines.join('\n');
+                  } else if (d.error || d.message) {
+                    _msg = d.error || d.message;
+                  }
+                }
+                _this2.$swal('Error', _msg, 'warning');
+              case 5:
+                _context2.p = 5;
+                _this2.actionBusy = false;
+                if (window.NProgress) setTimeout(function () {
+                  return NProgress.done();
+                }, 300);
+                return _context2.f(5);
+              case 6:
+                return _context2.a(2);
+            }
+          }, _callee2, null, [[2, 4, 5, 6]]);
+        }));
+        return function (_x) {
+          return _ref.apply(this, arguments);
+        };
+      }());
+    },
+    cancelOrder: function cancelOrder() {
+      var _this3 = this;
+      if (!this.order || this.order.status !== 'pending') return;
+      this.$swal({
+        title: 'Cancel this order?',
+        text: 'This will mark the order as cancelled.',
+        type: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        cancelButtonText: 'Keep',
+        confirmButtonText: 'Cancel'
+      }).then(/*#__PURE__*/function () {
+        var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(result) {
+          var _t2;
+          return _regenerator().w(function (_context3) {
+            while (1) switch (_context3.p = _context3.n) {
+              case 0:
+                if (result.value) {
+                  _context3.n = 1;
+                  break;
+                }
+                return _context3.a(2);
+              case 1:
+                if (window.NProgress) {
+                  NProgress.start();
+                  NProgress.set(0.1);
+                }
+                _this3.actionBusy = true;
+                _context3.p = 2;
+                _context3.n = 3;
+                return axios.patch("/store/orders/".concat(_this3.id), {
+                  status: 'cancelled'
+                });
+              case 3:
+                _this3.order.status = 'cancelled';
+                _this3.$swal('Success', 'Order cancelled', 'success');
+                _context3.n = 5;
+                break;
+              case 4:
+                _context3.p = 4;
+                _t2 = _context3.v;
+                _this3.$swal('Error', 'Operation failed. Please try again.', 'warning');
+              case 5:
+                _context3.p = 5;
+                _this3.actionBusy = false;
+                if (window.NProgress) setTimeout(function () {
+                  return NProgress.done();
+                }, 300);
+                return _context3.f(5);
+              case 6:
+                return _context3.a(2);
+            }
+          }, _callee3, null, [[2, 4, 5, 6]]);
+        }));
+        return function (_x2) {
+          return _ref2.apply(this, arguments);
+        };
+      }());
+    },
+    toast: function toast(variant, title, msg) {
+      if (this.$bvToast && this.$bvToast.toast) {
+        this.$bvToast.toast(msg, {
+          title: title,
+          variant: variant,
+          autoHideDelay: 3000,
+          solid: true
+        });
+      } else {
+        if (variant === 'danger') alert((title || 'Error') + ': ' + msg);else console.log(title + ': ' + msg);
+      }
+    }
+  }
+});
+
+/***/ },
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/store/OrderShow.vue?vue&type=template&id=6990fcd0"
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/store/OrderShow.vue?vue&type=template&id=6990fcd0 ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* binding */ render),
+/* harmony export */   staticRenderFns: () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("div", {
+    staticClass: "main-content"
+  }, [_c("breadcumb", {
+    attrs: {
+      page: _vm.$t("Order"),
+      folder: _vm.$t("Store")
+    }
+  }), _vm._v(" "), _vm.loading ? _c("div", {
+    staticClass: "loading_page spinner spinner-primary mr-3"
+  }) : _c("b-card", {
+    staticClass: "wrapper"
+  }, [_c("div", {
+    staticClass: "d-flex justify-content-between align-items-center mb-3"
+  }, [_c("h5", {
+    staticClass: "mb-0"
+  }, [_vm._v(_vm._s(_vm.code))]), _vm._v(" "), _c("div", {
+    staticClass: "d-flex align-items-center"
+  }, [_c("b-badge", {
+    staticClass: "mr-2 text-uppercase",
+    attrs: {
+      variant: _vm.badgeVariant(_vm.order.status)
+    }
+  }, [_vm._v("\n          " + _vm._s(_vm.order.status) + "\n        ")])], 1)]), _vm._v(" "), _c("div", {
+    staticClass: "row"
+  }, [_c("div", {
+    staticClass: "col-md-7"
+  }, [_c("b-card", {
+    staticClass: "mb-3"
+  }, [_c("h6", {
+    staticClass: "mb-3"
+  }, [_vm._v(_vm._s(_vm.$t("Items")))]), _vm._v(" "), _c("div", {
+    staticClass: "table-responsive"
+  }, [_c("table", {
+    staticClass: "table table-sm"
+  }, [_c("thead", [_c("tr", [_c("th", [_vm._v(_vm._s(_vm.$t("Product")))]), _vm._v(" "), _c("th", [_vm._v(_vm._s(_vm.$t("Qty")))]), _vm._v(" "), _c("th", [_vm._v(_vm._s(_vm.$t("Price")))]), _vm._v(" "), _c("th", {
+    staticClass: "text-right"
+  }, [_vm._v(_vm._s(_vm.$t("Total")))])])]), _vm._v(" "), _c("tbody", _vm._l(_vm.order.items, function (it) {
+    return _c("tr", {
+      key: it.id
+    }, [_c("td", [_vm._v(_vm._s(it.name))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(it.qty))]), _vm._v(" "), _c("td", [_vm._v(_vm._s(_vm.currency(it.price)))]), _vm._v(" "), _c("td", {
+      staticClass: "text-right"
+    }, [_vm._v(_vm._s(_vm.currency(it.price * it.qty)))])]);
+  }), 0)])])])], 1), _vm._v(" "), _c("div", {
+    staticClass: "col-md-5"
+  }, [_c("b-card", {
+    staticClass: "mb-3"
+  }, [_c("h6", [_vm._v("Customer")]), _vm._v(" "), _c("div", {
+    staticClass: "text-muted"
+  }, [_vm._v(_vm._s(_vm.order.customer_name))]), _vm._v(" "), _c("div", {
+    staticClass: "text-muted"
+  }, [_vm._v(_vm._s(_vm.order.customer_email))]), _vm._v(" "), _c("div", {
+    staticClass: "text-muted"
+  }, [_vm._v(_vm._s(_vm.order.customer_phone))])]), _vm._v(" "), _c("b-card", {
+    staticClass: "mb-3"
+  }, [_c("h6", [_vm._v(_vm._s(_vm.$t("Shipping")))]), _vm._v(" "), _c("div", {
+    staticClass: "text-muted"
+  }, [_vm._v(_vm._s(_vm.order.customer_phone || "-"))]), _vm._v(" "), _c("div", {
+    staticClass: "text-muted"
+  }, [_vm._v(_vm._s(_vm.order.customer_address || "-"))])]), _vm._v(" "), _c("b-card", {
+    staticClass: "mb-3"
+  }, [_c("h6", [_vm._v("Warehouse")]), _vm._v(" "), _c("div", {
+    staticClass: "text-muted"
+  }, [_vm._v("\n            " + _vm._s(_vm.order.warehouse_name || "-") + "\n          ")])]), _vm._v(" "), _c("b-card", {
+    staticClass: "mb-3"
+  }, [_c("h6", [_vm._v("Summary")]), _vm._v(" "), _c("ul", {
+    staticClass: "list-unstyled mb-0"
+  }, [_c("li", {
+    staticClass: "d-flex justify-content-between"
+  }, [_c("span", [_vm._v("Subtotal")]), _vm._v(" "), _c("strong", [_vm._v(_vm._s(_vm.currency(_vm.order.subtotal)))])]), _vm._v(" "), Number(_vm.order.shipping || 0) > 0 ? _c("li", {
+    staticClass: "d-flex justify-content-between"
+  }, [_c("span", [_vm._v("Shipping")]), _vm._v(" "), _c("strong", [_vm._v(_vm._s(_vm.currency(_vm.order.shipping || 0)))])]) : _vm._e(), _vm._v(" "), Number(_vm.order.discount || 0) > 0 ? _c("li", {
+    staticClass: "d-flex justify-content-between"
+  }, [_c("span", [_vm._v("Discount")]), _vm._v(" "), _c("strong", [_vm._v("-" + _vm._s(_vm.currency(_vm.order.discount || 0)))])]) : _vm._e(), _vm._v(" "), _c("li", {
+    staticClass: "d-flex justify-content-between border-top pt-2"
+  }, [_c("span", [_vm._v("Total")]), _vm._v(" "), _c("strong", [_vm._v(_vm._s(_vm.currency(_vm.order.total)))])])])])], 1)])])], 1);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/store/OrderShow.vue"
+/*!***********************************************************!*\
+  !*** ./resources/src/views/app/pages/store/OrderShow.vue ***!
+  \***********************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _OrderShow_vue_vue_type_template_id_6990fcd0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./OrderShow.vue?vue&type=template&id=6990fcd0 */ "./resources/src/views/app/pages/store/OrderShow.vue?vue&type=template&id=6990fcd0");
+/* harmony import */ var _OrderShow_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./OrderShow.vue?vue&type=script&lang=js */ "./resources/src/views/app/pages/store/OrderShow.vue?vue&type=script&lang=js");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _OrderShow_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _OrderShow_vue_vue_type_template_id_6990fcd0__WEBPACK_IMPORTED_MODULE_0__.render,
+  _OrderShow_vue_vue_type_template_id_6990fcd0__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "resources/src/views/app/pages/store/OrderShow.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/store/OrderShow.vue?vue&type=script&lang=js"
+/*!***********************************************************************************!*\
+  !*** ./resources/src/views/app/pages/store/OrderShow.vue?vue&type=script&lang=js ***!
+  \***********************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_OrderShow_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./OrderShow.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/store/OrderShow.vue?vue&type=script&lang=js");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_OrderShow_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/store/OrderShow.vue?vue&type=template&id=6990fcd0"
+/*!*****************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/store/OrderShow.vue?vue&type=template&id=6990fcd0 ***!
+  \*****************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_OrderShow_vue_vue_type_template_id_6990fcd0__WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   staticRenderFns: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_OrderShow_vue_vue_type_template_id_6990fcd0__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_OrderShow_vue_vue_type_template_id_6990fcd0__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./OrderShow.vue?vue&type=template&id=6990fcd0 */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/store/OrderShow.vue?vue&type=template&id=6990fcd0");
+
+
+/***/ }
+
+}]);

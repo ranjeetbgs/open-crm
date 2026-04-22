@@ -1,2 +1,626 @@
-/*! For license information please see translations_view.js.LICENSE.txt */
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[5333],{27012(t,n,e){e.r(n),e.d(n,{default:()=>c});function a(){var t,n,e="function"==typeof Symbol?Symbol:{},s=e.iterator||"@@iterator",o=e.toStringTag||"@@toStringTag";function i(e,a,s,o){var i=a&&a.prototype instanceof c?a:c,u=Object.create(i.prototype);return r(u,"_invoke",function(e,a,r){var s,o,i,c=0,u=r||[],f=!1,v={p:0,n:0,v:t,a:d,f:d.bind(t,4),d:function(n,e){return s=n,o=0,i=t,v.n=e,l}};function d(e,a){for(o=e,i=a,n=0;!f&&c&&!r&&n<u.length;n++){var r,s=u[n],d=v.p,p=s[2];e>3?(r=p===a)&&(i=s[(o=s[4])?5:(o=3,3)],s[4]=s[5]=t):s[0]<=d&&((r=e<2&&d<s[1])?(o=0,v.v=a,v.n=s[1]):d<p&&(r=e<3||s[0]>a||a>p)&&(s[4]=e,s[5]=a,v.n=p,o=0))}if(r||e>1)return l;throw f=!0,a}return function(r,u,p){if(c>1)throw TypeError("Generator is already running");for(f&&1===u&&d(u,p),o=u,i=p;(n=o<2?t:i)||!f;){s||(o?o<3?(o>1&&(v.n=-1),d(o,i)):v.n=i:v.v=i);try{if(c=2,s){if(o||(r="next"),n=s[r]){if(!(n=n.call(s,i)))throw TypeError("iterator result is not an object");if(!n.done)return n;i=n.value,o<2&&(o=0)}else 1===o&&(n=s.return)&&n.call(s),o<2&&(i=TypeError("The iterator does not provide a '"+r+"' method"),o=1);s=t}else if((n=(f=v.n<0)?i:e.call(a,v))!==l)break}catch(n){s=t,o=1,i=n}finally{c=1}}return{value:n,done:f}}}(e,s,o),!0),u}var l={};function c(){}function u(){}function f(){}n=Object.getPrototypeOf;var v=[][s]?n(n([][s]())):(r(n={},s,function(){return this}),n),d=f.prototype=c.prototype=Object.create(v);function p(t){return Object.setPrototypeOf?Object.setPrototypeOf(t,f):(t.__proto__=f,r(t,o,"GeneratorFunction")),t.prototype=Object.create(d),t}return u.prototype=f,r(d,"constructor",f),r(f,"constructor",u),u.displayName="GeneratorFunction",r(f,o,"GeneratorFunction"),r(d),r(d,o,"Generator"),r(d,s,function(){return this}),r(d,"toString",function(){return"[object Generator]"}),(a=function(){return{w:i,m:p}})()}function r(t,n,e,a){var s=Object.defineProperty;try{s({},"",{})}catch(t){s=0}r=function(t,n,e,a){function o(n,e){r(t,n,function(t){return this._invoke(n,e,t)})}n?s?s(t,n,{value:e,enumerable:!a,configurable:!a,writable:!a}):t[n]=e:(o("next",0),o("throw",1),o("return",2))},r(t,n,e,a)}function s(t,n,e,a,r,s,o){try{var i=t[s](o),l=i.value}catch(t){return void e(t)}i.done?n(l):Promise.resolve(l).then(a,r)}function o(t){return function(){var n=this,e=arguments;return new Promise(function(a,r){var o=t.apply(n,e);function i(t){s(o,a,r,i,l,"next",t)}function l(t){s(o,a,r,i,l,"throw",t)}i(void 0)})}}const i={data:function(){return{showAddModal:!1,newTranslation:{key:"",value:""},locale:this.$route.params.locale,language:"",translations:[],originalTranslations:[],totalRows:0,currentPage:1,perPage:100,isLoading:!1,searchQuery:"",searchInput:""}},computed:{filteredTranslations:function(){var t=this;return this.searchQuery?this.translations.filter(function(n){return n.key.toLowerCase().includes(t.searchQuery.toLowerCase())}):this.translations}},methods:{submitNewTranslation:function(){var t=this;return o(a().m(function n(){return a().w(function(n){for(;;)switch(n.p=n.n){case 0:if(t.newTranslation.key){n.n=1;break}return n.a(2);case 1:return n.p=1,n.n=2,axios.put("/translations_setting/".concat(t.locale),{key:t.newTranslation.key,value:t.newTranslation.value});case 2:t.$bvToast.toast(t.$t("Translation added"),{title:t.$t("Success"),variant:"success",solid:!0}),t.showAddModal=!1,t.newTranslation.key="",t.newTranslation.value="",t.fetchTranslations(t.currentPage),n.n=4;break;case 3:n.p=3,n.v,t.$bvToast.toast(t.$t("Failed to add translation"),{title:t.$t("Failed"),variant:"danger",solid:!0});case 4:return n.a(2)}},n,null,[[1,3]])}))()},applySearch:function(){this.searchQuery=this.searchInput,this.currentPage=1,this.fetchTranslations(1)},resetSearch:function(){this.searchInput="",this.searchQuery="",this.currentPage=1,this.fetchTranslations(1)},fetchTranslations:function(){var t=arguments,n=this;return o(a().m(function e(){var r,s;return a().w(function(e){for(;;)switch(e.p=e.n){case 0:return r=t.length>0&&void 0!==t[0]?t[0]:1,n.isLoading=!0,e.p=1,e.n=2,axios.get("/translations_setting/".concat(n.locale),{params:{page:r,per_page:n.perPage,search:n.searchQuery}});case 2:s=e.v,n.translations=s.data.data,n.originalTranslations=JSON.parse(JSON.stringify(s.data.data)),n.totalRows=s.data.total,n.currentPage=s.data.current_page,n.language=s.data.language,e.n=4;break;case 3:e.p=3,e.v;case 4:return e.p=4,n.isLoading=!1,e.f(4);case 5:return e.a(2)}},e,null,[[1,3,4,5]])}))()},saveTranslation:function(t){var n=this;return o(a().m(function e(){return a().w(function(e){for(;;)switch(e.p=e.n){case 0:return e.p=0,e.n=1,axios.put("/translations_setting/".concat(n.locale),{key:t.key,value:t.value});case 1:n.$bvToast.toast(n.$t("Translation updated"),{title:"Success",variant:"success",solid:!0}),e.n=3;break;case 2:e.p=2,e.v,n.$bvToast.toast(n.$t("Failed to update"),{title:n.$t("Failed"),variant:"danger",solid:!0});case 3:return e.a(2)}},e,null,[[0,2]])}))()},bulkSave:function(){var t=this;return o(a().m(function n(){var e;return a().w(function(n){for(;;)switch(n.p=n.n){case 0:if((e=t.translations.filter(function(n,e){var a;return n.value!==(null===(a=t.originalTranslations[e])||void 0===a?void 0:a.value)})).length){n.n=1;break}return t.$bvToast.toast(t.$t("No changes to save"),{title:t.$t("Notice"),variant:"info",solid:!0}),n.a(2);case 1:return t.isLoading=!0,n.p=2,n.n=3,Promise.all(e.map(function(n){return axios.put("/translations_setting/".concat(t.locale),{key:n.key,value:n.value})}));case 3:t.$bvToast.toast(t.$t("All changes saved successfully"),{title:t.$t("Success"),variant:"success",solid:!0}),t.fetchTranslations(t.currentPage),n.n=5;break;case 4:n.p=4,n.v,t.$bvToast.toast(t.$t("Bulk save failed"),{title:t.$t("Failed"),variant:"danger",solid:!0});case 5:return n.p=5,t.isLoading=!1,n.f(5);case 6:return n.a(2)}},n,null,[[2,4,5,6]])}))()},deleteTranslation:function(t){var n=this;return o(a().m(function e(){return a().w(function(e){for(;;)switch(e.n){case 0:if(n.translations.find(function(n){return n.key===t})){e.n=1;break}return e.a(2);case 1:n.$swal({title:n.$t("Delete_Title"),text:n.$t("Delete_Text"),icon:"warning",showCancelButton:!0,confirmButtonColor:"#3085d6",cancelButtonColor:"#d33",cancelButtonText:n.$t("Delete_cancelButtonText"),confirmButtonText:n.$t("Delete_confirmButtonText")}).then(function(){var e=o(a().m(function e(r){return a().w(function(e){for(;;)switch(e.p=e.n){case 0:if(!r.value){e.n=5;break}return e.p=1,e.n=2,axios.delete("/translations_setting/".concat(n.locale,"/").concat(t));case 2:n.$swal(n.$t("Delete_Deleted"),n.$t("Deleted_in_successfully"),"success"),n.fetchTranslations(n.currentPage),e.n=4;break;case 3:e.p=3,e.v,n.$swal(n.$t("Delete_Failed"),n.$t("Delete_Therewassomethingwronge"),"warning");case 4:return e.p=4,e.f(4);case 5:return e.a(2)}},e,null,[[1,3,4,5]])}));return function(t){return e.apply(this,arguments)}}());case 2:return e.a(2)}},e)}))()}},watch:{currentPage:function(t){this.fetchTranslations(t)},searchQuery:function(){this.currentPage=1,this.fetchTranslations(1)}},created:function(){this.fetchTranslations()}},l=i;const c=(0,e(14486).A)(l,function(){var t=this,n=t._self._c;return n("div",{staticClass:"main-content"},[n("breadcumb",{attrs:{page:t.$t("Translations"),folder:t.$t("Settings")}}),t._v(" "),t.isLoading?n("div",{staticClass:"loading_page spinner spinner-primary mr-3"}):t._e(),t._v(" "),t.isLoading?t._e():n("div",[n("div",{staticClass:"d-flex justify-content-between align-items-center mb-3"},[n("div",[n("b-button",{attrs:{variant:"secondary"},on:{click:function(n){return t.$router.push("/app/settings/translations_settings")}}},[t._v("\n          ← "+t._s(t.$t("Back"))+"\n        ")])],1),t._v(" "),n("h4",{staticClass:"mb-0"},[t._v(t._s(t.$t("Translations for"))+' " '+t._s(t.language)+' "')]),t._v(" "),n("div")]),t._v(" "),n("b-alert",{staticClass:"w-100 mb-3 text-center",attrs:{variant:"info",show:""}},[t._v("\n      🔄 "+t._s(t.$t("Please reload the page after saving translations to apply the changes."))+"\n    ")]),t._v(" "),n("div",{staticClass:"mb-3"},[n("b-row",{staticClass:"gy-2 align-items-center"},[n("b-col",{staticClass:"mt-2",attrs:{cols:"12",md:"8"}},[n("b-input-group",[n("b-form-input",{attrs:{placeholder:"Search by key or value..."},model:{value:t.searchInput,callback:function(n){t.searchInput=n},expression:"searchInput"}}),t._v(" "),n("b-input-group-append",[n("b-button",{attrs:{variant:"primary"},on:{click:t.applySearch}},[t._v("\n              🔍\n            ")]),t._v(" "),n("b-button",{attrs:{variant:"warning"},on:{click:t.resetSearch}},[t._v("\n              🔄\n            ")])],1)],1)],1),t._v(" "),n("b-col",{staticClass:"mt-2",attrs:{cols:"12",md:"4"}},[n("b-button",{staticClass:"mr-2",attrs:{variant:"info"},on:{click:function(n){t.showAddModal=!0}}},[t._v("\n          ➕ "+t._s(t.$t("Add New"))+"\n        ")]),t._v(" "),n("b-button",{attrs:{variant:"success"},on:{click:t.bulkSave}},[t._v("\n          💾 "+t._s(t.$t("Save All Changes"))+"\n        ")])],1)],1)],1),t._v(" "),n("b-modal",{attrs:{title:t.$t("Add New Translation"),"ok-title":"Add","cancel-title":"Cancel"},on:{ok:t.submitNewTranslation},model:{value:t.showAddModal,callback:function(n){t.showAddModal=n},expression:"showAddModal"}},[n("b-form",{on:{submit:function(t){t.stopPropagation(),t.preventDefault()}}},[n("b-form-group",{attrs:{label:"Key"}},[n("b-form-input",{attrs:{required:""},model:{value:t.newTranslation.key,callback:function(n){t.$set(t.newTranslation,"key",n)},expression:"newTranslation.key"}})],1),t._v(" "),n("b-form-group",{attrs:{label:"Value"}},[n("b-form-input",{model:{value:t.newTranslation.value,callback:function(n){t.$set(t.newTranslation,"value",n)},expression:"newTranslation.value"}})],1)],1)],1),t._v(" "),n("b-table",{attrs:{items:t.filteredTranslations,fields:["key","value","actions"],busy:t.isLoading,responsive:"",bordered:"",striped:"",small:""},scopedSlots:t._u([{key:"cell(key)",fn:function(t){return[n("b-form-input",{attrs:{value:t.item.key,disabled:""}})]}},{key:"cell(value)",fn:function(e){return[n("b-form-input",{model:{value:e.item.value,callback:function(n){t.$set(e.item,"value",n)},expression:"data.item.value"}})]}},{key:"cell(actions)",fn:function(e){return[n("b-button",{attrs:{size:"sm",variant:"success"},on:{click:function(n){return t.saveTranslation(e.item)}}},[t._v("\n      "+t._s(t.$t("Save"))+"\n    ")]),t._v(" "),"en"!=e.item.locale?n("b-button",{attrs:{size:"sm",variant:"danger"},on:{click:function(n){return t.deleteTranslation(e.item.key)}}},[t._v(t._s(t.$t("Delete"))+"\n    ")]):t._e()]}}],null,!1,3471801801)}),t._v(" "),n("b-pagination",{staticClass:"mt-3",attrs:{"total-rows":t.totalRows,"per-page":t.perPage,align:"center"},model:{value:t.currentPage,callback:function(n){t.currentPage=n},expression:"currentPage"}}),t._v(" "),n("div",{staticClass:"text-muted text-right mb-2"},[t._v("\n  "+t._s(t.$t("Showing"))+" "+t._s(t.translations.length)+" of "+t._s(t.totalRows)+" "+t._s(t.$t("Translations"))+"\n")])],1)],1)},[],!1,null,null,null).exports}}]);
+"use strict";
+(self["webpackChunk"] = self["webpackChunk"] || []).push([["translations_view"],{
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/translations_view.vue?vue&type=script&lang=js"
+/*!**************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/translations_view.vue?vue&type=script&lang=js ***!
+  \**************************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  data: function data() {
+    return {
+      showAddModal: false,
+      newTranslation: {
+        key: '',
+        value: ''
+      },
+      locale: this.$route.params.locale,
+      language: '',
+      translations: [],
+      originalTranslations: [],
+      totalRows: 0,
+      currentPage: 1,
+      perPage: 100,
+      isLoading: false,
+      searchQuery: '',
+      // sent to backend
+      searchInput: '' // input field
+    };
+  },
+  computed: {
+    filteredTranslations: function filteredTranslations() {
+      var _this = this;
+      if (!this.searchQuery) return this.translations;
+      return this.translations.filter(function (item) {
+        return item.key.toLowerCase().includes(_this.searchQuery.toLowerCase());
+      });
+    }
+  },
+  methods: {
+    submitNewTranslation: function submitNewTranslation() {
+      var _this2 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+        var _t;
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.p = _context.n) {
+            case 0:
+              if (_this2.newTranslation.key) {
+                _context.n = 1;
+                break;
+              }
+              return _context.a(2);
+            case 1:
+              _context.p = 1;
+              _context.n = 2;
+              return axios.put("/translations_setting/".concat(_this2.locale), {
+                key: _this2.newTranslation.key,
+                value: _this2.newTranslation.value
+              });
+            case 2:
+              _this2.$bvToast.toast(_this2.$t("Translation added"), {
+                title: _this2.$t("Success"),
+                variant: 'success',
+                solid: true
+              });
+              _this2.showAddModal = false;
+              _this2.newTranslation.key = '';
+              _this2.newTranslation.value = '';
+
+              // Reload current page
+              _this2.fetchTranslations(_this2.currentPage);
+              _context.n = 4;
+              break;
+            case 3:
+              _context.p = 3;
+              _t = _context.v;
+              _this2.$bvToast.toast(_this2.$t("Failed to add translation"), {
+                title: _this2.$t("Failed"),
+                variant: 'danger',
+                solid: true
+              });
+            case 4:
+              return _context.a(2);
+          }
+        }, _callee, null, [[1, 3]]);
+      }))();
+    },
+    applySearch: function applySearch() {
+      this.searchQuery = this.searchInput;
+      this.currentPage = 1;
+      this.fetchTranslations(1);
+    },
+    resetSearch: function resetSearch() {
+      this.searchInput = '';
+      this.searchQuery = '';
+      this.currentPage = 1;
+      this.fetchTranslations(1);
+    },
+    fetchTranslations: function fetchTranslations() {
+      var _arguments = arguments,
+        _this3 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+        var page, res, _t2;
+        return _regenerator().w(function (_context2) {
+          while (1) switch (_context2.p = _context2.n) {
+            case 0:
+              page = _arguments.length > 0 && _arguments[0] !== undefined ? _arguments[0] : 1;
+              _this3.isLoading = true;
+              _context2.p = 1;
+              _context2.n = 2;
+              return axios.get("/translations_setting/".concat(_this3.locale), {
+                params: {
+                  page: page,
+                  per_page: _this3.perPage,
+                  search: _this3.searchQuery
+                }
+              });
+            case 2:
+              res = _context2.v;
+              _this3.translations = res.data.data;
+              _this3.originalTranslations = JSON.parse(JSON.stringify(res.data.data));
+              _this3.totalRows = res.data.total;
+              _this3.currentPage = res.data.current_page;
+              _this3.language = res.data.language;
+              _context2.n = 4;
+              break;
+            case 3:
+              _context2.p = 3;
+              _t2 = _context2.v;
+            case 4:
+              _context2.p = 4;
+              _this3.isLoading = false;
+              return _context2.f(4);
+            case 5:
+              return _context2.a(2);
+          }
+        }, _callee2, null, [[1, 3, 4, 5]]);
+      }))();
+    },
+    saveTranslation: function saveTranslation(entry) {
+      var _this4 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+        var _t3;
+        return _regenerator().w(function (_context3) {
+          while (1) switch (_context3.p = _context3.n) {
+            case 0:
+              _context3.p = 0;
+              _context3.n = 1;
+              return axios.put("/translations_setting/".concat(_this4.locale), {
+                key: entry.key,
+                value: entry.value
+              });
+            case 1:
+              _this4.$bvToast.toast(_this4.$t("Translation updated"), {
+                title: 'Success',
+                variant: 'success',
+                solid: true
+              });
+              _context3.n = 3;
+              break;
+            case 2:
+              _context3.p = 2;
+              _t3 = _context3.v;
+              _this4.$bvToast.toast(_this4.$t("Failed to update"), {
+                title: _this4.$t("Failed"),
+                variant: 'danger',
+                solid: true
+              });
+            case 3:
+              return _context3.a(2);
+          }
+        }, _callee3, null, [[0, 2]]);
+      }))();
+    },
+    bulkSave: function bulkSave() {
+      var _this5 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
+        var changed, _t4;
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.p = _context4.n) {
+            case 0:
+              changed = _this5.translations.filter(function (t, i) {
+                var _this5$originalTransl;
+                return t.value !== ((_this5$originalTransl = _this5.originalTranslations[i]) === null || _this5$originalTransl === void 0 ? void 0 : _this5$originalTransl.value);
+              });
+              if (changed.length) {
+                _context4.n = 1;
+                break;
+              }
+              _this5.$bvToast.toast(_this5.$t("No changes to save"), {
+                title: _this5.$t("Notice"),
+                variant: 'info',
+                solid: true
+              });
+              return _context4.a(2);
+            case 1:
+              _this5.isLoading = true;
+              _context4.p = 2;
+              _context4.n = 3;
+              return Promise.all(changed.map(function (entry) {
+                return axios.put("/translations_setting/".concat(_this5.locale), {
+                  key: entry.key,
+                  value: entry.value
+                });
+              }));
+            case 3:
+              _this5.$bvToast.toast(_this5.$t("All changes saved successfully"), {
+                title: _this5.$t("Success"),
+                variant: 'success',
+                solid: true
+              });
+              _this5.fetchTranslations(_this5.currentPage);
+              _context4.n = 5;
+              break;
+            case 4:
+              _context4.p = 4;
+              _t4 = _context4.v;
+              _this5.$bvToast.toast(_this5.$t("Bulk save failed"), {
+                title: _this5.$t("Failed"),
+                variant: 'danger',
+                solid: true
+              });
+            case 5:
+              _context4.p = 5;
+              _this5.isLoading = false;
+              return _context4.f(5);
+            case 6:
+              return _context4.a(2);
+          }
+        }, _callee4, null, [[2, 4, 5, 6]]);
+      }))();
+    },
+    deleteTranslation: function deleteTranslation(key) {
+      var _this6 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
+        var translation;
+        return _regenerator().w(function (_context6) {
+          while (1) switch (_context6.n) {
+            case 0:
+              translation = _this6.translations.find(function (t) {
+                return t.key === key;
+              });
+              if (translation) {
+                _context6.n = 1;
+                break;
+              }
+              return _context6.a(2);
+            case 1:
+              _this6.$swal({
+                title: _this6.$t("Delete_Title"),
+                text: _this6.$t("Delete_Text"),
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                cancelButtonText: _this6.$t("Delete_cancelButtonText"),
+                confirmButtonText: _this6.$t("Delete_confirmButtonText")
+              }).then(/*#__PURE__*/function () {
+                var _ref = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(result) {
+                  var _t5;
+                  return _regenerator().w(function (_context5) {
+                    while (1) switch (_context5.p = _context5.n) {
+                      case 0:
+                        if (!result.value) {
+                          _context5.n = 5;
+                          break;
+                        }
+                        _context5.p = 1;
+                        _context5.n = 2;
+                        return axios["delete"]("/translations_setting/".concat(_this6.locale, "/").concat(key));
+                      case 2:
+                        _this6.$swal(_this6.$t("Delete_Deleted"), _this6.$t("Deleted_in_successfully"), "success");
+                        _this6.fetchTranslations(_this6.currentPage);
+                        _context5.n = 4;
+                        break;
+                      case 3:
+                        _context5.p = 3;
+                        _t5 = _context5.v;
+                        _this6.$swal(_this6.$t("Delete_Failed"), _this6.$t("Delete_Therewassomethingwronge"), "warning");
+                      case 4:
+                        _context5.p = 4;
+                        return _context5.f(4);
+                      case 5:
+                        return _context5.a(2);
+                    }
+                  }, _callee5, null, [[1, 3, 4, 5]]);
+                }));
+                return function (_x) {
+                  return _ref.apply(this, arguments);
+                };
+              }());
+            case 2:
+              return _context6.a(2);
+          }
+        }, _callee6);
+      }))();
+    }
+  },
+  watch: {
+    currentPage: function currentPage(newPage) {
+      this.fetchTranslations(newPage);
+    },
+    searchQuery: function searchQuery() {
+      this.currentPage = 1;
+      this.fetchTranslations(1);
+    }
+  },
+  created: function created() {
+    this.fetchTranslations();
+  }
+});
+
+/***/ },
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/translations_view.vue?vue&type=template&id=357a0cda"
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/translations_view.vue?vue&type=template&id=357a0cda ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* binding */ render),
+/* harmony export */   staticRenderFns: () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("div", {
+    staticClass: "main-content"
+  }, [_c("breadcumb", {
+    attrs: {
+      page: _vm.$t("Translations"),
+      folder: _vm.$t("Settings")
+    }
+  }), _vm._v(" "), _vm.isLoading ? _c("div", {
+    staticClass: "loading_page spinner spinner-primary mr-3"
+  }) : _vm._e(), _vm._v(" "), !_vm.isLoading ? _c("div", [_c("div", {
+    staticClass: "d-flex justify-content-between align-items-center mb-3"
+  }, [_c("div", [_c("b-button", {
+    attrs: {
+      variant: "secondary"
+    },
+    on: {
+      click: function click($event) {
+        return _vm.$router.push("/app/settings/translations_settings");
+      }
+    }
+  }, [_vm._v("\n          ← " + _vm._s(_vm.$t("Back")) + "\n        ")])], 1), _vm._v(" "), _c("h4", {
+    staticClass: "mb-0"
+  }, [_vm._v(_vm._s(_vm.$t("Translations for")) + ' " ' + _vm._s(_vm.language) + ' "')]), _vm._v(" "), _c("div")]), _vm._v(" "), _c("b-alert", {
+    staticClass: "w-100 mb-3 text-center",
+    attrs: {
+      variant: "info",
+      show: ""
+    }
+  }, [_vm._v("\n      🔄 " + _vm._s(_vm.$t("Please reload the page after saving translations to apply the changes.")) + "\n    ")]), _vm._v(" "), _c("div", {
+    staticClass: "mb-3"
+  }, [_c("b-row", {
+    staticClass: "gy-2 align-items-center"
+  }, [_c("b-col", {
+    staticClass: "mt-2",
+    attrs: {
+      cols: "12",
+      md: "8"
+    }
+  }, [_c("b-input-group", [_c("b-form-input", {
+    attrs: {
+      placeholder: "Search by key or value..."
+    },
+    model: {
+      value: _vm.searchInput,
+      callback: function callback($$v) {
+        _vm.searchInput = $$v;
+      },
+      expression: "searchInput"
+    }
+  }), _vm._v(" "), _c("b-input-group-append", [_c("b-button", {
+    attrs: {
+      variant: "primary"
+    },
+    on: {
+      click: _vm.applySearch
+    }
+  }, [_vm._v("\n              🔍\n            ")]), _vm._v(" "), _c("b-button", {
+    attrs: {
+      variant: "warning"
+    },
+    on: {
+      click: _vm.resetSearch
+    }
+  }, [_vm._v("\n              🔄\n            ")])], 1)], 1)], 1), _vm._v(" "), _c("b-col", {
+    staticClass: "mt-2",
+    attrs: {
+      cols: "12",
+      md: "4"
+    }
+  }, [_c("b-button", {
+    staticClass: "mr-2",
+    attrs: {
+      variant: "info"
+    },
+    on: {
+      click: function click($event) {
+        _vm.showAddModal = true;
+      }
+    }
+  }, [_vm._v("\n          ➕ " + _vm._s(_vm.$t("Add New")) + "\n        ")]), _vm._v(" "), _c("b-button", {
+    attrs: {
+      variant: "success"
+    },
+    on: {
+      click: _vm.bulkSave
+    }
+  }, [_vm._v("\n          💾 " + _vm._s(_vm.$t("Save All Changes")) + "\n        ")])], 1)], 1)], 1), _vm._v(" "), _c("b-modal", {
+    attrs: {
+      title: _vm.$t("Add New Translation"),
+      "ok-title": "Add",
+      "cancel-title": "Cancel"
+    },
+    on: {
+      ok: _vm.submitNewTranslation
+    },
+    model: {
+      value: _vm.showAddModal,
+      callback: function callback($$v) {
+        _vm.showAddModal = $$v;
+      },
+      expression: "showAddModal"
+    }
+  }, [_c("b-form", {
+    on: {
+      submit: function submit($event) {
+        $event.stopPropagation();
+        $event.preventDefault();
+      }
+    }
+  }, [_c("b-form-group", {
+    attrs: {
+      label: "Key"
+    }
+  }, [_c("b-form-input", {
+    attrs: {
+      required: ""
+    },
+    model: {
+      value: _vm.newTranslation.key,
+      callback: function callback($$v) {
+        _vm.$set(_vm.newTranslation, "key", $$v);
+      },
+      expression: "newTranslation.key"
+    }
+  })], 1), _vm._v(" "), _c("b-form-group", {
+    attrs: {
+      label: "Value"
+    }
+  }, [_c("b-form-input", {
+    model: {
+      value: _vm.newTranslation.value,
+      callback: function callback($$v) {
+        _vm.$set(_vm.newTranslation, "value", $$v);
+      },
+      expression: "newTranslation.value"
+    }
+  })], 1)], 1)], 1), _vm._v(" "), _c("b-table", {
+    attrs: {
+      items: _vm.filteredTranslations,
+      fields: ["key", "value", "actions"],
+      busy: _vm.isLoading,
+      responsive: "",
+      bordered: "",
+      striped: "",
+      small: ""
+    },
+    scopedSlots: _vm._u([{
+      key: "cell(key)",
+      fn: function fn(data) {
+        return [_c("b-form-input", {
+          attrs: {
+            value: data.item.key,
+            disabled: ""
+          }
+        })];
+      }
+    }, {
+      key: "cell(value)",
+      fn: function fn(data) {
+        return [_c("b-form-input", {
+          model: {
+            value: data.item.value,
+            callback: function callback($$v) {
+              _vm.$set(data.item, "value", $$v);
+            },
+            expression: "data.item.value"
+          }
+        })];
+      }
+    }, {
+      key: "cell(actions)",
+      fn: function fn(data) {
+        return [_c("b-button", {
+          attrs: {
+            size: "sm",
+            variant: "success"
+          },
+          on: {
+            click: function click($event) {
+              return _vm.saveTranslation(data.item);
+            }
+          }
+        }, [_vm._v("\n      " + _vm._s(_vm.$t("Save")) + "\n    ")]), _vm._v(" "), data.item.locale != "en" ? _c("b-button", {
+          attrs: {
+            size: "sm",
+            variant: "danger"
+          },
+          on: {
+            click: function click($event) {
+              return _vm.deleteTranslation(data.item.key);
+            }
+          }
+        }, [_vm._v(_vm._s(_vm.$t("Delete")) + "\n    ")]) : _vm._e()];
+      }
+    }], null, false, 3471801801)
+  }), _vm._v(" "), _c("b-pagination", {
+    staticClass: "mt-3",
+    attrs: {
+      "total-rows": _vm.totalRows,
+      "per-page": _vm.perPage,
+      align: "center"
+    },
+    model: {
+      value: _vm.currentPage,
+      callback: function callback($$v) {
+        _vm.currentPage = $$v;
+      },
+      expression: "currentPage"
+    }
+  }), _vm._v(" "), _c("div", {
+    staticClass: "text-muted text-right mb-2"
+  }, [_vm._v("\n  " + _vm._s(_vm.$t("Showing")) + " " + _vm._s(_vm.translations.length) + " of " + _vm._s(_vm.totalRows) + " " + _vm._s(_vm.$t("Translations")) + "\n")])], 1) : _vm._e()], 1);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/settings/translations_view.vue"
+/*!**********************************************************************!*\
+  !*** ./resources/src/views/app/pages/settings/translations_view.vue ***!
+  \**********************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _translations_view_vue_vue_type_template_id_357a0cda__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./translations_view.vue?vue&type=template&id=357a0cda */ "./resources/src/views/app/pages/settings/translations_view.vue?vue&type=template&id=357a0cda");
+/* harmony import */ var _translations_view_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./translations_view.vue?vue&type=script&lang=js */ "./resources/src/views/app/pages/settings/translations_view.vue?vue&type=script&lang=js");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _translations_view_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _translations_view_vue_vue_type_template_id_357a0cda__WEBPACK_IMPORTED_MODULE_0__.render,
+  _translations_view_vue_vue_type_template_id_357a0cda__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "resources/src/views/app/pages/settings/translations_view.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/settings/translations_view.vue?vue&type=script&lang=js"
+/*!**********************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/settings/translations_view.vue?vue&type=script&lang=js ***!
+  \**********************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_translations_view_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./translations_view.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/translations_view.vue?vue&type=script&lang=js");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_translations_view_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/settings/translations_view.vue?vue&type=template&id=357a0cda"
+/*!****************************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/settings/translations_view.vue?vue&type=template&id=357a0cda ***!
+  \****************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_translations_view_vue_vue_type_template_id_357a0cda__WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   staticRenderFns: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_translations_view_vue_vue_type_template_id_357a0cda__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_translations_view_vue_vue_type_template_id_357a0cda__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./translations_view.vue?vue&type=template&id=357a0cda */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/settings/translations_view.vue?vue&type=template&id=357a0cda");
+
+
+/***/ }
+
+}]);

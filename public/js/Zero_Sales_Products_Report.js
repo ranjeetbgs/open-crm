@@ -1,2 +1,957 @@
-/*! For license information please see Zero_Sales_Products_Report.js.LICENSE.txt */
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[8072],{10995(t,e,r){r.d(e,{A:()=>o});var n=r(76314),a=r.n(n)()(function(t){return t[1]});a.push([t.id,".btn-pill[data-v-5da9192c]{border-radius:999px}",""]);const o=a},76314(t){t.exports=function(t){var e=[];return e.toString=function(){return this.map(function(e){var r=t(e);return e[2]?"@media ".concat(e[2]," {").concat(r,"}"):r}).join("")},e.i=function(t,r,n){"string"==typeof t&&(t=[[null,t,""]]);var a={};if(n)for(var o=0;o<this.length;o++){var i=this[o][0];null!=i&&(a[i]=!0)}for(var s=0;s<t.length;s++){var l=[].concat(t[s]);n&&a[l[0]]||(r&&(l[2]?l[2]="".concat(r," and ").concat(l[2]):l[2]=r),e.push(l))}},e}},85072(t,e,r){var n,a=function(){return void 0===n&&(n=Boolean(window&&document&&document.all&&!window.atob)),n},o=function(){var t={};return function(e){if(void 0===t[e]){var r=document.querySelector(e);if(window.HTMLIFrameElement&&r instanceof window.HTMLIFrameElement)try{r=r.contentDocument.head}catch(t){r=null}t[e]=r}return t[e]}}(),i=[];function s(t){for(var e=-1,r=0;r<i.length;r++)if(i[r].identifier===t){e=r;break}return e}function l(t,e){for(var r={},n=[],a=0;a<t.length;a++){var o=t[a],l=e.base?o[0]+e.base:o[0],c=r[l]||0,d="".concat(l," ").concat(c);r[l]=c+1;var u=s(d),p={css:o[1],media:o[2],sourceMap:o[3]};-1!==u?(i[u].references++,i[u].updater(p)):i.push({identifier:d,updater:m(p,e),references:1}),n.push(d)}return n}function c(t){var e=document.createElement("style"),n=t.attributes||{};if(void 0===n.nonce){var a=r.nc;a&&(n.nonce=a)}if(Object.keys(n).forEach(function(t){e.setAttribute(t,n[t])}),"function"==typeof t.insert)t.insert(e);else{var i=o(t.insert||"head");if(!i)throw new Error("Couldn't find a style target. This probably means that the value for the 'insert' parameter is invalid.");i.appendChild(e)}return e}var d,u=(d=[],function(t,e){return d[t]=e,d.filter(Boolean).join("\n")});function p(t,e,r,n){var a=r?"":n.media?"@media ".concat(n.media," {").concat(n.css,"}"):n.css;if(t.styleSheet)t.styleSheet.cssText=u(e,a);else{var o=document.createTextNode(a),i=t.childNodes;i[e]&&t.removeChild(i[e]),i.length?t.insertBefore(o,i[e]):t.appendChild(o)}}function f(t,e,r){var n=r.css,a=r.media,o=r.sourceMap;if(a?t.setAttribute("media",a):t.removeAttribute("media"),o&&"undefined"!=typeof btoa&&(n+="\n/*# sourceMappingURL=data:application/json;base64,".concat(btoa(unescape(encodeURIComponent(JSON.stringify(o))))," */")),t.styleSheet)t.styleSheet.cssText=n;else{for(;t.firstChild;)t.removeChild(t.firstChild);t.appendChild(document.createTextNode(n))}}var h=null,v=0;function m(t,e){var r,n,a;if(e.singleton){var o=v++;r=h||(h=c(e)),n=p.bind(null,r,o,!1),a=p.bind(null,r,o,!0)}else r=c(e),n=f.bind(null,r,e),a=function(){!function(t){if(null===t.parentNode)return!1;t.parentNode.removeChild(t)}(r)};return n(t),function(e){if(e){if(e.css===t.css&&e.media===t.media&&e.sourceMap===t.sourceMap)return;n(t=e)}else a()}}t.exports=function(t,e){(e=e||{}).singleton||"boolean"==typeof e.singleton||(e.singleton=a());var r=l(t=t||[],e);return function(t){if(t=t||[],"[object Array]"===Object.prototype.toString.call(t)){for(var n=0;n<r.length;n++){var a=s(r[n]);i[a].references--}for(var o=l(t,e),c=0;c<r.length;c++){var d=s(r[c]);0===i[d].references&&(i[d].updater(),i.splice(d,1))}r=o}}}},1373(t,e,r){r.r(e),r.d(e,{default:()=>_});var n=r(5947),a=r.n(n);function o(t){return o="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},o(t)}function i(){var t,e,r="function"==typeof Symbol?Symbol:{},n=r.iterator||"@@iterator",a=r.toStringTag||"@@toStringTag";function o(r,n,a,o){var i=n&&n.prototype instanceof c?n:c,d=Object.create(i.prototype);return s(d,"_invoke",function(r,n,a){var o,i,s,c=0,d=a||[],u=!1,p={p:0,n:0,v:t,a:f,f:f.bind(t,4),d:function(e,r){return o=e,i=0,s=t,p.n=r,l}};function f(r,n){for(i=r,s=n,e=0;!u&&c&&!a&&e<d.length;e++){var a,o=d[e],f=p.p,h=o[2];r>3?(a=h===n)&&(s=o[(i=o[4])?5:(i=3,3)],o[4]=o[5]=t):o[0]<=f&&((a=r<2&&f<o[1])?(i=0,p.v=n,p.n=o[1]):f<h&&(a=r<3||o[0]>n||n>h)&&(o[4]=r,o[5]=n,p.n=h,i=0))}if(a||r>1)return l;throw u=!0,n}return function(a,d,h){if(c>1)throw TypeError("Generator is already running");for(u&&1===d&&f(d,h),i=d,s=h;(e=i<2?t:s)||!u;){o||(i?i<3?(i>1&&(p.n=-1),f(i,s)):p.n=s:p.v=s);try{if(c=2,o){if(i||(a="next"),e=o[a]){if(!(e=e.call(o,s)))throw TypeError("iterator result is not an object");if(!e.done)return e;s=e.value,i<2&&(i=0)}else 1===i&&(e=o.return)&&e.call(o),i<2&&(s=TypeError("The iterator does not provide a '"+a+"' method"),i=1);o=t}else if((e=(u=p.n<0)?s:r.call(n,p))!==l)break}catch(e){o=t,i=1,s=e}finally{c=1}}return{value:e,done:u}}}(r,a,o),!0),d}var l={};function c(){}function d(){}function u(){}e=Object.getPrototypeOf;var p=[][n]?e(e([][n]())):(s(e={},n,function(){return this}),e),f=u.prototype=c.prototype=Object.create(p);function h(t){return Object.setPrototypeOf?Object.setPrototypeOf(t,u):(t.__proto__=u,s(t,a,"GeneratorFunction")),t.prototype=Object.create(f),t}return d.prototype=u,s(f,"constructor",u),s(u,"constructor",d),d.displayName="GeneratorFunction",s(u,a,"GeneratorFunction"),s(f),s(f,a,"Generator"),s(f,n,function(){return this}),s(f,"toString",function(){return"[object Generator]"}),(i=function(){return{w:o,m:h}})()}function s(t,e,r,n){var a=Object.defineProperty;try{a({},"",{})}catch(t){a=0}s=function(t,e,r,n){function o(e,r){s(t,e,function(t){return this._invoke(e,r,t)})}e?a?a(t,e,{value:r,enumerable:!n,configurable:!n,writable:!n}):t[e]=r:(o("next",0),o("throw",1),o("return",2))},s(t,e,r,n)}function l(t,e,r,n,a,o,i){try{var s=t[o](i),l=s.value}catch(t){return void r(t)}s.done?e(l):Promise.resolve(l).then(n,a)}function c(t,e){var r=Object.keys(t);if(Object.getOwnPropertySymbols){var n=Object.getOwnPropertySymbols(t);e&&(n=n.filter(function(e){return Object.getOwnPropertyDescriptor(t,e).enumerable})),r.push.apply(r,n)}return r}function d(t){for(var e=1;e<arguments.length;e++){var r=null!=arguments[e]?arguments[e]:{};e%2?c(Object(r),!0).forEach(function(e){u(t,e,r[e])}):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(r)):c(Object(r)).forEach(function(e){Object.defineProperty(t,e,Object.getOwnPropertyDescriptor(r,e))})}return t}function u(t,e,r){return(e=function(t){var e=function(t,e){if("object"!=o(t)||!t)return t;var r=t[Symbol.toPrimitive];if(void 0!==r){var n=r.call(t,e||"default");if("object"!=o(n))return n;throw new TypeError("@@toPrimitive must return a primitive value.")}return("string"===e?String:Number)(t)}(t,"string");return"symbol"==o(e)?e:e+""}(e))in t?Object.defineProperty(t,e,{value:r,enumerable:!0,configurable:!0,writable:!0}):t[e]=r,t}const p={metaInfo:{title:"Zero Sales Products Report"},data:function(){return{isLoading:!0,serverParams:{sort:{field:"last_sale_at",type:"asc"},page:1,perPage:10},limit:10,search:"",totalRows:0,products:[],rows:[{children:[]}],period:30,periodOptions:[{value:"all",text:this.$t("All_time")||"All time"},{value:30,text:this.$t("Last_30_days")||"Last 30 days"},{value:60,text:this.$t("Last_60_days")||"Last 60 days"},{value:90,text:this.$t("Last_90_days")||"Last 90 days"}],warehouse_id:null,brand_id:null,category_id:null}},computed:d(d({},(0,r(95353).L8)(["currentUser"])),{},{columns:function(){return[{label:this.$t("Code"),field:"code",tdClass:"text-left",thClass:"text-left",sortable:!0},{label:this.$t("Product"),field:"name",tdClass:"text-left",thClass:"text-left",sortable:!0},{label:this.$t("Price"),field:"price",type:"decimal",tdClass:"text-left",thClass:"text-left",sortable:!0},{label:this.$t("LastSale"),field:"last_sale_at",tdClass:"text-left",thClass:"text-left",sortable:!0},{label:this.$t("DaysSinceLastSale"),field:"days_since_last_sale",type:"number",tdClass:"text-left",thClass:"text-left",sortable:!0}]}}),methods:{updateParams:function(t){this.serverParams=Object.assign({},this.serverParams,t)},onPageChange:function(t){var e=t.currentPage;this.serverParams.page!==e&&(this.updateParams({page:e}),this.Get_Zero_Sales_Products(e))},onPerPageChange:function(t){var e=t.currentPerPage;this.limit!==e&&(this.limit=e,this.updateParams({page:1,perPage:e}),this.Get_Zero_Sales_Products(1))},onSortChange:function(t){var e=Array.isArray(t)&&t.length?t[0]:null;e&&(this.updateParams({sort:{type:e.type,field:e.field}}),this.Get_Zero_Sales_Products(this.serverParams.page))},onSearch:function(t){this.search=t.searchTerm||"",this.updateParams({page:1}),this.Get_Zero_Sales_Products(1)},onPeriodChange:function(){this.updateParams({page:1}),this.Get_Zero_Sales_Products(1)},Get_Zero_Sales_Products:function(t){var e=this;a().start(),a().set(.1);var r=new URLSearchParams({page:String(t),SortField:this.serverParams.sort.field||"last_sale_at",SortType:this.serverParams.sort.type||"asc",search:this.search||"",limit:String(this.limit),period:String(this.period)});this.warehouse_id&&r.append("warehouse_id",this.warehouse_id),this.brand_id&&r.append("brand_id",this.brand_id),this.category_id&&r.append("category_id",this.category_id),axios.get("report/zero_sales_products?".concat(r.toString())).then(function(t){var r=t.data;e.products=r.report||[],e.totalRows=r.totalRows||0,e.rows[0].children=e.products,a().done(),e.isLoading=!1}).catch(function(){a().done(),setTimeout(function(){e.isLoading=!1},300)})},exportPdf:function(){var t,e=this;return(t=i().m(function t(){var n,o,s,l,c,d,u,p,f,h,v,m,g,_,b,y,P,S,w,x,C,$,O,j,L,T,F,z,A;return i().w(function(t){for(;;)switch(t.p=t.n){case 0:return t.p=0,a().start(),a().set(.2),t.n=1,r.e(4733).then(r.bind(r,94733));case 1:return l=t.v,c=l.jsPDF,t.n=2,r.e(5708).then(r.bind(r,25708));case 2:return d=t.v.default,u=new URLSearchParams({page:"1",limit:"-1",SortField:(null===(n=e.serverParams)||void 0===n||null===(n=n.sort)||void 0===n?void 0:n.field)||"last_sale_at",SortType:(null===(o=e.serverParams)||void 0===o||null===(o=o.sort)||void 0===o?void 0:o.type)||"asc",search:e.search||"",period:String(e.period)}),e.warehouse_id&&u.append("warehouse_id",e.warehouse_id),e.brand_id&&u.append("brand_id",e.brand_id),e.category_id&&u.append("category_id",e.category_id),t.n=3,axios.get("report/zero_sales_products?".concat(u.toString())).catch(function(){return{data:{}}});case 3:p=t.v,f=p.data,h=Array.isArray(null==f?void 0:f.report)?f.report:[],v=new c({orientation:"landscape",unit:"pt",format:"a4"}),m="/fonts/Vazirmatn-Bold.ttf";try{v.addFont(m,"Vazirmatn","normal"),v.addFont(m,"Vazirmatn","bold")}catch(t){}v.setFont("Vazirmatn","normal"),g=e.$i18n&&["ar","fa","ur","he"].includes(e.$i18n.locale)||"undefined"!=typeof document&&"rtl"===document.documentElement.dir,_=40,b=v.internal.pageSize.getWidth(),v.setFont("Vazirmatn","bold"),v.setFontSize(16),y="Zero Sales Products Report",g?v.text(y,b-_,36,{align:"right"}):v.text(y,_,36),v.setFont("Vazirmatn","normal"),v.setFontSize(10),P=(null===(s=(e.periodOptions||[]).find(function(t){return String(t.value)===String(e.period)}))||void 0===s?void 0:s.text)||String(e.period),S=["".concat(e.$t?e.$t("Period"):"Period",": ").concat(P),e.warehouse_id?"".concat(e.$t?e.$t("warehouse"):"Warehouse",": ").concat(e.warehouse_id):null,e.brand_id?"".concat(e.$t?e.$t("Brand"):"Brand",": ").concat(e.brand_id):null,e.category_id?"".concat(e.$t?e.$t("Category"):"Category",": ").concat(e.category_id):null,e.search?"".concat(e.$t?e.$t("Search_this_table"):"Search",': "').concat(e.search,'"'):null].filter(Boolean).join("   •   "),w=v.splitTextToSize(S,b-80),g?v.text(w,b-_,56,{align:"right"}):v.text(w,_,56),x=e.$t?e.$t("Code"):"Code",C=e.$t?e.$t("Product"):"Product",$=e.$t?e.$t("Price"):"Price",O=e.$t?e.$t("LastSale"):"Last sale",j=e.$t?e.$t("DaysSinceLastSale"):"Days since last sale",L=e.$t?e.$t("Never_Sold"):"Never Sold",T=[[x,C,$,O,j]],F=h.map(function(t){var e,r,n;return[t.code||"",t.name||"","number"==typeof t.price?t.price.toFixed(2):null!==(e=t.price)&&void 0!==e?e:"",null!==(r=t.last_sale_at)&&void 0!==r?r:"—",t.last_sale_at?null!==(n=t.days_since_last_sale)&&void 0!==n?n:"":L]}),d(v,{startY:74,head:T,body:F,margin:{left:_,right:_},theme:"striped",styles:{font:"Vazirmatn",fontStyle:"normal",fontSize:9,cellPadding:6,overflow:"linebreak",halign:g?"right":"left"},headStyles:{font:"Vazirmatn",fontStyle:"bold",fillColor:[26,86,219],textColor:255,halign:g?"right":"left"},columnStyles:{2:{halign:"right"},4:{halign:"right"}},didDrawPage:function(t){v.setFont("Vazirmatn","normal"),v.setFontSize(8);var e=v.internal.pageSize.getHeight(),r="".concat(t.pageNumber," / ").concat(v.internal.getNumberOfPages());g?v.text(r,_,e-14,{align:"left"}):v.text(r,b-_,e-14,{align:"right"})}}),z=(new Date).toISOString().slice(0,19).replace(/[:T]/g,"-"),A="zero_sales_products_".concat(String(e.period),"_").concat(z,".pdf"),v.save(A),t.n=5;break;case 4:t.p=4,t.v,e.$bvToast&&e.$bvToast.toast(e.$t?e.$t("Export_Failed"):"Export failed",{variant:"danger",solid:!0});case 5:return t.p=5,a().done(),t.f(5);case 6:return t.a(2)}},t,null,[[0,4,5,6]])}),function(){var e=this,r=arguments;return new Promise(function(n,a){var o=t.apply(e,r);function i(t){l(o,n,a,i,s,"next",t)}function s(t){l(o,n,a,i,s,"throw",t)}i(void 0)})})()}},created:function(){this.Get_Zero_Sales_Products(1)}},f=p;var h=r(85072),v=r.n(h),m=r(10995),g={insert:"head",singleton:!1};v()(m.A,g);m.A.locals;const _=(0,r(14486).A)(f,function(){var t=this,e=t._self._c;return e("div",{staticClass:"main-content"},[e("breadcumb",{attrs:{page:t.$t("Zero_Sales_Products_Report"),folder:t.$t("Reports")}}),t._v(" "),t.isLoading?e("div",{staticClass:"loading_page spinner spinner-primary mr-3"}):t._e(),t._v(" "),t.isLoading?t._e():e("b-card",{staticClass:"wrapper"},[e("div",{staticClass:"d-flex flex-wrap align-items-center mb-2"},[e("div",{staticClass:"d-flex align-items-center mr-3 mb-2"},[e("label",{staticClass:"mb-0 mr-2"},[t._v(t._s(t.$t("Period"))+":")]),t._v(" "),e("b-form-select",{staticClass:"w-auto",attrs:{options:t.periodOptions,size:"sm"},on:{change:t.onPeriodChange},model:{value:t.period,callback:function(e){t.period=e},expression:"period"}})],1),t._v(" "),e("div",{staticClass:"ml-auto mb-2"},[e("b-button",{staticClass:"btn-pill",attrs:{size:"sm",variant:"danger"},on:{click:t.exportPdf}},[e("i",{staticClass:"i-File-PDF mr-1"}),t._v(" Export PDF\n        ")])],1)]),t._v(" "),e("vue-good-table",{attrs:{mode:"remote",columns:t.columns,totalRows:t.totalRows,rows:t.rows,"group-options":{enabled:!0,headerPosition:"bottom"},"search-options":{placeholder:t.$t("Search_this_table"),enabled:!0},"pagination-options":{enabled:!0,mode:"records",perPage:t.serverParams.perPage,perPageDropdown:[10,20,50,100],dropdownAllowAll:!0,nextLabel:"next",prevLabel:"prev"},styleClass:"tableOne table-hover vgt-table mt-3"},on:{"on-page-change":t.onPageChange,"on-per-page-change":t.onPerPageChange,"on-sort-change":t.onSortChange,"on-search":t.onSearch},scopedSlots:t._u([{key:"table-row",fn:function(r){return["last_sale_at"===r.column.field?e("span",[t._v("\n          "+t._s(r.row.last_sale_at?r.row.last_sale_at:"—")+"\n        ")]):"days_since_last_sale"===r.column.field?e("span",[r.row.last_sale_at?e("span",[t._v(t._s(r.row.days_since_last_sale))]):e("b-badge",{attrs:{variant:"warning"}},[t._v("\n            "+t._s(t.$t("Never_Sold"))+"\n          ")])],1):e("span",[t._v("\n          "+t._s(r.formattedRow[r.column.field])+"\n        ")])]}}],null,!1,624551675)})],1)],1)},[],!1,null,"5da9192c",null).exports}}]);
+"use strict";
+(self["webpackChunk"] = self["webpackChunk"] || []).push([["Zero_Sales_Products_Report"],{
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=script&lang=js"
+/*!**********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=script&lang=js ***!
+  \**********************************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var nprogress__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! nprogress */ "./node_modules/nprogress/nprogress.js");
+/* harmony import */ var nprogress__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(nprogress__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+
+// axios assumed globally available
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  metaInfo: {
+    title: "Zero Sales Products Report"
+  },
+  data: function data() {
+    return {
+      isLoading: true,
+      serverParams: {
+        sort: {
+          field: "last_sale_at",
+          type: "asc"
+        },
+        // NULL last first (handled server-side)
+        page: 1,
+        perPage: 10
+      },
+      limit: 10,
+      search: "",
+      totalRows: 0,
+      products: [],
+      rows: [{
+        children: []
+      }],
+      // filters
+      period: 30,
+      periodOptions: [{
+        value: 'all',
+        text: this.$t('All_time') || 'All time'
+      },
+      // "never sold ever"
+      {
+        value: 30,
+        text: this.$t('Last_30_days') || 'Last 30 days'
+      }, {
+        value: 60,
+        text: this.$t('Last_60_days') || 'Last 60 days'
+      }, {
+        value: 90,
+        text: this.$t('Last_90_days') || 'Last 90 days'
+      }],
+      // optional extra filters (wire later if needed)
+      warehouse_id: null,
+      brand_id: null,
+      category_id: null
+    };
+  },
+  computed: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapGetters)(["currentUser"])), {}, {
+    columns: function columns() {
+      return [{
+        label: this.$t("Code"),
+        field: "code",
+        tdClass: "text-left",
+        thClass: "text-left",
+        sortable: true
+      }, {
+        label: this.$t("Product"),
+        field: "name",
+        tdClass: "text-left",
+        thClass: "text-left",
+        sortable: true
+      }, {
+        label: this.$t("Price"),
+        field: "price",
+        type: "decimal",
+        tdClass: "text-left",
+        thClass: "text-left",
+        sortable: true
+      }, {
+        label: this.$t("LastSale"),
+        field: "last_sale_at",
+        tdClass: "text-left",
+        thClass: "text-left",
+        sortable: true
+      }, {
+        label: this.$t("DaysSinceLastSale"),
+        field: "days_since_last_sale",
+        type: "number",
+        tdClass: "text-left",
+        thClass: "text-left",
+        sortable: true
+      }];
+    }
+  }),
+  methods: {
+    // ---- table param helpers
+    updateParams: function updateParams(newProps) {
+      this.serverParams = Object.assign({}, this.serverParams, newProps);
+    },
+    onPageChange: function onPageChange(_ref) {
+      var currentPage = _ref.currentPage;
+      if (this.serverParams.page !== currentPage) {
+        this.updateParams({
+          page: currentPage
+        });
+        this.Get_Zero_Sales_Products(currentPage);
+      }
+    },
+    onPerPageChange: function onPerPageChange(_ref2) {
+      var currentPerPage = _ref2.currentPerPage;
+      if (this.limit !== currentPerPage) {
+        this.limit = currentPerPage;
+        this.updateParams({
+          page: 1,
+          perPage: currentPerPage
+        });
+        this.Get_Zero_Sales_Products(1);
+      }
+    },
+    onSortChange: function onSortChange(params) {
+      var p = Array.isArray(params) && params.length ? params[0] : null;
+      if (!p) return;
+      this.updateParams({
+        sort: {
+          type: p.type,
+          field: p.field
+        }
+      });
+      this.Get_Zero_Sales_Products(this.serverParams.page);
+    },
+    onSearch: function onSearch(value) {
+      this.search = value.searchTerm || "";
+      this.updateParams({
+        page: 1
+      });
+      this.Get_Zero_Sales_Products(1);
+    },
+    onPeriodChange: function onPeriodChange() {
+      this.updateParams({
+        page: 1
+      });
+      this.Get_Zero_Sales_Products(1);
+    },
+    //--------------------------- Fetch -------------------------------\\
+    Get_Zero_Sales_Products: function Get_Zero_Sales_Products(page) {
+      var _this = this;
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+      var qp = new URLSearchParams({
+        page: String(page),
+        SortField: this.serverParams.sort.field || 'last_sale_at',
+        SortType: this.serverParams.sort.type || 'asc',
+        search: this.search || '',
+        limit: String(this.limit),
+        period: String(this.period)
+      });
+      if (this.warehouse_id) qp.append('warehouse_id', this.warehouse_id);
+      if (this.brand_id) qp.append('brand_id', this.brand_id);
+      if (this.category_id) qp.append('category_id', this.category_id);
+      axios.get("report/zero_sales_products?".concat(qp.toString())).then(function (_ref3) {
+        var data = _ref3.data;
+        _this.products = data.report || [];
+        _this.totalRows = data.totalRows || 0;
+        _this.rows[0].children = _this.products;
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+        _this.isLoading = false;
+      })["catch"](function () {
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+        setTimeout(function () {
+          _this.isLoading = false;
+        }, 300);
+      });
+    },
+    // ------------------------ Export PDF (NO i18n calls) ------------------------ \\
+    exportPdf: function exportPdf() {
+      var _this2 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+        var _this2$serverParams, _this2$serverParams2, _find, _yield$import, jsPDF, autoTable, qp, _yield$axios$get$catc, data, items, pdf, fontPath, rtl, margin, pageW, title, periodLabel, filtersLine, wrapped, hCode, hProd, hPrice, hLast, hDays, neverTx, head, body, stamp, fname, _t;
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.p = _context.n) {
+            case 0:
+              _context.p = 0;
+              nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+              nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.2);
+
+              // Lazy-load libs (keeps your current pattern for this page)
+              _context.n = 1;
+              return __webpack_require__.e(/*! import() */ "node_modules_jspdf_dist_jspdf_es_min_js").then(__webpack_require__.bind(__webpack_require__, /*! jspdf */ "./node_modules/jspdf/dist/jspdf.es.min.js"));
+            case 1:
+              _yield$import = _context.v;
+              jsPDF = _yield$import.jsPDF;
+              _context.n = 2;
+              return __webpack_require__.e(/*! import() */ "node_modules_jspdf-autotable_dist_jspdf_plugin_autotable_mjs").then(__webpack_require__.bind(__webpack_require__, /*! jspdf-autotable */ "./node_modules/jspdf-autotable/dist/jspdf.plugin.autotable.mjs"));
+            case 2:
+              autoTable = _context.v["default"];
+              // --- gather current filters & fetch ALL rows (limit=-1)
+              qp = new URLSearchParams({
+                page: '1',
+                limit: '-1',
+                SortField: ((_this2$serverParams = _this2.serverParams) === null || _this2$serverParams === void 0 || (_this2$serverParams = _this2$serverParams.sort) === null || _this2$serverParams === void 0 ? void 0 : _this2$serverParams.field) || 'last_sale_at',
+                SortType: ((_this2$serverParams2 = _this2.serverParams) === null || _this2$serverParams2 === void 0 || (_this2$serverParams2 = _this2$serverParams2.sort) === null || _this2$serverParams2 === void 0 ? void 0 : _this2$serverParams2.type) || 'asc',
+                search: _this2.search || '',
+                period: String(_this2.period)
+              });
+              if (_this2.warehouse_id) qp.append('warehouse_id', _this2.warehouse_id);
+              if (_this2.brand_id) qp.append('brand_id', _this2.brand_id);
+              if (_this2.category_id) qp.append('category_id', _this2.category_id);
+              _context.n = 3;
+              return axios.get("report/zero_sales_products?".concat(qp.toString()))["catch"](function () {
+                return {
+                  data: {}
+                };
+              });
+            case 3:
+              _yield$axios$get$catc = _context.v;
+              data = _yield$axios$get$catc.data;
+              items = Array.isArray(data === null || data === void 0 ? void 0 : data.report) ? data.report : []; // --- PDF setup (landscape A4) + RTL + font
+              pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'pt',
+                format: 'a4'
+              }); // Use your only font file for both normal & bold (Arabic-safe)
+              fontPath = '/fonts/Vazirmatn-Bold.ttf';
+              try {
+                pdf.addFont(fontPath, 'Vazirmatn', 'normal');
+                pdf.addFont(fontPath, 'Vazirmatn', 'bold');
+              } catch (e) {/* ignore if already added */}
+              pdf.setFont('Vazirmatn', 'normal');
+              rtl = _this2.$i18n && ['ar', 'fa', 'ur', 'he'].includes(_this2.$i18n.locale) || typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
+              margin = 40;
+              pageW = pdf.internal.pageSize.getWidth(); // --- Header (title + filters)
+              pdf.setFont('Vazirmatn', 'bold');
+              pdf.setFontSize(16);
+              title = 'Zero Sales Products Report';
+              rtl ? pdf.text(title, pageW - margin, 36, {
+                align: 'right'
+              }) : pdf.text(title, margin, 36);
+              pdf.setFont('Vazirmatn', 'normal');
+              pdf.setFontSize(10);
+
+              // Period label from your dropdown text (already localized)
+              periodLabel = ((_find = (_this2.periodOptions || []).find(function (o) {
+                return String(o.value) === String(_this2.period);
+              })) === null || _find === void 0 ? void 0 : _find.text) || String(_this2.period);
+              filtersLine = ["".concat(_this2.$t ? _this2.$t('Period') : 'Period', ": ").concat(periodLabel), _this2.warehouse_id ? "".concat(_this2.$t ? _this2.$t('warehouse') : 'Warehouse', ": ").concat(_this2.warehouse_id) : null, _this2.brand_id ? "".concat(_this2.$t ? _this2.$t('Brand') : 'Brand', ": ").concat(_this2.brand_id) : null, _this2.category_id ? "".concat(_this2.$t ? _this2.$t('Category') : 'Category', ": ").concat(_this2.category_id) : null, _this2.search ? "".concat(_this2.$t ? _this2.$t('Search_this_table') : 'Search', ": \"").concat(_this2.search, "\"") : null].filter(Boolean).join('   •   ');
+              wrapped = pdf.splitTextToSize(filtersLine, pageW - margin * 2);
+              rtl ? pdf.text(wrapped, pageW - margin, 56, {
+                align: 'right'
+              }) : pdf.text(wrapped, margin, 56);
+
+              // --- Table
+              hCode = _this2.$t ? _this2.$t('Code') : 'Code';
+              hProd = _this2.$t ? _this2.$t('Product') : 'Product';
+              hPrice = _this2.$t ? _this2.$t('Price') : 'Price';
+              hLast = _this2.$t ? _this2.$t('LastSale') : 'Last sale';
+              hDays = _this2.$t ? _this2.$t('DaysSinceLastSale') : 'Days since last sale';
+              neverTx = _this2.$t ? _this2.$t('Never_Sold') : 'Never Sold';
+              head = [[hCode, hProd, hPrice, hLast, hDays]];
+              body = items.map(function (r) {
+                var _r$price, _r$last_sale_at, _r$days_since_last_sa;
+                return [r.code || '', r.name || '', typeof r.price === 'number' ? r.price.toFixed(2) : (_r$price = r.price) !== null && _r$price !== void 0 ? _r$price : '', (_r$last_sale_at = r.last_sale_at) !== null && _r$last_sale_at !== void 0 ? _r$last_sale_at : '—', r.last_sale_at ? (_r$days_since_last_sa = r.days_since_last_sale) !== null && _r$days_since_last_sa !== void 0 ? _r$days_since_last_sa : '' : neverTx];
+              });
+              autoTable(pdf, {
+                startY: 74,
+                head: head,
+                body: body,
+                margin: {
+                  left: margin,
+                  right: margin
+                },
+                theme: 'striped',
+                styles: {
+                  font: 'Vazirmatn',
+                  fontStyle: 'normal',
+                  fontSize: 9,
+                  cellPadding: 6,
+                  overflow: 'linebreak',
+                  halign: rtl ? 'right' : 'left'
+                },
+                headStyles: {
+                  font: 'Vazirmatn',
+                  fontStyle: 'bold',
+                  fillColor: [26, 86, 219],
+                  textColor: 255,
+                  halign: rtl ? 'right' : 'left'
+                },
+                columnStyles: {
+                  2: {
+                    halign: 'right'
+                  },
+                  // Price
+                  4: {
+                    halign: 'right'
+                  } // Days since last sale
+                },
+                didDrawPage: function didDrawPage(d) {
+                  pdf.setFont('Vazirmatn', 'normal');
+                  pdf.setFontSize(8);
+                  var ph = pdf.internal.pageSize.getHeight();
+                  var pn = "".concat(d.pageNumber, " / ").concat(pdf.internal.getNumberOfPages());
+                  rtl ? pdf.text(pn, margin, ph - 14, {
+                    align: 'left'
+                  }) : pdf.text(pn, pageW - margin, ph - 14, {
+                    align: 'right'
+                  });
+                }
+              });
+              stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+              fname = "zero_sales_products_".concat(String(_this2.period), "_").concat(stamp, ".pdf");
+              pdf.save(fname);
+              _context.n = 5;
+              break;
+            case 4:
+              _context.p = 4;
+              _t = _context.v;
+              // optional toast
+              _this2.$bvToast && _this2.$bvToast.toast(_this2.$t ? _this2.$t('Export_Failed') : 'Export failed', {
+                variant: 'danger',
+                solid: true
+              });
+              // console.error(e);
+            case 5:
+              _context.p = 5;
+              nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+              return _context.f(5);
+            case 6:
+              return _context.a(2);
+          }
+        }, _callee, null, [[0, 4, 5, 6]]);
+      }))();
+    }
+  },
+  created: function created() {
+    this.Get_Zero_Sales_Products(1);
+  }
+});
+
+/***/ },
+
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=template&id=0e229652&scoped=true"
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=template&id=0e229652&scoped=true ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* binding */ render),
+/* harmony export */   staticRenderFns: () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function render() {
+  var _vm = this,
+    _c = _vm._self._c;
+  return _c("div", {
+    staticClass: "main-content"
+  }, [_c("breadcumb", {
+    attrs: {
+      page: _vm.$t("Zero_Sales_Products_Report"),
+      folder: _vm.$t("Reports")
+    }
+  }), _vm._v(" "), _vm.isLoading ? _c("div", {
+    staticClass: "loading_page spinner spinner-primary mr-3"
+  }) : _vm._e(), _vm._v(" "), !_vm.isLoading ? _c("b-card", {
+    staticClass: "wrapper"
+  }, [_c("div", {
+    staticClass: "d-flex flex-wrap align-items-center mb-2"
+  }, [_c("div", {
+    staticClass: "d-flex align-items-center mr-3 mb-2"
+  }, [_c("label", {
+    staticClass: "mb-0 mr-2"
+  }, [_vm._v(_vm._s(_vm.$t("Period")) + ":")]), _vm._v(" "), _c("b-form-select", {
+    staticClass: "w-auto",
+    attrs: {
+      options: _vm.periodOptions,
+      size: "sm"
+    },
+    on: {
+      change: _vm.onPeriodChange
+    },
+    model: {
+      value: _vm.period,
+      callback: function callback($$v) {
+        _vm.period = $$v;
+      },
+      expression: "period"
+    }
+  })], 1), _vm._v(" "), _c("div", {
+    staticClass: "ml-auto mb-2"
+  }, [_c("b-button", {
+    staticClass: "btn-pill",
+    attrs: {
+      size: "sm",
+      variant: "danger"
+    },
+    on: {
+      click: _vm.exportPdf
+    }
+  }, [_c("i", {
+    staticClass: "i-File-PDF mr-1"
+  }), _vm._v(" Export PDF\n        ")])], 1)]), _vm._v(" "), _c("vue-good-table", {
+    attrs: {
+      mode: "remote",
+      columns: _vm.columns,
+      totalRows: _vm.totalRows,
+      rows: _vm.rows,
+      "group-options": {
+        enabled: true,
+        headerPosition: "bottom"
+      },
+      "search-options": {
+        placeholder: _vm.$t("Search_this_table"),
+        enabled: true
+      },
+      "pagination-options": {
+        enabled: true,
+        mode: "records",
+        perPage: _vm.serverParams.perPage,
+        perPageDropdown: [10, 20, 50, 100],
+        dropdownAllowAll: true,
+        nextLabel: "next",
+        prevLabel: "prev"
+      },
+      styleClass: "tableOne table-hover vgt-table mt-3"
+    },
+    on: {
+      "on-page-change": _vm.onPageChange,
+      "on-per-page-change": _vm.onPerPageChange,
+      "on-sort-change": _vm.onSortChange,
+      "on-search": _vm.onSearch
+    },
+    scopedSlots: _vm._u([{
+      key: "table-row",
+      fn: function fn(props) {
+        return [props.column.field === "last_sale_at" ? _c("span", [_vm._v("\n          " + _vm._s(props.row.last_sale_at ? props.row.last_sale_at : "—") + "\n        ")]) : props.column.field === "days_since_last_sale" ? _c("span", [!props.row.last_sale_at ? _c("b-badge", {
+          attrs: {
+            variant: "warning"
+          }
+        }, [_vm._v("\n            " + _vm._s(_vm.$t("Never_Sold")) + "\n          ")]) : _c("span", [_vm._v(_vm._s(props.row.days_since_last_sale))])], 1) : _c("span", [_vm._v("\n          " + _vm._s(props.formattedRow[props.column.field]) + "\n        ")])];
+      }
+    }], null, false, 624551675)
+  })], 1) : _vm._e()], 1);
+};
+var staticRenderFns = [];
+render._withStripped = true;
+
+
+/***/ },
+
+/***/ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css"
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+(module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../../../../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0__);
+// Imports
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, "\n.btn-pill[data-v-0e229652] { border-radius: 999px;\n}\n", ""]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ },
+
+/***/ "./node_modules/css-loader/dist/runtime/api.js"
+/*!*****************************************************!*\
+  !*** ./node_modules/css-loader/dist/runtime/api.js ***!
+  \*****************************************************/
+(module) {
+
+
+
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+// eslint-disable-next-line func-names
+module.exports = function (cssWithMappingToString) {
+  var list = []; // return the list of modules as css string
+
+  list.toString = function toString() {
+    return this.map(function (item) {
+      var content = cssWithMappingToString(item);
+
+      if (item[2]) {
+        return "@media ".concat(item[2], " {").concat(content, "}");
+      }
+
+      return content;
+    }).join("");
+  }; // import a list of modules into the list
+  // eslint-disable-next-line func-names
+
+
+  list.i = function (modules, mediaQuery, dedupe) {
+    if (typeof modules === "string") {
+      // eslint-disable-next-line no-param-reassign
+      modules = [[null, modules, ""]];
+    }
+
+    var alreadyImportedModules = {};
+
+    if (dedupe) {
+      for (var i = 0; i < this.length; i++) {
+        // eslint-disable-next-line prefer-destructuring
+        var id = this[i][0];
+
+        if (id != null) {
+          alreadyImportedModules[id] = true;
+        }
+      }
+    }
+
+    for (var _i = 0; _i < modules.length; _i++) {
+      var item = [].concat(modules[_i]);
+
+      if (dedupe && alreadyImportedModules[item[0]]) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+
+      if (mediaQuery) {
+        if (!item[2]) {
+          item[2] = mediaQuery;
+        } else {
+          item[2] = "".concat(mediaQuery, " and ").concat(item[2]);
+        }
+      }
+
+      list.push(item);
+    }
+  };
+
+  return list;
+};
+
+/***/ },
+
+/***/ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css"
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../../../../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Zero_Sales_Products_Report_vue_vue_type_style_index_0_id_0e229652_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !!../../../../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!../../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css */ "./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css");
+
+            
+
+var options = {};
+
+options.insert = "head";
+options.singleton = false;
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Zero_Sales_Products_Report_vue_vue_type_style_index_0_id_0e229652_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_1__["default"], options);
+
+
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Zero_Sales_Products_Report_vue_vue_type_style_index_0_id_0e229652_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
+
+/***/ },
+
+/***/ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js"
+/*!****************************************************************************!*\
+  !*** ./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js ***!
+  \****************************************************************************/
+(module, __unused_webpack_exports, __webpack_require__) {
+
+
+
+var isOldIE = function isOldIE() {
+  var memo;
+  return function memorize() {
+    if (typeof memo === 'undefined') {
+      // Test for IE <= 9 as proposed by Browserhacks
+      // @see http://browserhacks.com/#hack-e71d8692f65334173fee715c222cb805
+      // Tests for existence of standard globals is to allow style-loader
+      // to operate correctly into non-standard environments
+      // @see https://github.com/webpack-contrib/style-loader/issues/177
+      memo = Boolean(window && document && document.all && !window.atob);
+    }
+
+    return memo;
+  };
+}();
+
+var getTarget = function getTarget() {
+  var memo = {};
+  return function memorize(target) {
+    if (typeof memo[target] === 'undefined') {
+      var styleTarget = document.querySelector(target); // Special case to return head of iframe instead of iframe itself
+
+      if (window.HTMLIFrameElement && styleTarget instanceof window.HTMLIFrameElement) {
+        try {
+          // This will throw an exception if access to iframe is blocked
+          // due to cross-origin restrictions
+          styleTarget = styleTarget.contentDocument.head;
+        } catch (e) {
+          // istanbul ignore next
+          styleTarget = null;
+        }
+      }
+
+      memo[target] = styleTarget;
+    }
+
+    return memo[target];
+  };
+}();
+
+var stylesInDom = [];
+
+function getIndexByIdentifier(identifier) {
+  var result = -1;
+
+  for (var i = 0; i < stylesInDom.length; i++) {
+    if (stylesInDom[i].identifier === identifier) {
+      result = i;
+      break;
+    }
+  }
+
+  return result;
+}
+
+function modulesToDom(list, options) {
+  var idCountMap = {};
+  var identifiers = [];
+
+  for (var i = 0; i < list.length; i++) {
+    var item = list[i];
+    var id = options.base ? item[0] + options.base : item[0];
+    var count = idCountMap[id] || 0;
+    var identifier = "".concat(id, " ").concat(count);
+    idCountMap[id] = count + 1;
+    var index = getIndexByIdentifier(identifier);
+    var obj = {
+      css: item[1],
+      media: item[2],
+      sourceMap: item[3]
+    };
+
+    if (index !== -1) {
+      stylesInDom[index].references++;
+      stylesInDom[index].updater(obj);
+    } else {
+      stylesInDom.push({
+        identifier: identifier,
+        updater: addStyle(obj, options),
+        references: 1
+      });
+    }
+
+    identifiers.push(identifier);
+  }
+
+  return identifiers;
+}
+
+function insertStyleElement(options) {
+  var style = document.createElement('style');
+  var attributes = options.attributes || {};
+
+  if (typeof attributes.nonce === 'undefined') {
+    var nonce =  true ? __webpack_require__.nc : 0;
+
+    if (nonce) {
+      attributes.nonce = nonce;
+    }
+  }
+
+  Object.keys(attributes).forEach(function (key) {
+    style.setAttribute(key, attributes[key]);
+  });
+
+  if (typeof options.insert === 'function') {
+    options.insert(style);
+  } else {
+    var target = getTarget(options.insert || 'head');
+
+    if (!target) {
+      throw new Error("Couldn't find a style target. This probably means that the value for the 'insert' parameter is invalid.");
+    }
+
+    target.appendChild(style);
+  }
+
+  return style;
+}
+
+function removeStyleElement(style) {
+  // istanbul ignore if
+  if (style.parentNode === null) {
+    return false;
+  }
+
+  style.parentNode.removeChild(style);
+}
+/* istanbul ignore next  */
+
+
+var replaceText = function replaceText() {
+  var textStore = [];
+  return function replace(index, replacement) {
+    textStore[index] = replacement;
+    return textStore.filter(Boolean).join('\n');
+  };
+}();
+
+function applyToSingletonTag(style, index, remove, obj) {
+  var css = remove ? '' : obj.media ? "@media ".concat(obj.media, " {").concat(obj.css, "}") : obj.css; // For old IE
+
+  /* istanbul ignore if  */
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = replaceText(index, css);
+  } else {
+    var cssNode = document.createTextNode(css);
+    var childNodes = style.childNodes;
+
+    if (childNodes[index]) {
+      style.removeChild(childNodes[index]);
+    }
+
+    if (childNodes.length) {
+      style.insertBefore(cssNode, childNodes[index]);
+    } else {
+      style.appendChild(cssNode);
+    }
+  }
+}
+
+function applyToTag(style, options, obj) {
+  var css = obj.css;
+  var media = obj.media;
+  var sourceMap = obj.sourceMap;
+
+  if (media) {
+    style.setAttribute('media', media);
+  } else {
+    style.removeAttribute('media');
+  }
+
+  if (sourceMap && typeof btoa !== 'undefined') {
+    css += "\n/*# sourceMappingURL=data:application/json;base64,".concat(btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))), " */");
+  } // For old IE
+
+  /* istanbul ignore if  */
+
+
+  if (style.styleSheet) {
+    style.styleSheet.cssText = css;
+  } else {
+    while (style.firstChild) {
+      style.removeChild(style.firstChild);
+    }
+
+    style.appendChild(document.createTextNode(css));
+  }
+}
+
+var singleton = null;
+var singletonCounter = 0;
+
+function addStyle(obj, options) {
+  var style;
+  var update;
+  var remove;
+
+  if (options.singleton) {
+    var styleIndex = singletonCounter++;
+    style = singleton || (singleton = insertStyleElement(options));
+    update = applyToSingletonTag.bind(null, style, styleIndex, false);
+    remove = applyToSingletonTag.bind(null, style, styleIndex, true);
+  } else {
+    style = insertStyleElement(options);
+    update = applyToTag.bind(null, style, options);
+
+    remove = function remove() {
+      removeStyleElement(style);
+    };
+  }
+
+  update(obj);
+  return function updateStyle(newObj) {
+    if (newObj) {
+      if (newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap) {
+        return;
+      }
+
+      update(obj = newObj);
+    } else {
+      remove();
+    }
+  };
+}
+
+module.exports = function (list, options) {
+  options = options || {}; // Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+  // tags it will allow on a page
+
+  if (!options.singleton && typeof options.singleton !== 'boolean') {
+    options.singleton = isOldIE();
+  }
+
+  list = list || [];
+  var lastIdentifiers = modulesToDom(list, options);
+  return function update(newList) {
+    newList = newList || [];
+
+    if (Object.prototype.toString.call(newList) !== '[object Array]') {
+      return;
+    }
+
+    for (var i = 0; i < lastIdentifiers.length; i++) {
+      var identifier = lastIdentifiers[i];
+      var index = getIndexByIdentifier(identifier);
+      stylesInDom[index].references--;
+    }
+
+    var newLastIdentifiers = modulesToDom(newList, options);
+
+    for (var _i = 0; _i < lastIdentifiers.length; _i++) {
+      var _identifier = lastIdentifiers[_i];
+
+      var _index = getIndexByIdentifier(_identifier);
+
+      if (stylesInDom[_index].references === 0) {
+        stylesInDom[_index].updater();
+
+        stylesInDom.splice(_index, 1);
+      }
+    }
+
+    lastIdentifiers = newLastIdentifiers;
+  };
+};
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue"
+/*!******************************************************************************!*\
+  !*** ./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue ***!
+  \******************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _Zero_Sales_Products_Report_vue_vue_type_template_id_0e229652_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Zero_Sales_Products_Report.vue?vue&type=template&id=0e229652&scoped=true */ "./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=template&id=0e229652&scoped=true");
+/* harmony import */ var _Zero_Sales_Products_Report_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Zero_Sales_Products_Report.vue?vue&type=script&lang=js */ "./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=script&lang=js");
+/* harmony import */ var _Zero_Sales_Products_Report_vue_vue_type_style_index_0_id_0e229652_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css */ "./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+;
+
+
+/* normalize component */
+
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _Zero_Sales_Products_Report_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Zero_Sales_Products_Report_vue_vue_type_template_id_0e229652_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render,
+  _Zero_Sales_Products_Report_vue_vue_type_template_id_0e229652_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "0e229652",
+  null
+  
+)
+
+/* hot reload */
+if (false) // removed by dead control flow
+{ var api; }
+component.options.__file = "resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=script&lang=js"
+/*!******************************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=script&lang=js ***!
+  \******************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Zero_Sales_Products_Report_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Zero_Sales_Products_Report.vue?vue&type=script&lang=js */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=script&lang=js");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Zero_Sales_Products_Report_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=template&id=0e229652&scoped=true"
+/*!************************************************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=template&id=0e229652&scoped=true ***!
+  \************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   render: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Zero_Sales_Products_Report_vue_vue_type_template_id_0e229652_scoped_true__WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   staticRenderFns: () => (/* reexport safe */ _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Zero_Sales_Products_Report_vue_vue_type_template_id_0e229652_scoped_true__WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_use_0_node_modules_vue_loader_lib_loaders_templateLoader_js_ruleSet_1_rules_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Zero_Sales_Products_Report_vue_vue_type_template_id_0e229652_scoped_true__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!../../../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Zero_Sales_Products_Report.vue?vue&type=template&id=0e229652&scoped=true */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5.use[0]!./node_modules/vue-loader/lib/loaders/templateLoader.js??ruleSet[1].rules[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=template&id=0e229652&scoped=true");
+
+
+/***/ },
+
+/***/ "./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css"
+/*!**************************************************************************************************************************************!*\
+  !*** ./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css ***!
+  \**************************************************************************************************************************************/
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_dist_cjs_js_node_modules_css_loader_dist_cjs_js_clonedRuleSet_8_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_8_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Zero_Sales_Products_Report_vue_vue_type_style_index_0_id_0e229652_scoped_true_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../../../node_modules/style-loader/dist/cjs.js!../../../../../../node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!../../../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../../../node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!../../../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css */ "./node_modules/style-loader/dist/cjs.js!./node_modules/css-loader/dist/cjs.js??clonedRuleSet-8.use[1]!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/dist/cjs.js??clonedRuleSet-8.use[2]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/src/views/app/pages/reports/Zero_Sales_Products_Report.vue?vue&type=style&index=0&id=0e229652&scoped=true&lang=css");
+
+
+/***/ }
+
+}]);
