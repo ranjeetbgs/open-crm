@@ -1735,7 +1735,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       var customer = this.clients.find(function (c) {
         return c.id === _this.selectedClientId;
       });
-      if (customer.is_royalty_eligible) this.sale.discount = 20;
+      if (customer !== null && customer !== void 0 && customer.is_royalty_eligible) this.sale.discount = 20;
       return customer;
     },
     // Receipt subtotal (sum of invoice detail totals; before order tax/discount/shipping)
@@ -6564,6 +6564,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   staticRenderFns: () => (/* binding */ staticRenderFns)
 /* harmony export */ });
 var render = function render() {
+  var _vm$currentClient, _vm$client;
   var _vm = this,
     _c = _vm._self._c;
   return _c("div", {
@@ -7229,7 +7230,7 @@ var render = function render() {
     staticClass: "card-header"
   }, [_c("h3", [_vm._v(_vm._s(_vm.$t("pos.Checkout")))]), _vm._v(" "), _vm.details.length > 0 ? _c("span", {
     staticClass: "badge-count"
-  }, [_vm._v(_vm._s(_vm.details.length) + " " + _vm._s(_vm.$t("pos.items")))]) : _vm._e(), _vm._v(" "), _vm.currentClient && _vm.currentClient.is_royalty_eligible ? _c("p", {
+  }, [_vm._v(_vm._s(_vm.details.length) + " " + _vm._s(_vm.$t("pos.items")))]) : _vm._e(), _vm._v(" "), _vm.currentClient && (_vm$currentClient = _vm.currentClient) !== null && _vm$currentClient !== void 0 && _vm$currentClient.is_royalty_eligible ? _c("p", {
     staticClass: "blink text-success"
   }, [_vm._v("Royalty eligibled")]) : _vm._e()]), _vm._v(" "), _c("div", {
     staticClass: "cart-section"
@@ -9727,7 +9728,7 @@ var render = function render() {
     attrs: {
       "for": "is_royalty_eligible"
     }
-  }, [_c("h5", [_vm._v(_vm._s(_vm.$t("Is_Royalty_Eligible")))])])])]), _vm._v(" "), _vm.client.is_royalty_eligible ? _c("b-col", {
+  }, [_c("h5", [_vm._v(_vm._s(_vm.$t("Is_Royalty_Eligible")))])])])]), _vm._v(" "), (_vm$client = _vm.client) !== null && _vm$client !== void 0 && _vm$client.is_royalty_eligible ? _c("b-col", {
     attrs: {
       md: "6",
       sm: "12"

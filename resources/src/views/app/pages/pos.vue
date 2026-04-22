@@ -376,7 +376,7 @@
           <div class="card-header">
             <h3>{{ $t('pos.Checkout') }}</h3>
             <span v-if="details.length > 0" class="badge-count">{{ details.length }} {{$t('pos.items')}}</span>
-             <p v-if="currentClient && currentClient.is_royalty_eligible" class="blink text-success">Royalty eligibled</p>
+             <p v-if="currentClient && currentClient?.is_royalty_eligible" class="blink text-success">Royalty eligibled</p>
           </div>
 
           <!-- Cart Items Section -->
@@ -1509,7 +1509,7 @@
           </b-col>
 
           <!-- Customer Card Number -->
-          <b-col md="6" sm="12" v-if="client.is_royalty_eligible">
+          <b-col md="6" sm="12" v-if="client?.is_royalty_eligible">
             <b-form-group :label="$t('Card_Number')">
               <b-form-input
                 label="Card Number"
@@ -2089,7 +2089,7 @@ export default {
       c => c.id === this.selectedClientId
     );
 
-    if(customer.is_royalty_eligible)this.sale.discount = 20;
+    if(customer?.is_royalty_eligible)this.sale.discount = 20;
      
     return customer;
 
