@@ -1348,7 +1348,7 @@ return [
 'pos.Tax' => 'Tax',
 'pos.Discount' => 'Discount',
 'pos.Shipping' => 'Shipping',
-'pos.Loyalty_Card' => 'Loyalty Card'
+'pos.Loyalty_Card' => 'Loyalty Card',
 'pos.Grand_Total' => 'Grand Total',
 'pos.No_products_found' => 'No products found',
 'pos.Page' => 'Page',

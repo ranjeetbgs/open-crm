@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Passport\Passport;
 
+use Illuminate\Support\Facades\Http;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -30,6 +32,20 @@ use Laravel\Passport\Passport;
 // Passport::routes();
 
 // Login route will be defined explicitly below with middleware
+
+Route::get('test',function(){
+
+
+
+$response = Http::post('https://api.zeoact.com/v1/send-message', [
+    'api_key' => env('ZEOACT_API_KEY'),
+    'number'  => '91XXXXXXXXXX',
+    'message' => 'Hello from Laravel via Zeoact API'
+]);
+
+return $response->json();
+    
+});
 
 Route::get('password/find/{token}', 'PasswordResetController@find');
 
