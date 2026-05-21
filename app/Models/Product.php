@@ -47,6 +47,12 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class, 'product_id');
     }
 
+    public function warehouses()
+    {
+       
+        return $this->hasMany('App\Models\product_warehouse', 'product_id');
+    }
+
     public function ProductVariant()
     {
         return $this->belongsTo('App\Models\ProductVariant');

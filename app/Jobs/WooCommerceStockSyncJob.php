@@ -268,7 +268,7 @@ class WooCommerceStockSyncJob implements ShouldQueue
 
     private function computeStockQuantity(int $productId): int
     {
-        $sum = (float) product_warehouse::where('product_id', $productId)
+         $sum = (float) product_warehouse::where('warehouse_id', 1)->where('product_id', $productId)
             ->whereNull('deleted_at')
             ->sum('qte');
         $qty = (int) round($sum);

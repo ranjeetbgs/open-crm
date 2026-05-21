@@ -34,12 +34,15 @@ return [
         'url' => env('WOOCOMMERCE_URL'),
         'consumer_key' => env('WOOCOMMERCE_CONSUMER_KEY'),
         'consumer_secret' => env('WOOCOMMERCE_CONSUMER_SECRET'),
+        'webhook_secret' => env('WOOCOMMERCE_WEBHOOK_SECRET'),
     ],
 
     'stripe' => [
         'key'    => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
     ],
+
+    'whatsapp_api_endpoint' => env('WHATSAPP_API_ENDPOINT')
 
 
 ];

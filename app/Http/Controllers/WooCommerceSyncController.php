@@ -11,6 +11,7 @@ use App\Services\WooCommerce\SyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class WooCommerceSyncController extends BaseController
 {
@@ -320,5 +321,54 @@ class WooCommerceSyncController extends BaseController
         }, 3);
 
         return response()->json(['success' => true]);
+    }
+
+
+    public function handleWebhook(Request $request)
+    {
+
+        $secret = config('services.woocommerce.webhook_secret'); 
+        $signature = $request->header('X-WC-Webhook-Signature');
+        $payload = $request->getContent();
+
+        // Calculate HMAC SHA256 signature
+        $calculated_hmac = base64_encode(hash_hmac('sha256', $payload, $secret, true));
+
+        if ($signature !== $calculated_hmac) {
+            \Log::warning('Invalid WooCommerce webhook signature.');
+            return response()->json(['message' => 'Invalid signature'], 401);
+        }
+
+        // Process the data (e.g., $request->all())
+        $wc_order = json_decode($payload, true);
+        $orderd_items =  $wc_order['line_items'];
+        $wc_product_ids = array_column($orderd_items, 'product_id');
+        $topic = $request->header('X-WC-Webhook-Topic'); // e.g., 'order.created'
+
+        \Log::info("WooCommerce Webhook Received: {$topic} {$request->method()}", $wc_product_ids);
+
+
+        // now requesting for woocommerce products api for getting current stock
+        $wc = WooCommerceSetting::first();
+
+       
+        $response = Http::withBasicAuth($wc->consumer_key, $wc->consumer_secret)
+    ->get($wc->store_url.'/wp-json/wc/v3/products',[
+        'include' =>  $wc_product_ids,
+            'per_page' => 100, // Maximize results per request
+            '_fields' => 'id,stock_quantity,sku'
+    ]);
+
+    $wc_products = $response->json();
+
+    foreach($wc_products as $wc_product)
+        {
+            Product::whereNull('deleted_at')->where('woocommerce_id',$wc_product['id'])->first()
+            ->warehouses()->where('warehouse_id',1)->update(['qte'=>$wc_product['stock_quantity']]);
+        }
+
+
+
+        return response()->json(['message' => 'Success'], 200);
     }
 }

@@ -43,6 +43,7 @@ use Infobip\Model\SmsDestination;
 use Infobip\Model\SmsTextualMessage;
 use Stripe;
 use Twilio\Rest\Client as Client_Twilio;
+use Illuminate\Support\Facades\Http;
 
 class PosController extends BaseController
 {
@@ -59,6 +60,8 @@ class PosController extends BaseController
             'payments.*.amount' => 'required|numeric',
             'payments.*.payment_method_id' => 'required',
         ]);
+
+        
 
         // Block overpayment if multiple methods used
         $totalPaid = collect($request->payments)->sum('amount');
@@ -405,6 +408,8 @@ class PosController extends BaseController
                 }
             }
 
+
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -479,8 +484,11 @@ class PosController extends BaseController
         $response = [
             'success' => true,
             'id' => $sale->id,
+            'sales'=>$this->SendWhatsappMessage($sale->id),
             'qbo_sync' => $qboSync,
         ];
+
+        
 
         if ($emailError) {
             $response['email_error'] = $emailError;
@@ -491,6 +499,20 @@ class PosController extends BaseController
         }
 
         return response()->json($response, 200);
+    }
+
+    public function SendWhatsappMessage($sales_id)
+    {
+        $sale = Sale::with('client')->where('deleted_at', '=', null)->findOrFail($sales_id);
+
+    $response = Http::post(config('services.whatsapp_api_endpoint'), [
+    'name' => $sale['client']->name,
+    'mobile' => $sale['client']->phone,
+    'invoice_id'=> $sale->Ref,
+    "amount"=> $sale->paid_amount
+]);
+
+        return $sale;
     }
 
     public function Send_Email($id)

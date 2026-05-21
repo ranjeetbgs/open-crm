@@ -35,15 +35,16 @@ use Illuminate\Support\Facades\Http;
 
 Route::get('test',function(){
 
+//dd(config('services.whatsapp_api_endpoint'));
 
+// $response = Http::post(config('services.whatsapp_api_endpoint'), [
+//     'name' => 'Ranjeet',
+//     'mobile' => '+919798506262',
+//     'invoice_id'=> '1001202601',
+//     "amount"=> 5000
+// ]);
 
-$response = Http::post('https://api.zeoact.com/v1/send-message', [
-    'api_key' => env('ZEOACT_API_KEY'),
-    'number'  => '91XXXXXXXXXX',
-    'message' => 'Hello from Laravel via Zeoact API'
-]);
-
-return $response->json();
+// return $response->json();
     
 });
 

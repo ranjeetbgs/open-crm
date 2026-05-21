@@ -22,6 +22,15 @@ use Illuminate\Support\Facades\Route;
 |
  */
 
+
+use Illuminate\Support\Facades\Http;
+Route::get('/test', function () {
+
+
+});
+
+Route::post('/webhooks/woocommerce','WooCommerceSyncController@handleWebhook');
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
