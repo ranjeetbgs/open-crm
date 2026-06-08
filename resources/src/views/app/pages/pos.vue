@@ -394,7 +394,7 @@
               <div v-for="(item, index) in details" :key="index" class="cart-item-card">
                 <div class="item-header">
                   <h4 class="item-name">{{ item.name }}</h4>
-                  <button @mousedown.prevent @click="Modal_Updat_Detail(item)" type="button" class="edit-btn" :title="$t('pos.Edit')">
+                  <button v-if="0" @mousedown.prevent @click="Modal_Updat_Detail(item)" type="button" class="edit-btn" :title="$t('pos.Edit')">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                       <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"></path>
                     </svg>
@@ -416,7 +416,7 @@
                 <div class="item-price">
                   <div class="d-flex align-items-center justify-content-end pos-price-container">
                     <span class="mr-2 item-amount">{{ formatPriceWithCurrentCurrency(item.Total_price, 2) }}</span>
-                    <select
+                    <select v-if="0"
                       class="form-control ml-2 pos-price-select"
                       v-model="item.price_type"
                       @change="onChangePriceType(item)"
@@ -3666,6 +3666,7 @@ export default {
     },
 
     decrement(detail, id) {
+      if(detail.quantity == 1) return;
       for (var i = 0; i < this.details.length; i++) {
         if (this.details[i].detail_id == id) {
           // Prevent quantity from going negative, but allow zero and fractional quantities
@@ -3681,6 +3682,7 @@ export default {
     },
 
     Verified_Qty(detail, id) {
+      
       for (var i = 0; i < this.details.length; i++) {
         if (this.details[i].detail_id === id) {
           const qty = parseFloat(detail.quantity);
@@ -3689,7 +3691,7 @@ export default {
           if (isNaN(qty) || detail.quantity === null || detail.quantity === '') {
             this.details[i].quantity = 1;
           // Enforce only that quantity must not be negative (zero is allowed)
-          } else if (qty < 0) {
+          } else if (qty < 2) {
             this.makeToast("warning", this.$t("MinimumQuantity"), this.$t("Warning"));
             this.details[i].quantity = 1;
           } else if (this.details[i].product_type !== 'is_service' && qty > detail.current) {

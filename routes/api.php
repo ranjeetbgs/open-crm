@@ -24,12 +24,56 @@ use Illuminate\Support\Facades\Route;
 
 
 use Illuminate\Support\Facades\Http;
-Route::get('/test', function () {
+Route::match(['GET', 'POST'], '/test', function (Request $request) {
 
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | FACEBOOK VERIFICATION
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->isMethod('GET')) {
+
+        if (
+            $request->hub_verify_token === 'crm_verify_token_123'
+        ) {
+
+            return response(
+                $request->hub_challenge,
+                200
+            );
+        }
+
+        return response(
+            'Invalid Verify Token',
+            403
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | FACEBOOK LEAD EVENT
+    |--------------------------------------------------------------------------
+    */
+
+    \Log::warning(
+        json_encode(
+            $request->all(),
+            JSON_PRETTY_PRINT
+        )
+    );
+
+    return response(
+        'EVENT_RECEIVED',
+        200
+    );
 });
 
 Route::post('/webhooks/woocommerce','WooCommerceSyncController@handleWebhook');
+
+Route::post('/webhooks/wp-user-sync','WooCommerceSyncController@handleWpUserSync');
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

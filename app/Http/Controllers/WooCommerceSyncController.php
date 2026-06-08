@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use App\Models\Client;
 
 class WooCommerceSyncController extends BaseController
 {
@@ -353,22 +354,57 @@ class WooCommerceSyncController extends BaseController
 
        
         $response = Http::withBasicAuth($wc->consumer_key, $wc->consumer_secret)
-    ->get($wc->store_url.'/wp-json/wc/v3/products',[
-        'include' =>  $wc_product_ids,
-            'per_page' => 100, // Maximize results per request
-            '_fields' => 'id,stock_quantity,sku'
-    ]);
+                            ->get($wc->store_url.'/wp-json/wc/v3/products',[
+                                        'include' =>  $wc_product_ids,
+                                        'per_page' => 100, // Maximize results per request
+                                        '_fields' => 'id,stock_quantity,sku'
+                                    ]);
 
-    $wc_products = $response->json();
+        $wc_products = $response->json();
 
-    foreach($wc_products as $wc_product)
-        {
-            Product::whereNull('deleted_at')->where('woocommerce_id',$wc_product['id'])->first()
-            ->warehouses()->where('warehouse_id',1)->update(['qte'=>$wc_product['stock_quantity']]);
-        }
+        foreach($wc_products as $wc_product)
+            {
+                Product::whereNull('deleted_at')->where('woocommerce_id',$wc_product['id'])->first()
+                ->warehouses()->where('warehouse_id',1)->update(['qte'=>$wc_product['stock_quantity']]);
+            }
 
 
 
         return response()->json(['message' => 'Success'], 200);
+    }
+
+    public function handleWpUserSync(Request $request)
+    {
+        
+        $secret = config('services.woocommerce.webhook_secret'); 
+        $signature = $request->header('X-WC-Webhook-Signature');
+        $payload = $request->getContent();
+
+        // Calculate HMAC SHA256 signature
+        $calculated_hmac = base64_encode(hash_hmac('sha256', $payload, $secret, true));
+
+        if ($signature !== $calculated_hmac) {
+            \Log::warning('Invalid WooCommerce webhook signature.');
+            return response()->json(['message' => 'Invalid signature'], 401);
+        }
+
+    //     \Log::warning(
+    //     json_encode(
+    //         $request->all(),
+    //         JSON_PRETTY_PRINT
+    //     )
+    // );
+
+    $phone = substr($request['phone'], 2); 
+
+     Client::updateOrCreate(['phone' => $phone],[
+            'name' => $request['name'],
+            'phone' => $phone,
+            'is_royalty_eligible' => 0,
+        ]);
+
+     
+
+    return 1;
     }
 }

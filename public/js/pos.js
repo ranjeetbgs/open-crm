@@ -3263,6 +3263,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     if (_this18.uiLoadingProductId === key) _this18.uiLoadingProductId = null;
   });
 }), "decrement", function decrement(detail, id) {
+  if (detail.quantity == 1) return;
   for (var i = 0; i < this.details.length; i++) {
     if (this.details[i].detail_id == id) {
       // Prevent quantity from going negative, but allow zero and fractional quantities
@@ -3284,7 +3285,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       if (isNaN(qty) || detail.quantity === null || detail.quantity === '') {
         this.details[i].quantity = 1;
         // Enforce only that quantity must not be negative (zero is allowed)
-      } else if (qty < 0) {
+      } else if (qty < 2) {
         this.makeToast("warning", this.$t("MinimumQuantity"), this.$t("Warning"));
         this.details[i].quantity = 1;
       } else if (this.details[i].product_type !== 'is_service' && qty > detail.current) {
@@ -7270,30 +7271,7 @@ var render = function render() {
       staticClass: "item-header"
     }, [_c("h4", {
       staticClass: "item-name"
-    }, [_vm._v(_vm._s(item.name))]), _vm._v(" "), _c("button", {
-      staticClass: "edit-btn",
-      attrs: {
-        type: "button",
-        title: _vm.$t("pos.Edit")
-      },
-      on: {
-        mousedown: function mousedown($event) {
-          $event.preventDefault();
-        },
-        click: function click($event) {
-          return _vm.Modal_Updat_Detail(item);
-        }
-      }
-    }, [_c("svg", {
-      attrs: {
-        viewBox: "0 0 24 24",
-        fill: "currentColor"
-      }
-    }, [_c("path", {
-      attrs: {
-        d: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"
-      }
-    })])]), _vm._v(" "), _c("button", {
+    }, [_vm._v(_vm._s(item.name))]), _vm._v(" "),  false ? 0 : _vm._e(), _vm._v(" "), _c("button", {
       staticClass: "remove-btn",
       attrs: {
         type: "button",
@@ -7377,36 +7355,7 @@ var render = function render() {
       staticClass: "d-flex align-items-center justify-content-end pos-price-container"
     }, [_c("span", {
       staticClass: "mr-2 item-amount"
-    }, [_vm._v(_vm._s(_vm.formatPriceWithCurrentCurrency(item.Total_price, 2)))]), _vm._v(" "), _c("select", {
-      directives: [{
-        name: "model",
-        rawName: "v-model",
-        value: item.price_type,
-        expression: "item.price_type"
-      }],
-      staticClass: "form-control ml-2 pos-price-select",
-      on: {
-        change: [function ($event) {
-          var $$selectedVal = Array.prototype.filter.call($event.target.options, function (o) {
-            return o.selected;
-          }).map(function (o) {
-            var val = "_value" in o ? o._value : o.value;
-            return val;
-          });
-          _vm.$set(item, "price_type", $event.target.multiple ? $$selectedVal : $$selectedVal[0]);
-        }, function ($event) {
-          return _vm.onChangePriceType(item);
-        }]
-      }
-    }, [_c("option", {
-      attrs: {
-        value: "retail"
-      }
-    }, [_vm._v(_vm._s(_vm.$t("Retail Price")))]), _vm._v(" "), _c("option", {
-      attrs: {
-        value: "wholesale"
-      }
-    }, [_vm._v(_vm._s(_vm.$t("Wholesale Price")))])])]), _vm._v(" "), _c("div", {
+    }, [_vm._v(_vm._s(_vm.formatPriceWithCurrentCurrency(item.Total_price, 2)))]), _vm._v(" "),  false ? 0 : _vm._e()]), _vm._v(" "), _c("div", {
       staticClass: "item-subtotal"
     }, [_c("span", {
       staticClass: "subtotal-label"
