@@ -2845,7 +2845,7 @@ var render = function render() {
     staticStyle: {
       "text-align": "right"
     }
-  }, [_vm._v("\n                   " + _vm._s(_vm.formatPriceWithSymbol(_vm.invoice_pos.symbol, (_vm.invoiceSubtotal - ((_vm$calculatedManualD = _vm.calculatedManualDiscountAmount) !== null && _vm$calculatedManualD !== void 0 ? _vm$calculatedManualD : 0)) * 0.015, 2)) + " (" + _vm._s(_vm.formatNumber(1.5, 2)) + " %)\n                  ")])]), _vm._v(" "), _c("tr", {
+  }, [_vm._v("\n                   " + _vm._s(_vm.formatPriceWithSymbol(_vm.invoice_pos.symbol, (_vm.invoiceSubtotal - ((_vm$calculatedManualD = _vm.calculatedManualDiscountAmount) !== null && _vm$calculatedManualD !== void 0 ? _vm$calculatedManualD : 0)) * 0.01456, 2)) + " (" + _vm._s(_vm.formatNumber(1.5, 2)) + " %)\n                  ")])]), _vm._v(" "), _c("tr", {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -2865,7 +2865,7 @@ var render = function render() {
     staticStyle: {
       "text-align": "right"
     }
-  }, [_vm._v("\n                    " + _vm._s(_vm.formatPriceWithSymbol(_vm.invoice_pos.symbol, (_vm.invoiceSubtotal - ((_vm$calculatedManualD2 = _vm.calculatedManualDiscountAmount) !== null && _vm$calculatedManualD2 !== void 0 ? _vm$calculatedManualD2 : 0)) * 0.015, 2)) + " (" + _vm._s(_vm.formatNumber(1.5, 2)) + " %)\n                    ")])]), _vm._v(" "), _c("tr", {
+  }, [_vm._v("\n                    " + _vm._s(_vm.formatPriceWithSymbol(_vm.invoice_pos.symbol, (_vm.invoiceSubtotal - ((_vm$calculatedManualD2 = _vm.calculatedManualDiscountAmount) !== null && _vm$calculatedManualD2 !== void 0 ? _vm$calculatedManualD2 : 0)) * 0.01456, 2)) + " (" + _vm._s(_vm.formatNumber(1.5, 2)) + " %)\n                    ")])]), _vm._v(" "), _c("tr", {
     staticStyle: {
       "margin-top": "10px"
     }

@@ -245,6 +245,8 @@ class ClientController extends BaseController
             'is_royalty_eligible' => ['nullable'],
         ]);
 
+         
+
         // Normalize boolean flag from various inputs: '1', 'true', true, etc.
         $isRoyaltyEligible = filter_var($request->input('is_royalty_eligible'), FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
 
@@ -273,11 +275,12 @@ class ClientController extends BaseController
             if ($request->filled('password')) {
                 $payload['password'] = Hash::make($request->input('password'));
             }
-
-            EcommerceClient::updateOrCreate(
-                ['client_id' => $id], // lookup by client_id
-                $payload
-            );
+            
+            
+            // EcommerceClient::updateOrCreate(
+            //     ['client_id' => $id], // lookup by client_id
+            //     $payload
+            // );
         });
 
         return response()->json(['success' => true]);

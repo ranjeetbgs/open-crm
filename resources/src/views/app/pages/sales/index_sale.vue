@@ -781,14 +781,14 @@
                   <tr style="margin-top:10px" v-show="pos_settings.show_tax">
                     <td colspan="3" class="total">{{$t('IGST')}}</td>
                     <td style="text-align:right;" class="total">
-                     {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-(calculatedManualDiscountAmount ?? 0))*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                     {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-(calculatedManualDiscountAmount ?? 0))*0.01456) ,2) }} ({{formatNumber(1.5,2)}} %)
                     </td>
                   </tr>
                   
                   <tr style="margin-top:10px" v-show="pos_settings.show_tax">
                     <td colspan="3" class="total">{{$t('CGST')}}</td>
                     <td style="text-align:right;" class="total">
-                      {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-(calculatedManualDiscountAmount ?? 0))*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-(calculatedManualDiscountAmount ?? 0))*0.01456) ,2) }} ({{formatNumber(1.5,2)}} %)
                       <!-- {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.taxe ,2) }} ({{formatNumber(invoice_pos.sale.tax_rate,2)}} %) -->
                        
                     </td>

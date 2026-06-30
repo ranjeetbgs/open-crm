@@ -327,6 +327,17 @@
           :clearable="true"
           @input="onClientSelected(selectedClientId)"
         />
+
+        <button 
+          class="action-btn-icon btn-new-customer" 
+          @click="Quick_Add_Client" 
+          :title="$t('Quick_Add_Customer')" 
+          v-if="isQuickAddCustomerEnabled && isOnline && !this.selectedClientId"
+        >
+          
+          
+           <i class="i-Add-User" ></i>
+        </button>
       </div>
 
       <!-- Row 5: Search -->
@@ -697,14 +708,14 @@
                     <td colspan="3" class="total">{{$t('IGST')}}</td>
                     <td style="text-align:right;" class="total">
                       
-                     {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                     {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.01456) ,2) }} ({{formatNumber(1.5,2)}} %)
                     </td>
                   </tr>
                   
                   <tr style="margin-top:10px" v-show="pos_settings.show_tax">
                     <td colspan="3" class="total">{{$t('CGST')}}</td>
                     <td style="text-align:right;" class="total">
-                      {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.015) ,2) }} ({{formatNumber(1.5,2)}} %)
+                      {{ formatPriceWithSymbol(invoice_pos.symbol, ((invoiceSubtotal-calculatedManualDiscountAmount)*0.01456) ,2) }} ({{formatNumber(1.5,2)}} %)
                       <!-- {{ formatPriceWithSymbol(invoice_pos.symbol, invoice_pos.sale.taxe ,2) }} ({{formatNumber(invoice_pos.sale.tax_rate,2)}} %) -->
                        
                     </td>
@@ -1442,16 +1453,29 @@
             </b-form-group>
           </b-col>
 
+
           <!-- Customer Phone -->
           <b-col md="6" sm="12">
-            <b-form-group :label="$t('Phone')">
-              <b-form-input
-                label="Phone"
-                v-model="client.phone"
-                :placeholder="$t('Phone')"
-              ></b-form-input>
-            </b-form-group>
+            <validation-provider
+              name="Mobile"
+              :rules="{  required: true,
+    regex: /^[6-9][0-9]{9}$/}"
+              v-slot="validationContext"
+            >
+              <b-form-group :label="$t('Phone') + ' ' + '*'">
+                <b-form-input
+                  :state="getValidationState(validationContext)"
+                  aria-describedby="name-feedback"
+                  label="Phone"
+                  :placeholder="$t('Phone')"
+                  v-model="client.phone"
+                ></b-form-input>
+                <b-form-invalid-feedback id="phone-feedback">{{ validationContext.errors[0] }}</b-form-invalid-feedback>
+              </b-form-group>
+            </validation-provider>
           </b-col>
+
+          
 
           <!-- Customer Country -->
           <b-col md="6" sm="12">
@@ -3746,7 +3770,7 @@ export default {
           this.detail.imei_number = detail.imei_number;
           this.detailLoading = false;
         });
-        console.log(detail);
+        
 
     },
 
@@ -4433,6 +4457,10 @@ export default {
 
       // With unified API, a single call loads both grid and scan lists.
       this.getProducts();
+       localStorage.setItem(
+                'selected_warehouse_id',
+                value
+            );
     },
 
     onOnlineReloadNow() {
@@ -5199,6 +5227,10 @@ export default {
               );
               
               this.$bvModal.hide("Quick_Add_Customer");
+
+              //window.location.reload();
+             // this.GetElementsPos(); 
+
             }
           );
 
@@ -5258,7 +5290,6 @@ export default {
     Quick_Add_Client() {
       this.reset_Form_client();
       this.$bvModal.show("Quick_Add_Customer");
-      console.log(this.client);
     },
     reset_Form_client() {
       this.client = {
@@ -5516,7 +5547,12 @@ export default {
           this.categories = response.data.categories;
           this.brands = response.data.brands;
           this.payment_methods = response.data.payment_methods;
-          this.sale.warehouse_id = response.data.defaultWarehouse;
+          
+          // Set default ware from local storage
+          this.sale.warehouse_id = localStorage.getItem('selected_warehouse_id') ? parseInt(localStorage.getItem('selected_warehouse_id')) : response.data.defaultWarehouse;
+
+
+
           this.selectedClientId = response.data.defaultClient;
           this.client_name = response.data.default_client_name;
           this.clientIsEligible = response.data.default_client_eligible === true || response.data.default_client_eligible === 1;
@@ -6148,6 +6184,7 @@ export default {
     },
   },
   created() {
+
     // Clear cached POS data on page reload when online to avoid stale/outdated data
     // Fresh data will be fetched and cache rebuilt via GetElementsPos()
     // Only clear when online - when offline, preserve cache as it's needed for offline functionality

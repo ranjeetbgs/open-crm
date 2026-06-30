@@ -3335,7 +3335,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     _this19.detail.imei_number = detail.imei_number;
     _this19.detailLoading = false;
   });
-  console.log(detail);
 }), "submit_Update_Detail", function submit_Update_Detail() {
   var _this20 = this;
   for (var i = 0; i < this.details.length; i++) {
@@ -3943,6 +3942,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
   // With unified API, a single call loads both grid and scan lists.
   this.getProducts();
+  localStorage.setItem('selected_warehouse_id', value);
 }), "onOnlineReloadNow", function onOnlineReloadNow() {
   this.onlineReloadModalVisible = false;
   this.onlineReloadAfterSale = false;
@@ -4696,6 +4696,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       _this37.SubmitProcessing = false;
       _this37.makeToast("success", _this37.$t("Successfully_Updated"), _this37.$t("Success"));
       _this37.$bvModal.hide("Quick_Add_Customer");
+
+      //window.location.reload();
+      // this.GetElementsPos(); 
     });else axios.post("clients", _this37.client).then(function (response) {
       var _newClient$client;
       var newClient = response.data;
@@ -4743,7 +4746,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 }), "Quick_Add_Client", function Quick_Add_Client() {
   this.reset_Form_client();
   this.$bvModal.show("Quick_Add_Customer");
-  console.log(this.client);
 }), "reset_Form_client", function reset_Form_client() {
   this.client = {
     id: "",
@@ -5025,7 +5027,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     _this41.categories = response.data.categories;
     _this41.brands = response.data.brands;
     _this41.payment_methods = response.data.payment_methods;
-    _this41.sale.warehouse_id = response.data.defaultWarehouse;
+
+    // Set default ware from local storage
+    _this41.sale.warehouse_id = localStorage.getItem('selected_warehouse_id') ? parseInt(localStorage.getItem('selected_warehouse_id')) : response.data.defaultWarehouse;
     _this41.selectedClientId = response.data.defaultClient;
     _this41.client_name = response.data.default_client_name;
     _this41.clientIsEligible = response.data.default_client_eligible === true || response.data.default_client_eligible === 1;
@@ -7148,7 +7152,17 @@ var render = function render() {
       },
       expression: "selectedClientId"
     }
-  })], 1), _vm._v(" "), _c("div", {
+  }), _vm._v(" "), _vm.isQuickAddCustomerEnabled && _vm.isOnline && !this.selectedClientId ? _c("button", {
+    staticClass: "action-btn-icon btn-new-customer",
+    attrs: {
+      title: _vm.$t("Quick_Add_Customer")
+    },
+    on: {
+      click: _vm.Quick_Add_Client
+    }
+  }, [_c("i", {
+    staticClass: "i-Add-User"
+  })]) : _vm._e()], 1), _vm._v(" "), _c("div", {
     staticClass: "mobile-row"
   }, [_c("div", {
     staticClass: "search-wrapper"
@@ -7947,7 +7961,7 @@ var render = function render() {
     staticStyle: {
       "text-align": "right"
     }
-  }, [_vm._v("\n                      \n                     " + _vm._s(_vm.formatPriceWithSymbol(_vm.invoice_pos.symbol, (_vm.invoiceSubtotal - _vm.calculatedManualDiscountAmount) * 0.015, 2)) + " (" + _vm._s(_vm.formatNumber(1.5, 2)) + " %)\n                    ")])]), _vm._v(" "), _c("tr", {
+  }, [_vm._v("\n                      \n                     " + _vm._s(_vm.formatPriceWithSymbol(_vm.invoice_pos.symbol, (_vm.invoiceSubtotal - _vm.calculatedManualDiscountAmount) * 0.01456, 2)) + " (" + _vm._s(_vm.formatNumber(1.5, 2)) + " %)\n                    ")])]), _vm._v(" "), _c("tr", {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -7967,7 +7981,7 @@ var render = function render() {
     staticStyle: {
       "text-align": "right"
     }
-  }, [_vm._v("\n                      " + _vm._s(_vm.formatPriceWithSymbol(_vm.invoice_pos.symbol, (_vm.invoiceSubtotal - _vm.calculatedManualDiscountAmount) * 0.015, 2)) + " (" + _vm._s(_vm.formatNumber(1.5, 2)) + " %)\n                      ")])]), _vm._v(" "), _c("tr", {
+  }, [_vm._v("\n                      " + _vm._s(_vm.formatPriceWithSymbol(_vm.invoice_pos.symbol, (_vm.invoiceSubtotal - _vm.calculatedManualDiscountAmount) * 0.01456, 2)) + " (" + _vm._s(_vm.formatNumber(1.5, 2)) + " %)\n                      ")])]), _vm._v(" "), _c("tr", {
     staticStyle: {
       "margin-top": "10px"
     }
@@ -9521,23 +9535,43 @@ var render = function render() {
       md: "6",
       sm: "12"
     }
-  }, [_c("b-form-group", {
+  }, [_c("validation-provider", {
     attrs: {
-      label: _vm.$t("Phone")
-    }
-  }, [_c("b-form-input", {
-    attrs: {
-      label: "Phone",
-      placeholder: _vm.$t("Phone")
+      name: "Mobile",
+      rules: {
+        required: true,
+        regex: /^[6-9][0-9]{9}$/
+      }
     },
-    model: {
-      value: _vm.client.phone,
-      callback: function callback($$v) {
-        _vm.$set(_vm.client, "phone", $$v);
-      },
-      expression: "client.phone"
-    }
-  })], 1)], 1), _vm._v(" "), _c("b-col", {
+    scopedSlots: _vm._u([{
+      key: "default",
+      fn: function fn(validationContext) {
+        return [_c("b-form-group", {
+          attrs: {
+            label: _vm.$t("Phone") + " " + "*"
+          }
+        }, [_c("b-form-input", {
+          attrs: {
+            state: _vm.getValidationState(validationContext),
+            "aria-describedby": "name-feedback",
+            label: "Phone",
+            placeholder: _vm.$t("Phone")
+          },
+          model: {
+            value: _vm.client.phone,
+            callback: function callback($$v) {
+              _vm.$set(_vm.client, "phone", $$v);
+            },
+            expression: "client.phone"
+          }
+        }), _vm._v(" "), _c("b-form-invalid-feedback", {
+          attrs: {
+            id: "phone-feedback"
+          }
+        }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
+      }
+    }], null, false, 2614753954)
+  })], 1), _vm._v(" "), _c("b-col", {
     attrs: {
       md: "6",
       sm: "12"

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\Store\NewsletterController;
 use App\Http\Controllers\QuickBooksController;
 use App\Http\Controllers\StoreAuthController;
 use App\Http\Controllers\StoreFrontController;
+use App\Http\Controllers\SalesController;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,9 @@ Route::get('test',function(){
 // return $response->json();
     
 });
+
+
+Route::get('receipt/{uuid}','SalesController@InvoicePdfByUUID');
 
 Route::get('password/find/{token}', 'PasswordResetController@find');
 

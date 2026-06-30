@@ -1298,6 +1298,27 @@ class SalesController extends BaseController
 
     }
 
+    // -------------- Print Invoice ---------------\\
+
+    public function InvoicePdfByUUID(Request $request, $uuid)
+    {
+
+    $sale = Sale::where('sale_uuid', $uuid)
+            ->where('deleted_at', '=', null)
+            ->firstOrFail();
+       
+     $data = $this->Print_Invoice_POS($request, $sale->id)->getData(true);
+
+    //  dd($data);
+      $pdf = Pdf::loadView('pdf.pos_invoice', $data);
+
+      return $pdf->stream('invoice.pdf');
+
+        return $this->Print_Invoice_POS($request, 262);
+
+    }
+
+
     // ------------- GET PAYMENTS SALE -----------\\
 
     public function Payments_Sale(Request $request, $id)
