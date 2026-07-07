@@ -85,7 +85,17 @@
           :clearable="true"
           @search="onCustomerSearch"
           @input="onClientSelected(selectedClientId)"
-        />
+        >
+
+         <template #no-options>
+        <a style="cursor: pointer;"
+            class="add-customer-link"
+            @mousedown.prevent="Quick_Add_Client"
+        >
+            + Add New Customer 
+         </a>
+    </template>
+        </v-select>
         <!-- Add Customer in POS (controlled by quick_add_customer toggle) -->
         <!-- When disabled (0/false): hide all add-customer buttons in POS header -->
         <!-- When enabled (1/true): show Quick Add Customer button only -->
@@ -93,7 +103,7 @@
           class="action-btn-icon btn-new-customer" 
           @click="Quick_Add_Client" 
           :title="$t('Quick_Add_Customer')" 
-          v-if="isQuickAddCustomerEnabled && isOnline && !this.selectedClientId"
+          v-if="isQuickAddCustomerEnabled && isOnline && !this.selectedClientId && 0"
         >
           
           
@@ -326,18 +336,27 @@
           :filter-by="filterCustomerByPhone"
           :clearable="true"
           @input="onClientSelected(selectedClientId)"
-        />
-
-        <button 
-          class="action-btn-icon btn-new-customer" 
-          @click="Quick_Add_Client" 
-          :title="$t('Quick_Add_Customer')" 
-          v-if="isQuickAddCustomerEnabled && isOnline && !this.selectedClientId"
         >
-          
-          
-           <i class="i-Add-User" ></i>
-        </button>
+        <template #no-options>
+        <a
+            class="add-customer-link"
+            @mousedown.prevent="Quick_Add_Client"
+        >
+            + Add New Customer 
+        </a>
+    </template>
+    </v-select>
+
+    <button 
+  class="action-btn-icon btn-edit-customer"
+  v-if="selectedClientId && isOnline"
+  @click="editCustomer"
+  title="Edit Customer"
+>
+  <i class="i-Pen"></i>
+</button>
+
+        
       </div>
 
       <!-- Row 5: Search -->

@@ -6729,6 +6729,24 @@ var render = function render() {
         return _vm.onClientSelected(_vm.selectedClientId);
       }
     },
+    scopedSlots: _vm._u([{
+      key: "no-options",
+      fn: function fn() {
+        return [_c("a", {
+          staticClass: "add-customer-link",
+          staticStyle: {
+            cursor: "pointer"
+          },
+          on: {
+            mousedown: function mousedown($event) {
+              $event.preventDefault();
+              return _vm.Quick_Add_Client.apply(null, arguments);
+            }
+          }
+        }, [_vm._v("\n            + Add New Customer \n         ")])];
+      },
+      proxy: true
+    }], null, false, 670561029),
     model: {
       value: _vm.selectedClientId,
       callback: function callback($$v) {
@@ -6736,17 +6754,7 @@ var render = function render() {
       },
       expression: "selectedClientId"
     }
-  }), _vm._v(" "), _vm.isQuickAddCustomerEnabled && _vm.isOnline && !this.selectedClientId ? _c("button", {
-    staticClass: "action-btn-icon btn-new-customer",
-    attrs: {
-      title: _vm.$t("Quick_Add_Customer")
-    },
-    on: {
-      click: _vm.Quick_Add_Client
-    }
-  }, [_c("i", {
-    staticClass: "i-Add-User"
-  })]) : _vm._e(), _vm._v(" "), _vm.selectedClientId && _vm.isOnline ? _c("button", {
+  }), _vm._v(" "), _vm.isQuickAddCustomerEnabled && _vm.isOnline && !this.selectedClientId && 0 ? 0 : _vm._e(), _vm._v(" "), _vm.selectedClientId && _vm.isOnline ? _c("button", {
     staticClass: "action-btn-icon btn-edit-customer",
     attrs: {
       title: "Edit Customer"
@@ -7145,6 +7153,21 @@ var render = function render() {
         return _vm.onClientSelected(_vm.selectedClientId);
       }
     },
+    scopedSlots: _vm._u([{
+      key: "no-options",
+      fn: function fn() {
+        return [_c("a", {
+          staticClass: "add-customer-link",
+          on: {
+            mousedown: function mousedown($event) {
+              $event.preventDefault();
+              return _vm.Quick_Add_Client.apply(null, arguments);
+            }
+          }
+        }, [_vm._v("\n            + Add New Customer \n        ")])];
+      },
+      proxy: true
+    }], null, false, 232205969),
     model: {
       value: _vm.selectedClientId,
       callback: function callback($$v) {
@@ -7152,16 +7175,16 @@ var render = function render() {
       },
       expression: "selectedClientId"
     }
-  }), _vm._v(" "), _vm.isQuickAddCustomerEnabled && _vm.isOnline && !this.selectedClientId ? _c("button", {
-    staticClass: "action-btn-icon btn-new-customer",
+  }), _vm._v(" "), _vm.selectedClientId && _vm.isOnline ? _c("button", {
+    staticClass: "action-btn-icon btn-edit-customer",
     attrs: {
-      title: _vm.$t("Quick_Add_Customer")
+      title: "Edit Customer"
     },
     on: {
-      click: _vm.Quick_Add_Client
+      click: _vm.editCustomer
     }
   }, [_c("i", {
-    staticClass: "i-Add-User"
+    staticClass: "i-Pen"
   })]) : _vm._e()], 1), _vm._v(" "), _c("div", {
     staticClass: "mobile-row"
   }, [_c("div", {
