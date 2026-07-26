@@ -261,7 +261,18 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       if (this.details.length > 0 && this.details.some(function (detail) {
         return detail.code === result.code;
       })) {
-        this.makeToast("warning", this.$t("AlreadyAdd"), this.$t("Warning"));
+        var detail = this.details.find(function (d) {
+          return d.code === result.code;
+        });
+        if (detail.quantity < detail.stock) {
+          detail.quantity++;
+          this.Calcul_Total();
+          this.$forceUpdate();
+        } else {
+          this.makeToast("warning", this.$t("LowStock"), this.$t("Warning"));
+        }
+
+        // this.makeToast("warning", this.$t("AlreadyAdd"), this.$t("Warning"));
       } else {
         this.product.code = result.code;
         this.product.stock = result.qte_purchase;

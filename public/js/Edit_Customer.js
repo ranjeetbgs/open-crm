@@ -245,6 +245,7 @@ __webpack_require__.r(__webpack_exports__);
         city: "",
         adresse: "",
         is_royalty_eligible: "",
+        card_number: "",
         credit_limit: 0
       }
     };
@@ -274,6 +275,7 @@ __webpack_require__.r(__webpack_exports__);
         city: this.client.city,
         adresse: this.client.adresse,
         is_royalty_eligible: this.client.is_royalty_eligible,
+        card_number: this.client.card_number,
         credit_limit: parseFloat(this.client.credit_limit) || 0
       }).then(function (response) {
         // Save custom field values if any
@@ -513,6 +515,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   staticRenderFns: () => (/* binding */ staticRenderFns)
 /* harmony export */ });
 var render = function render() {
+  var _vm$client;
   var _vm = this,
     _c = _vm._self._c;
   return _c("div", {
@@ -582,7 +585,7 @@ var render = function render() {
     attrs: {
       name: "Email",
       rules: {
-        required: true
+        required: false
       }
     },
     scopedSlots: _vm._u([{
@@ -590,7 +593,7 @@ var render = function render() {
       fn: function fn(validationContext) {
         return [_c("b-form-group", {
           attrs: {
-            label: _vm.$t("Email") + " " + "*"
+            label: _vm.$t("Email")
           }
         }, [_c("b-form-input", {
           attrs: {
@@ -612,7 +615,7 @@ var render = function render() {
           }
         }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
       }
-    }], null, false, 2958191321)
+    }], null, false, 2784783123)
   })], 1), _vm._v(" "), _c("b-col", {
     attrs: {
       md: "6",
@@ -799,7 +802,28 @@ var render = function render() {
     attrs: {
       "for": "is_royalty_eligible"
     }
-  }, [_c("h5", [_vm._v(_vm._s(_vm.$t("Is_Royalty_Eligible")))])])])]), _vm._v(" "), _vm.client.id ? _c("b-col", {
+  }, [_c("h5", [_vm._v(_vm._s(_vm.$t("Is_Royalty_Eligible")))])])])]), _vm._v(" "), (_vm$client = _vm.client) !== null && _vm$client !== void 0 && _vm$client.is_royalty_eligible ? _c("b-col", {
+    attrs: {
+      md: "6",
+      sm: "12"
+    }
+  }, [_c("b-form-group", {
+    attrs: {
+      label: _vm.$t("Card_Number")
+    }
+  }, [_c("b-form-input", {
+    attrs: {
+      label: "Card Number",
+      placeholder: _vm.$t("Card_Number")
+    },
+    model: {
+      value: _vm.client.card_number,
+      callback: function callback($$v) {
+        _vm.$set(_vm.client, "card_number", $$v);
+      },
+      expression: "client.card_number"
+    }
+  })], 1)], 1) : _vm._e(), _vm._v(" "), _vm.client.id ? _c("b-col", {
     staticClass: "mt-4",
     attrs: {
       md: "12",

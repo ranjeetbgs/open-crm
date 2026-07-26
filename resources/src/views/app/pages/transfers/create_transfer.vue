@@ -759,11 +759,24 @@ export default {
 
     SearchProduct(result) {
       this.product = {};
-      if (
+      if ( 
         this.details.length > 0 &&
         this.details.some(detail => detail.code === result.code)
       ) {
-        this.makeToast("warning", this.$t("AlreadyAdd"), this.$t("Warning"));
+      const detail = this.details.find(d => d.code === result.code);
+          if (detail.quantity < detail.stock) {
+        detail.quantity++;
+        this.Calcul_Total();
+        this.$forceUpdate();
+    } else {
+        this.makeToast(
+            "warning",
+            this.$t("LowStock"),
+            this.$t("Warning")
+        );
+    }
+
+       // this.makeToast("warning", this.$t("AlreadyAdd"), this.$t("Warning"));
       } else {
         this.product.code = result.code;
         this.product.stock = result.qte_purchase;

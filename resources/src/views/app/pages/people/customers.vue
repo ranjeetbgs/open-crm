@@ -975,12 +975,7 @@ export default {
           thClass: "text-left",
           sortable: false
         },
-        {
-          label: this.$t("Code"),
-          field: "code",
-          tdClass: "text-left",
-          thClass: "text-left"
-        },
+       
         {
           label: this.$t("Name"),
           field: "name",
@@ -994,12 +989,7 @@ export default {
           tdClass: "text-left",
           thClass: "text-left"
         },
-        {
-          label: this.$t("Email"),
-          field: "email",
-          tdClass: "text-left",
-          thClass: "text-left"
-        },
+      
         {
           label: this.$t("Points"),
           field: "points",

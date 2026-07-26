@@ -153,11 +153,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         thClass: "text-left",
         sortable: false
       }, {
-        label: this.$t("Code"),
-        field: "code",
-        tdClass: "text-left",
-        thClass: "text-left"
-      }, {
         label: this.$t("Name"),
         field: "name",
         tdClass: "text-left",
@@ -165,11 +160,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       }, {
         label: this.$t("Phone"),
         field: "phone",
-        tdClass: "text-left",
-        thClass: "text-left"
-      }, {
-        label: this.$t("Email"),
-        field: "email",
         tdClass: "text-left",
         thClass: "text-left"
       }, {

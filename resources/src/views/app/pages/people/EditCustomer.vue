@@ -32,10 +32,10 @@
             <b-col md="6" sm="12">
               <validation-provider
                 name="Email"
-                :rules="{ required: true }"
+                :rules="{ required: false }"
                 v-slot="validationContext"
               >
-                <b-form-group :label="$t('Email') + ' ' + '*'">
+                <b-form-group :label="$t('Email')">
                   <b-form-input
                     :state="getValidationState(validationContext)"
                     aria-describedby="email-feedback"
@@ -128,6 +128,18 @@
               </div>
             </b-col>
 
+
+            <!-- Customer Card Number -->
+          <b-col md="6" sm="12" v-if="client?.is_royalty_eligible">
+            <b-form-group :label="$t('Card_Number')">
+              <b-form-input
+                label="Card Number"
+                v-model="client.card_number"
+                :placeholder="$t('Card_Number')"
+              ></b-form-input>
+            </b-form-group>
+          </b-col>
+
             <!-- Custom Fields -->
             <b-col md="12" sm="12" class="mt-4" v-if="client.id">
               <CustomFieldsForm
@@ -178,6 +190,7 @@ export default {
         city: "",
         adresse: "",
         is_royalty_eligible: "",
+        card_number:"",
         credit_limit: 0,
       },
     };
@@ -212,6 +225,7 @@ export default {
           city: this.client.city,
           adresse: this.client.adresse,
           is_royalty_eligible: this.client.is_royalty_eligible,
+          card_number:this.client.card_number,
           credit_limit: parseFloat(this.client.credit_limit) || 0
         })
         .then(response => {
