@@ -92,29 +92,7 @@
                 </b-form-group>
             </b-col>
 
-            <!-- Country -->
-            <b-col md="6">
-                <b-form-group :label="$t('Country')">
-                  <b-form-input
-                    :placeholder="$t('Enter_Country_Warehouse')"
-                    label="Country"
-                    v-model="warehouse.country"
-                  ></b-form-input>
-                </b-form-group>
-            </b-col>
-
-            <!-- City -->
-            <b-col md="6">
-                <b-form-group :label="$t('City')">
-                  <b-form-input
-                    :placeholder="$t('Enter_City_Warehouse')"
-                    label="City"
-                    v-model="warehouse.city"
-                  ></b-form-input>
-                </b-form-group>
-            </b-col>
-
-            <!-- Email -->
+             <!-- Email -->
             <b-col md="6">
               <b-form-group :label="$t('Email')">
                 <b-form-input
@@ -124,17 +102,24 @@
                 ></b-form-input>
               </b-form-group>
             </b-col>
+           
 
-            <!-- Zip Code -->
+            <!-- City -->
             <b-col md="6">
-              <b-form-group :label="$t('ZipCode')">
-                <b-form-input
-                  :placeholder="$t('Enter_ZipCode_Warehouse')"
-                  label="ZipCode"
-                  v-model="warehouse.zip"
-                ></b-form-input>
-              </b-form-group>
+                <b-form-group :label="$t('Address')">
+                   <b-form-textarea
+      v-model="warehouse.city"
+      :placeholder="$t('Enter_Address')"
+      rows="3"
+      max-rows="6"
+    ></b-form-textarea>
+                  
+                </b-form-group>
             </b-col>
+
+           
+
+            
 
             <b-col md="12" class="mt-3">
                 <b-button variant="primary" type="submit"  :disabled="SubmitProcessing"><i class="i-Yes me-2 font-weight-bold"></i> {{$t('submit')}}</b-button>
@@ -203,14 +188,9 @@ export default {
           tdClass: "text-left",
           thClass: "text-left"
         },
+        
         {
-          label: this.$t("Country"),
-          field: "country",
-          tdClass: "text-left",
-          thClass: "text-left"
-        },
-        {
-          label: this.$t("City"),
+          label: this.$t("Address"),
           field: "city",
           tdClass: "text-left",
           thClass: "text-left"
@@ -221,12 +201,7 @@ export default {
           tdClass: "text-left",
           thClass: "text-left"
         },
-        {
-          label: this.$t("ZipCode"),
-          field: "zip",
-          tdClass: "text-left",
-          thClass: "text-left"
-        },
+        
         {
           label: this.$t("Action"),
           field: "actions",

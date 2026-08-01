@@ -61,23 +61,13 @@ __webpack_require__.r(__webpack_exports__);
         tdClass: "text-left",
         thClass: "text-left"
       }, {
-        label: this.$t("Country"),
-        field: "country",
-        tdClass: "text-left",
-        thClass: "text-left"
-      }, {
-        label: this.$t("City"),
+        label: this.$t("Address"),
         field: "city",
         tdClass: "text-left",
         thClass: "text-left"
       }, {
         label: this.$t("Email"),
         field: "email",
-        tdClass: "text-left",
-        thClass: "text-left"
-      }, {
-        label: this.$t("ZipCode"),
-        field: "zip",
         tdClass: "text-left",
         thClass: "text-left"
       }, {
@@ -542,46 +532,6 @@ var render = function render() {
     }
   }, [_c("b-form-group", {
     attrs: {
-      label: _vm.$t("Country")
-    }
-  }, [_c("b-form-input", {
-    attrs: {
-      placeholder: _vm.$t("Enter_Country_Warehouse"),
-      label: "Country"
-    },
-    model: {
-      value: _vm.warehouse.country,
-      callback: function callback($$v) {
-        _vm.$set(_vm.warehouse, "country", $$v);
-      },
-      expression: "warehouse.country"
-    }
-  })], 1)], 1), _vm._v(" "), _c("b-col", {
-    attrs: {
-      md: "6"
-    }
-  }, [_c("b-form-group", {
-    attrs: {
-      label: _vm.$t("City")
-    }
-  }, [_c("b-form-input", {
-    attrs: {
-      placeholder: _vm.$t("Enter_City_Warehouse"),
-      label: "City"
-    },
-    model: {
-      value: _vm.warehouse.city,
-      callback: function callback($$v) {
-        _vm.$set(_vm.warehouse, "city", $$v);
-      },
-      expression: "warehouse.city"
-    }
-  })], 1)], 1), _vm._v(" "), _c("b-col", {
-    attrs: {
-      md: "6"
-    }
-  }, [_c("b-form-group", {
-    attrs: {
       label: _vm.$t("Email")
     }
   }, [_c("b-form-input", {
@@ -602,19 +552,20 @@ var render = function render() {
     }
   }, [_c("b-form-group", {
     attrs: {
-      label: _vm.$t("ZipCode")
+      label: _vm.$t("Address")
     }
-  }, [_c("b-form-input", {
+  }, [_c("b-form-textarea", {
     attrs: {
-      placeholder: _vm.$t("Enter_ZipCode_Warehouse"),
-      label: "ZipCode"
+      placeholder: _vm.$t("Enter_Address"),
+      rows: "3",
+      "max-rows": "6"
     },
     model: {
-      value: _vm.warehouse.zip,
+      value: _vm.warehouse.city,
       callback: function callback($$v) {
-        _vm.$set(_vm.warehouse, "zip", $$v);
+        _vm.$set(_vm.warehouse, "city", $$v);
       },
-      expression: "warehouse.zip"
+      expression: "warehouse.city"
     }
   })], 1)], 1), _vm._v(" "), _c("b-col", {
     staticClass: "mt-3",

@@ -6569,7 +6569,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   staticRenderFns: () => (/* binding */ staticRenderFns)
 /* harmony export */ });
 var render = function render() {
-  var _vm$currentClient, _vm$client;
+  var _vm$currentClient, _vm$invoice_pos$sale, _vm$invoice_pos$sale2, _vm$invoice_pos$sale3, _vm$client;
   var _vm = this,
     _c = _vm._self._c;
   return _c("div", {
@@ -7814,7 +7814,7 @@ var render = function render() {
       value: _vm.pos_settings.show_store_name !== 0,
       expression: "pos_settings.show_store_name !== 0"
     }]
-  }, [_c("strong", [_vm._v(_vm._s(_vm.invoice_pos.setting.CompanyName))]), _c("br")]), _vm._v(" "), _vm.invoice_pos.sale && _vm.invoice_pos.sale.Ref && _vm.pos_settings.show_reference !== 0 ? _c("span", [_vm._v(_vm._s(_vm.$t("Reference")) + " : " + _vm._s(_vm.invoice_pos.sale.Ref) + " "), _c("br")]) : _vm._e(), _vm._v(" "), _c("span", {
+  }, [_c("center", [_c("strong", [_vm._v(_vm._s(_vm.invoice_pos.setting.CompanyName))])]), _c("br")], 1), _vm._v(" "), _c("span", [_c("center", [_c("strong", [_vm._v("TAX INVOICE")])]), _c("br")], 1), _vm._v(" "), _vm.invoice_pos.sale && _vm.invoice_pos.sale.Ref && _vm.pos_settings.show_reference !== 0 ? _c("span", [_vm._v(_vm._s(_vm.$t("Invoice No")) + " : " + _vm._s(_vm.invoice_pos.sale.Ref) + " "), _c("br")]) : _vm._e(), _vm._v(" "), _c("span", {
     directives: [{
       name: "show",
       rawName: "v-show",
@@ -7835,35 +7835,32 @@ var render = function render() {
       value: _vm.pos_settings.show_address,
       expression: "pos_settings.show_address"
     }]
-  }, [_vm._v(_vm._s(_vm.$t("Adress")) + " : " + _vm._s(_vm.invoice_pos.setting.CompanyAdress) + " "), _c("br")]), _vm._v(" "), _c("span", {
+  }, [_vm._v(_vm._s(_vm.$t("Adress")) + " : " + _vm._s((_vm$invoice_pos$sale = _vm.invoice_pos.sale) === null || _vm$invoice_pos$sale === void 0 || (_vm$invoice_pos$sale = _vm$invoice_pos$sale.warehouse) === null || _vm$invoice_pos$sale === void 0 ? void 0 : _vm$invoice_pos$sale.city) + " "), _c("br")]), _vm._v(" "), _c("span", {
     directives: [{
       name: "show",
       rawName: "v-show",
       value: _vm.pos_settings.show_email,
       expression: "pos_settings.show_email"
     }]
-  }, [_vm._v(_vm._s(_vm.$t("Email")) + " : " + _vm._s(_vm.invoice_pos.setting.email) + " "), _c("br")]), _vm._v(" "), _c("span", {
+  }, [_vm._v(_vm._s(_vm.$t("Email")) + " : "), _c("span", {
+    staticStyle: {
+      "text-transform": "lowercase"
+    }
+  }, [_vm._v(_vm._s((_vm$invoice_pos$sale2 = _vm.invoice_pos.sale) === null || _vm$invoice_pos$sale2 === void 0 || (_vm$invoice_pos$sale2 = _vm$invoice_pos$sale2.warehouse) === null || _vm$invoice_pos$sale2 === void 0 ? void 0 : _vm$invoice_pos$sale2.email) + " ")]), _c("br")]), _vm._v(" "), _c("span", {
     directives: [{
       name: "show",
       rawName: "v-show",
       value: _vm.pos_settings.show_phone,
       expression: "pos_settings.show_phone"
     }]
-  }, [_vm._v(_vm._s(_vm.$t("Phone")) + " : " + _vm._s(_vm.invoice_pos.setting.CompanyPhone) + " "), _c("br")]), _vm._v(" "), _c("span", {
+  }, [_vm._v(_vm._s(_vm.$t("Phone")) + " : " + _vm._s((_vm$invoice_pos$sale3 = _vm.invoice_pos.sale) === null || _vm$invoice_pos$sale3 === void 0 || (_vm$invoice_pos$sale3 = _vm$invoice_pos$sale3.warehouse) === null || _vm$invoice_pos$sale3 === void 0 ? void 0 : _vm$invoice_pos$sale3.mobile) + " "), _c("br")]), _vm._v(" "), _c("span", {
     directives: [{
       name: "show",
       rawName: "v-show",
       value: _vm.pos_settings.show_customer,
       expression: "pos_settings.show_customer"
     }]
-  }, [_vm._v(_vm._s(_vm.$t("Customer")) + " : " + _vm._s(_vm.invoice_pos.sale.client_name) + " "), _c("br")]), _vm._v(" "), _c("span", {
-    directives: [{
-      name: "show",
-      rawName: "v-show",
-      value: _vm.pos_settings.show_Warehouse,
-      expression: "pos_settings.show_Warehouse"
-    }]
-  }, [_vm._v(_vm._s(_vm.$t("warehouse")) + " : " + _vm._s(_vm.invoice_pos.sale.warehouse_name) + " "), _c("br")])])]), _vm._v(" "), _c("table", {
+  }, [_vm._v(_vm._s(_vm.$t("Customer")) + " : " + _vm._s(_vm.invoice_pos.sale.client_name) + " "), _c("br")])])]), _vm._v(" "), _c("table", {
     staticClass: "table_data",
     staticStyle: {
       width: "100%"
@@ -7873,7 +7870,11 @@ var render = function render() {
       attrs: {
         colspan: "3"
       }
-    }, [_vm._v("\n                      " + _vm._s(detail_invoice.name) + "\n                      "), _c("br", {
+    }, [_vm._v("\n                      " + _vm._s(detail_invoice.name) + " (" + _vm._s(detail_invoice.code) + ")\n                      "), _c("br"), _vm._v(" "), _c("span", {
+      staticStyle: {
+        "font-size": "smaller"
+      }
+    }, [_vm._v(_vm._s(detail_invoice.guarantee))]), _vm._v(" "), _c("br", {
       directives: [{
         name: "show",
         rawName: "v-show",

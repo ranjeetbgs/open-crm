@@ -1224,6 +1224,7 @@ class SalesController extends BaseController
         $item['tax_rate'] = $sale->tax_rate;
         $item['client_name'] = $sale['client']->name;
         $item['warehouse_name'] = $sale['warehouse']->name;
+         $item['warehouse'] = $sale['warehouse'];
         $item['seller_name'] = $sale['user']->username;
         $item['GrandTotal'] = number_format($sale->GrandTotal, 2, '.', '');
         $item['paid_amount'] = number_format($sale->paid_amount, 2, '.', '');
@@ -1263,6 +1264,12 @@ class SalesController extends BaseController
 
             $data['is_imei'] = $detail['product']['is_imei'];
             $data['imei_number'] = $detail->imei_number;
+            $data['guarantee'] = "No Guarantee";
+
+            if($detail->product->has_guarantee)
+                {
+                    $data['guarantee'] = $detail->product->guarantee_period ."". strtoupper($detail->product->guarantee_unit)[0]." Guarantee" ;
+                }
 
             $details[] = $data;
         }
