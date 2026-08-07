@@ -144,6 +144,15 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     }
   }),
   methods: {
+    //------------------------------- set product cost || 35% of retail price -------------------------\\
+    updateProductCost: function updateProductCost(value) {
+      var retailPrice = parseFloat(value);
+      if (!isNaN(retailPrice) && retailPrice >= 0) {
+        this.product.cost = (retailPrice * 0.35).toFixed(2);
+      } else {
+        this.product.cost = "";
+      }
+    },
     //------------------------------Formetted Numbers -------------------------\\
     formatNumber: function formatNumber(number, dec) {
       var value = (typeof number === "string" ? number : number.toString()).split(".");
@@ -2359,6 +2368,9 @@ var render = function render() {
             label: "Price",
             placeholder: _vm.$t("Enter_Product_Price")
           },
+          on: {
+            input: _vm.updateProductCost
+          },
           model: {
             value: _vm.product.price,
             callback: function callback($$v) {
@@ -2372,7 +2384,7 @@ var render = function render() {
           }
         }, [_vm._v(_vm._s(validationContext.errors[0]))])], 1)];
       }
-    }], null, false, 1704638084)
+    }], null, false, 169237608)
   })], 1) : _vm._e(), _vm._v(" "), _vm.product.type == "is_single" || _vm.product.type == "is_service" || _vm.product.type == "is_combo" ? _c("b-col", {
     staticClass: "mb-2",
     attrs: {
