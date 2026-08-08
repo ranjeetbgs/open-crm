@@ -73,16 +73,15 @@
                                     
                                 
                                 </div>
-                                <p><span><strong>Trinkly</strong><br></span> <span>
-                                        Reference : {{$sale['Ref']}}<br></span> <span>
-                                        Date : {{$sale['date']}}<br></span> <span style="display: none;">
-                                        Seller : Trinkly Admin<br></span> <span>
-                                        Address : {{$setting['CompanyAdress']}}<br></span>
+                                <p><span><center><strong>Trinkly</strong><br></span> <span>
+                                    <span><strong>TAX INVOICE</strong></center><br></span>
+                                        Invoice No : {{$sale['Ref']}}<br></span> <span>
+                                        Date : {{$sale['date']}}<br></span>
+                                         <span>Address : {{$sale["warehouse"]["city"]}}<br></span>
                                     <span>
-                                        Email : {{$setting['email']}}<br></span> <span>
-                                        Phone : {{$setting['CompanyPhone']}}<br></span> <span>
-                                        Customer : {{$sale['client_name']}}<br></span> <span>
-                                        Warehouse : {{$sale['warehouse_name']}}<br></span></p>
+                                        Email : {{$sale["warehouse"]['email']}}<br></span> <span>
+                                        Phone : {{$sale["warehouse"]['mobile']}}<br></span> <span>
+                                        Customer : {{$sale['client_name']}}<br></span> </p>
                             </div>
                             <table class="table_data" style="width: 100%; margin-top:20px">
                                 <tbody>
@@ -90,8 +89,9 @@
                                 @foreach ($details as $item)
                                     <tr style="border-bottom:1px dashed #333333; margin-bottom:20px">
                                         <td colspan="3">
-                                            {{$item['name']}}
+                                            {{$item['name']}} ({{$item['code']}})
                                             <br style="display: none;">
+                                             <span style="font-size: smaller;">{{$item['guarantee']}}</span>
                                             <br> <span>{{$item['quantity']}} {{$item['unit_sale']}} X {{$item['total']}}</span>
                                         </td>
                                         <td style="text-align: right; vertical-align: bottom;">

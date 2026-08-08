@@ -1264,7 +1264,7 @@ class SalesController extends BaseController
 
             $data['is_imei'] = $detail['product']['is_imei'];
             $data['imei_number'] = $detail->imei_number;
-            $data['guarantee'] = "No Guarantee";
+            $data['guarantee'] = "";
 
             if($detail->product->has_guarantee)
                 {
