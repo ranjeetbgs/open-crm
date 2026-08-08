@@ -692,11 +692,12 @@
                 >
               </div>
               <p>
-                <span v-show="pos_settings.show_store_name !== 0">
-                  <strong>{{invoice_pos.setting.CompanyName}}</strong><br>
-                </span>
+                
+               <span v-show="pos_settings.show_store_name !== 0"><center><strong>{{invoice_pos.setting.CompanyName}}</strong></center><br></span>
+                   <span><center><strong>TAX INVOICE</strong></center><br></span>
+               
                 <span v-if="invoice_pos.sale && invoice_pos.sale.Ref && pos_settings.show_reference !== 0">
-                  {{$t('Reference')}} : {{invoice_pos.sale.Ref}}<br>
+                  {{$t('Invoice No')}} : {{invoice_pos.sale.Ref}}<br>
                 </span>
                 <span v-show="pos_settings.show_date !== 0">
                   {{$t('date')}} : {{invoice_pos.sale.date}}<br>
@@ -704,21 +705,12 @@
                 <span v-show="pos_settings.show_seller !== 0">
                   {{$t('Seller')}} : {{invoice_pos.sale.seller_name}}<br>
                 </span>
-                <span v-show="pos_settings.show_address">
-                  {{$t('Adress')}} : {{invoice_pos.setting.CompanyAdress}}<br>
-                </span>
-                <span v-show="pos_settings.show_email">
-                  {{$t('Email')}} : {{invoice_pos.setting.email}}<br>
-                </span>
-                <span v-show="pos_settings.show_phone">
-                  {{$t('Phone')}} : {{invoice_pos.setting.CompanyPhone}}<br>
-                </span>
-                <span v-show="pos_settings.show_customer">
-                  {{$t('Customer')}} : {{invoice_pos.sale.client_name}}<br>
-                </span>
-                <span v-show="pos_settings.show_Warehouse">
-                  {{$t('warehouse')}} : {{invoice_pos.sale.warehouse_name}}<br>
-                </span>
+               
+                  <span v-show="pos_settings.show_address">{{$t('Adress')}} : {{invoice_pos.sale?.warehouse?.city}} <br></span>
+                
+                <span v-show="pos_settings.show_email">{{$t('Email')}} : <span style="text-transform: lowercase;">{{invoice_pos.sale?.warehouse?.email}} </span><br></span>
+                  <span v-show="pos_settings.show_phone">{{$t('Phone')}} : {{invoice_pos.sale?.warehouse?.mobile}} <br></span>
+                  <span v-show="pos_settings.show_customer">{{$t('Customer')}} : {{invoice_pos.sale.client_name}} <br></span>
               </p>
             </div>
 
@@ -726,7 +718,9 @@
                 <tbody>
                   <tr v-for="detail_invoice in invoice_pos.details">
                     <td colspan="3">
-                      {{detail_invoice.name}}
+                      {{detail_invoice.name}} ({{detail_invoice.code}})
+                      <br/>
+                      <span style="font-size: smaller;">{{detail_invoice.guarantee}}</span>
                       <br v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null">
                       <span v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null ">{{$t('IMEI_SN')}} : {{detail_invoice.imei_number}}</span>
                       <br>
