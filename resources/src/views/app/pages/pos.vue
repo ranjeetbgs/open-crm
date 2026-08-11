@@ -5248,8 +5248,8 @@ export default {
               
               this.$bvModal.hide("Quick_Add_Customer");
 
-              //window.location.reload();
-             // this.GetElementsPos(); 
+              window.location.reload();
+             this.GetElementsPos(); 
 
             }
           );
@@ -5280,10 +5280,12 @@ export default {
                 this.$t("Successfully_Created"),
                 this.$t("Success")
               );
-              this.Get_Client_Without_Paginate();
-              this.$bvModal.hide("Quick_Add_Customer");
-              this.reset_Form_client();
-              this.quickAddCustomFieldValues = {};
+              window.location.reload();
+             this.GetElementsPos(); 
+              // this.Get_Client_Without_Paginate();
+              // this.$bvModal.hide("Quick_Add_Customer");
+              // this.reset_Form_client();
+              // this.quickAddCustomFieldValues = {};
             };
 
             if (hasCustoms) {

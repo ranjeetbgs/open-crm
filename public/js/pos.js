@@ -4696,9 +4696,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       _this37.SubmitProcessing = false;
       _this37.makeToast("success", _this37.$t("Successfully_Updated"), _this37.$t("Success"));
       _this37.$bvModal.hide("Quick_Add_Customer");
-
-      //window.location.reload();
-      // this.GetElementsPos(); 
+      window.location.reload();
+      _this37.GetElementsPos();
     });else axios.post("clients", _this37.client).then(function (response) {
       var _newClient$client;
       var newClient = response.data;
@@ -4718,10 +4717,12 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         _this37.client_name = newClient.name;
         _this37.onClientSelected(newClient.id);
         _this37.makeToast("success", _this37.$t("Successfully_Created"), _this37.$t("Success"));
-        _this37.Get_Client_Without_Paginate();
-        _this37.$bvModal.hide("Quick_Add_Customer");
-        _this37.reset_Form_client();
-        _this37.quickAddCustomFieldValues = {};
+        window.location.reload();
+        _this37.GetElementsPos();
+        // this.Get_Client_Without_Paginate();
+        // this.$bvModal.hide("Quick_Add_Customer");
+        // this.reset_Form_client();
+        // this.quickAddCustomFieldValues = {};
       };
       if (hasCustoms) {
         axios.post("custom-field-values", {

@@ -146,6 +146,7 @@
                 <b-dropdown-item title="PDF" @click="Invoice_PDF(props.row , props.row.id)">
                   <i class="nav-icon i-File-TXT font-weight-bold mr-2"></i>
                   {{$t('DownloadPdf')}}
+                  {{ props.row }}
                 </b-dropdown-item>
 
                 <b-dropdown-item title=" WhatsApp Notification" @click="Send_WhatsApp(props.row.id)">
