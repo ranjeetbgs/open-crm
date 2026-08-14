@@ -4662,20 +4662,44 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     city: this.client.city,
     adresse: this.client.adresse,
     is_royalty_eligible: this.client.is_royalty_eligible
-  }).then(function (response) {
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-    var newClient = response.data;
-    _this36.clients.push({
-      id: newClient.id,
-      name: newClient.name
-    });
-    _this36.selectedClientId = newClient.id;
-    _this36.client_name = newClient.name;
-    _this36.onClientSelected(newClient.id);
-    _this36.makeToast("success", _this36.$t("Successfully_Created"), _this36.$t("Success"));
-    _this36.Get_Client_Without_Paginate();
-    _this36.$bvModal.hide("New_Customer");
-  })["catch"](function () {
+  }).then(/*#__PURE__*/function () {
+    var _ref8 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(response) {
+      var newClient, newCustomer;
+      return _regenerator().w(function (_context10) {
+        while (1) switch (_context10.n) {
+          case 0:
+            nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+            newClient = response.data;
+            newCustomer = {
+              id: Number(newClient.id),
+              name: newClient.name,
+              phone: newClient.phone || '',
+              email: newClient.email || ''
+            }; // Add new customer
+            _this36.clients.push(newCustomer);
+
+            // Select new customer
+            _this36.selectedClientId = newCustomer.id;
+            _this36.client_name = newCustomer.name;
+
+            // Load customer details
+            _context10.n = 1;
+            return _this36.onClientSelected(newCustomer.id);
+          case 1:
+            _context10.n = 2;
+            return _this36.$nextTick();
+          case 2:
+            _this36.makeToast("success", _this36.$t("Successfully_Created"), _this36.$t("Success"));
+            _this36.$bvModal.hide("New_Customer");
+          case 3:
+            return _context10.a(2);
+        }
+      }, _callee10);
+    }));
+    return function (_x2) {
+      return _ref8.apply(this, arguments);
+    };
+  }())["catch"](function () {
     nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
     _this36.makeToast("danger", _this36.$t("InvalidData"), _this36.$t("Failed"));
   });
@@ -4696,34 +4720,64 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       _this37.SubmitProcessing = false;
       _this37.makeToast("success", _this37.$t("Successfully_Updated"), _this37.$t("Success"));
       _this37.$bvModal.hide("Quick_Add_Customer");
-      window.location.reload();
-      _this37.GetElementsPos();
+
+      //window.location.reload();
+      // this.GetElementsPos(); 
     });else axios.post("clients", _this37.client).then(function (response) {
       var _newClient$client;
       var newClient = response.data;
 
       // If there are custom field values from the quick-add form, persist them
-      var clientId = newClient.id || ((_newClient$client = newClient.client) === null || _newClient$client === void 0 ? void 0 : _newClient$client.id);
+      var clientId = Number(newClient.id) || Number((_newClient$client = newClient.client) === null || _newClient$client === void 0 ? void 0 : _newClient$client.id);
       var hasCustoms = clientId && _this37.quickAddCustomFieldValues && Object.keys(_this37.quickAddCustomFieldValues).length > 0;
-      var afterCustoms = function afterCustoms() {
-        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-        _this37.SubmitProcessing = false;
-        _this37.clients.push({
-          id: newClient.id,
-          name: newClient.name,
-          phone: newClient.phone || ''
-        });
-        _this37.selectedClientId = newClient.id;
-        _this37.client_name = newClient.name;
-        _this37.onClientSelected(newClient.id);
-        _this37.makeToast("success", _this37.$t("Successfully_Created"), _this37.$t("Success"));
-        window.location.reload();
-        _this37.GetElementsPos();
-        // this.Get_Client_Without_Paginate();
-        // this.$bvModal.hide("Quick_Add_Customer");
-        // this.reset_Form_client();
-        // this.quickAddCustomFieldValues = {};
-      };
+      var afterCustoms = /*#__PURE__*/function () {
+        var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11() {
+          var newCustomer, existingIndex;
+          return _regenerator().w(function (_context11) {
+            while (1) switch (_context11.n) {
+              case 0:
+                nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+                _this37.SubmitProcessing = false;
+                newCustomer = {
+                  id: Number(newClient.id),
+                  name: newClient.name,
+                  phone: newClient.phone || '',
+                  email: newClient.email || ''
+                }; // Add customer to the current clients list
+                existingIndex = _this37.clients.findIndex(function (client) {
+                  return client.id == newCustomer.id;
+                });
+                if (existingIndex === -1) {
+                  _this37.clients.push(newCustomer);
+                } else {
+                  _this37.$set(_this37.clients, existingIndex, newCustomer);
+                }
+
+                // IMPORTANT: select the newly created customer
+                _this37.selectedClientId = newCustomer.id;
+                _this37.client_name = newCustomer.name;
+
+                // Run customer selection logic
+                _context11.n = 1;
+                return _this37.onClientSelected(newCustomer.id);
+              case 1:
+                _context11.n = 2;
+                return _this37.$nextTick();
+              case 2:
+                // Close modal
+                _this37.$bvModal.hide("Quick_Add_Customer");
+                _this37.makeToast("success", _this37.$t("Successfully_Created"), _this37.$t("Success"));
+                _this37.reset_Form_client();
+                _this37.quickAddCustomFieldValues = {};
+              case 3:
+                return _context11.a(2);
+            }
+          }, _callee11);
+        }));
+        return function afterCustoms() {
+          return _ref9.apply(this, arguments);
+        };
+      }();
       if (hasCustoms) {
         axios.post("custom-field-values", {
           entity_type: "App\\Models\\Client",
@@ -4761,8 +4815,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   };
 }), "Get_Client_Without_Paginate", function Get_Client_Without_Paginate() {
   var _this38 = this;
-  axios.get("get_clients_without_paginate").then(function (_ref8) {
-    var data = _ref8.data;
+  axios.get("get_clients_without_paginate").then(function (_ref0) {
+    var data = _ref0.data;
     return _this38.clients = data;
   });
 }), "get_today_sales", function get_today_sales() {
@@ -5454,34 +5508,34 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   }
 }), "trySyncOfflineSales", function trySyncOfflineSales() {
   var _this43 = this;
-  return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10() {
+  return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12() {
     var syncedCount, queue, i, sale, basePayload, normalizedDetails, payload, response, isNetworkError, msg, _t0, _t1;
-    return _regenerator().w(function (_context10) {
-      while (1) switch (_context10.p = _context10.n) {
+    return _regenerator().w(function (_context12) {
+      while (1) switch (_context12.p = _context12.n) {
         case 0:
           if (!_this43.offlineSyncInProgress) {
-            _context10.n = 1;
+            _context12.n = 1;
             break;
           }
-          return _context10.a(2);
+          return _context12.a(2);
         case 1:
           if (!(typeof window !== 'undefined')) {
-            _context10.n = 5;
+            _context12.n = 5;
             break;
           }
-          _context10.p = 2;
+          _context12.p = 2;
           if (!(window.navigator && window.navigator.onLine === false)) {
-            _context10.n = 3;
+            _context12.n = 3;
             break;
           }
           _this43.isOnline = false;
-          return _context10.a(2);
+          return _context12.a(2);
         case 3:
-          _context10.n = 5;
+          _context12.n = 5;
           break;
         case 4:
-          _context10.p = 4;
-          _t0 = _context10.v;
+          _context12.p = 4;
+          _t0 = _context12.v;
         case 5:
           _this43.offlineSyncInProgress = true;
           // Notify UI (via global event bus) that POS offline sync has started
@@ -5492,28 +5546,28 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
           } catch (e) {}
           _this43.offlineLastSyncError = null;
           syncedCount = 0;
-          _context10.p = 6;
+          _context12.p = 6;
           if (!(!_utils__WEBPACK_IMPORTED_MODULE_4__["default"] || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales)) {
-            _context10.n = 7;
+            _context12.n = 7;
             break;
           }
-          return _context10.a(2);
+          return _context12.a(2);
         case 7:
           queue = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales() || [];
           i = 0;
         case 8:
           if (!(i < queue.length)) {
-            _context10.n = 14;
+            _context12.n = 14;
             break;
           }
           sale = queue[i]; // Skip already-synced, failed or in-progress records
           if (!(!sale || !sale.payload || sale.status === 'synced' || sale.status === 'syncing' || sale.status === 'failed')) {
-            _context10.n = 9;
+            _context12.n = 9;
             break;
           }
-          return _context10.a(3, 13);
+          return _context12.a(3, 13);
         case 9:
-          _context10.p = 9;
+          _context12.p = 9;
           // Mark this sale as "syncing" in the shared offline queue so that
           // other sync workers (global/offline, other tabs) do not submit it
           // concurrently.
@@ -5535,10 +5589,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             offline_id: sale.id,
             details: normalizedDetails
           }); // Use absolute API path to avoid hitting SPA routes (e.g. /app/pos/create_pos)
-          _context10.n = 10;
+          _context12.n = 10;
           return axios.post('/pos/create_pos', payload);
         case 10:
-          response = _context10.v;
+          response = _context12.v;
           if (response && response.data && response.data.success === true) {
             _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsSynced(sale.id, response.data.id);
             syncedCount++;
@@ -5557,11 +5611,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
               }
             } catch (e) {}
           }
-          _context10.n = 13;
+          _context12.n = 13;
           break;
         case 11:
-          _context10.p = 11;
-          _t1 = _context10.v;
+          _context12.p = 11;
+          _t1 = _context12.v;
           isNetworkError = !_t1.response || _t1.message === 'Network Error';
           if (typeof window !== 'undefined') {
             try {
@@ -5571,10 +5625,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             } catch (e) {}
           }
           if (!(isNetworkError && !_this43.isOnline)) {
-            _context10.n = 12;
+            _context12.n = 12;
             break;
           }
-          return _context10.a(3, 14);
+          return _context12.a(3, 14);
         case 12:
           msg = _t1.response && _t1.response.data && (_t1.response.data.message || _t1.response.data.error) || _t1.message || 'Unknown error';
           _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsFailed(sale.id, msg, _t1.response && _t1.response.status);
@@ -5589,10 +5643,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
           }
         case 13:
           i++;
-          _context10.n = 8;
+          _context12.n = 8;
           break;
         case 14:
-          _context10.p = 14;
+          _context12.p = 14;
           _this43.offlineSyncInProgress = false;
           _this43.refreshOfflineSalesCount();
           // Notify UI that POS offline sync has finished
@@ -5609,11 +5663,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             syncedCount: syncedCount,
             lastError: _this43.offlineLastSyncError
           });
-          return _context10.f(14);
+          return _context12.f(14);
         case 15:
-          return _context10.a(2);
+          return _context12.a(2);
       }
-    }, _callee10, null, [[9, 11], [6,, 14, 15], [2, 4]]);
+    }, _callee12, null, [[9, 11], [6,, 14, 15], [2, 4]]);
   }))();
 }), "syncOfflineSales", function syncOfflineSales() {
   if (!this.isOnline) {
@@ -7871,7 +7925,14 @@ var render = function render() {
       attrs: {
         colspan: "3"
       }
-    }, [_vm._v("\n                      " + _vm._s(detail_invoice.name) + " (" + _vm._s(detail_invoice.code) + ")\n                      "), _c("br"), _vm._v(" "), _c("span", {
+    }, [_vm._v("\n                      " + _vm._s(detail_invoice.name) + " (" + _vm._s(detail_invoice.code) + ")\n                      "), _c("br", {
+      directives: [{
+        name: "show",
+        rawName: "v-show",
+        value: detail_invoice.guarantee,
+        expression: "detail_invoice.guarantee"
+      }]
+    }), _vm._v(" "), _c("span", {
       staticStyle: {
         "font-size": "smaller"
       }

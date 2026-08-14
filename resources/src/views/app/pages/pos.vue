@@ -672,7 +672,7 @@
                   <tr v-for="detail_invoice in invoice_pos.details">
                     <td colspan="3">
                       {{detail_invoice.name}} ({{detail_invoice.code}})
-                      <br/>
+                      <br v-show="detail_invoice.guarantee">
                       <span style="font-size: smaller;">{{detail_invoice.guarantee}}</span>
                       <br v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null">
                       <span v-show="detail_invoice.is_imei && detail_invoice.imei_number !==null ">{{$t('IMEI_SN')}} : {{detail_invoice.imei_number}}</span>
@@ -5195,30 +5195,45 @@ export default {
           adresse: this.client.adresse,
           is_royalty_eligible: this.client.is_royalty_eligible
         })
-        .then(response => {
-          NProgress.done();
-          const newClient = response.data;
-          this.clients.push({
-            id: newClient.id,
-            name: newClient.name,
-          });
-          this.selectedClientId = newClient.id;
-          this.client_name = newClient.name;
-          this.onClientSelected(newClient.id);
-          this.makeToast(
-            "success",
-            this.$t("Successfully_Created"),
-            this.$t("Success")
-          );
-          this.Get_Client_Without_Paginate();
-          this.$bvModal.hide("New_Customer");
-        })
-        .catch(() => {
+        .then(async response => {
+    NProgress.done();
+
+    const newClient = response.data;
+
+    const newCustomer = {
+        id: Number(newClient.id),
+        name: newClient.name,
+        phone: newClient.phone || '',
+        email: newClient.email || '',
+    };
+
+    // Add new customer
+    this.clients.push(newCustomer);
+
+    // Select new customer
+    this.selectedClientId = newCustomer.id;
+    this.client_name = newCustomer.name;
+
+    // Load customer details
+    await this.onClientSelected(newCustomer.id);
+
+    // Wait for v-select to update
+    await this.$nextTick();
+
+    this.makeToast(
+        "success",
+        this.$t("Successfully_Created"),
+        this.$t("Success")
+    );
+
+    this.$bvModal.hide("New_Customer");
+}).catch(() => {
           NProgress.done();
           this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
         });
     },
     Submit_Quick_Add_Customer() {
+      
       NProgress.start();
       NProgress.set(0.1);
       this.SubmitProcessing = true;
@@ -5248,8 +5263,8 @@ export default {
               
               this.$bvModal.hide("Quick_Add_Customer");
 
-              window.location.reload();
-             this.GetElementsPos(); 
+              //window.location.reload();
+             // this.GetElementsPos(); 
 
             }
           );
@@ -5261,33 +5276,53 @@ export default {
             const newClient = response.data;
 
             // If there are custom field values from the quick-add form, persist them
-            const clientId = newClient.id || newClient.client?.id;
+            const clientId = Number(newClient.id) || Number(newClient.client?.id);
             const hasCustoms = clientId && this.quickAddCustomFieldValues && Object.keys(this.quickAddCustomFieldValues).length > 0;
 
-            const afterCustoms = () => {
-              NProgress.done();
-              this.SubmitProcessing = false;
-              this.clients.push({
-                id: newClient.id,
-                name: newClient.name,
-                phone: newClient.phone || '',
-              });
-              this.selectedClientId = newClient.id;
-              this.client_name = newClient.name;
-              this.onClientSelected(newClient.id);
-              this.makeToast(
-                "success",
-                this.$t("Successfully_Created"),
-                this.$t("Success")
-              );
-              window.location.reload();
-             this.GetElementsPos(); 
-              // this.Get_Client_Without_Paginate();
-              // this.$bvModal.hide("Quick_Add_Customer");
-              // this.reset_Form_client();
-              // this.quickAddCustomFieldValues = {};
-            };
+            const afterCustoms = async () => {
+    NProgress.done();
+    this.SubmitProcessing = false;
 
+    const newCustomer = {
+        id: Number(newClient.id),
+        name: newClient.name,
+        phone: newClient.phone || '',
+        email: newClient.email || '',
+    };
+
+    // Add customer to the current clients list
+    const existingIndex = this.clients.findIndex(
+        client => client.id == newCustomer.id
+    );
+
+    if (existingIndex === -1) {
+        this.clients.push(newCustomer);
+    } else {
+        this.$set(this.clients, existingIndex, newCustomer);
+    }
+
+    // IMPORTANT: select the newly created customer
+    this.selectedClientId = newCustomer.id;
+    this.client_name = newCustomer.name;
+
+    // Run customer selection logic
+    await this.onClientSelected(newCustomer.id);
+
+    // Allow Vue to update v-select
+    await this.$nextTick();
+
+    // Close modal
+    this.$bvModal.hide("Quick_Add_Customer");
+
+    this.makeToast(
+        "success",
+        this.$t("Successfully_Created"),
+        this.$t("Success")
+    );
+
+    this.reset_Form_client();
+    this.quickAddCustomFieldValues = {};
+};
             if (hasCustoms) {
               axios.post("custom-field-values", {
                 entity_type: "App\\Models\\Client",
