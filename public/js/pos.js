@@ -1490,7 +1490,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
     vueEasyPrint: vue_easy_print__WEBPACK_IMPORTED_MODULE_2__["default"],
     barcode: (vue_barcode__WEBPACK_IMPORTED_MODULE_3___default()),
@@ -1723,6 +1723,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       },
       warehouseOptions: [],
       selectedClientId: "",
+      // Increment this whenever the customer options/value changes so both
+      // desktop and mobile vue-select instances are remounted with the new value.
+      customerSelectKey: 0,
       productsReady: false,
       uiLoadingProductId: null,
       detailLoading: false,
@@ -1733,7 +1736,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     currentClient: function currentClient() {
       var _this = this;
       var customer = this.clients.find(function (c) {
-        return c.id === _this.selectedClientId;
+        return Number(c.id) === Number(_this.selectedClientId);
       });
       if (customer !== null && customer !== void 0 && customer.is_royalty_eligible) this.sale.discount = 20;
       return customer;
@@ -1772,8 +1775,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     customerOptions: function customerOptions() {
       return this.clients.map(function (client) {
         return {
-          label: client.name + " (" + client.phone + ")",
-          value: client.id,
+          label: "".concat(client.name, " (").concat(client.phone || '', ")"),
+          value: Number(client.id),
           phone: client.phone || '',
           email: client.email || '',
           name: client.name || ''
@@ -1998,20 +2001,13 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     // When the warehouse changes (including being cleared), clear the current
     // checkout so we never mix products/stock from different warehouses.
     'sale.warehouse_id': function saleWarehouse_id(newVal, oldVal) {
-      // Only react when there was a previously selected warehouse and it
-      // actually changed.
       if (!oldVal || oldVal === newVal) {
         return;
       }
-
-      // Clear cart lines and totals but keep current client and general UI state.
       this.details = [];
       this.product = {};
       this.GrandTotal = 0;
       this.total = 0;
-
-      // Notify any external listeners (dashboard widgets, etc.) that the
-      // checkout has been cleared.
       try {
         this._cd_emit && this._cd_emit({
           currency: this.currentUser && this.currentUser.currency || '',
@@ -2021,547 +2017,477 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
           GrandTotal: 0
         }, true);
       } catch (e) {}
-    }
-  }
-}, "watch", {
-  'invoice_pos.zatca_qr': function invoice_posZatca_qr(val) {
-    var _this5 = this;
-    if (val) {
-      this.$nextTick(function () {
-        return _this5.renderZatcaQrPos();
-      });
-    }
-  }
-}), "mounted", function mounted() {
-  this.changeSidebarProperties();
-  this.paginate_products(this.product_perPage, 0);
-}), "methods", _objectSpread(_objectSpread({
-  onCustomerSearch: function onCustomerSearch(search) {
-    if (search && search.trim() !== "") this.searchPhone = search;
-  },
-  editCustomer: function editCustomer() {
-    var _this6 = this;
-    var customer = this.clients.find(function (c) {
-      return c.id === _this6.selectedClientId;
-    });
-    if (!customer) return;
-
-    // open same modal used for add
-    this.$bvModal.show('Quick_Add_Customer');
-    this.client = _objectSpread({}, customer);
-
-    // pass data
-    // this.editingCustomer = { ...customer };
-
-    // this.isEditMode = true;
-  },
-  // Custom filter function for customer v-select to search by name and phone
-  filterCustomerByPhone: function filterCustomerByPhone(option, label, search) {
-    if (!search) return true;
-    var searchLower = search.toLowerCase();
-    var name = (option.name || '').toLowerCase();
-    var phone = (option.phone || '').toLowerCase();
-    return name.includes(searchLower) || phone.includes(searchLower);
-  },
-  refreshCurrentRegister: function refreshCurrentRegister() {
-    var _this7 = this;
-    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var params, _yield$axios$get, data, _t;
-      return _regenerator().w(function (_context) {
-        while (1) switch (_context.p = _context.n) {
-          case 0:
-            _context.p = 0;
-            if (_this7.currentUser) {
-              _context.n = 1;
-              break;
-            }
-            return _context.a(2);
-          case 1:
-            params = {};
-            if (_this7.sale && _this7.sale.warehouse_id) params.warehouse_id = _this7.sale.warehouse_id;
-            _context.n = 2;
-            return axios.get("cash-registers/current/".concat(_this7.currentUser.id), {
-              params: params
-            });
-          case 2:
-            _yield$axios$get = _context.v;
-            data = _yield$axios$get.data;
-            _this7.currentRegister = data.register || null;
-            _context.n = 4;
-            break;
-          case 3:
-            _context.p = 3;
-            _t = _context.v;
-            _this7.currentRegister = null;
-          case 4:
-            return _context.a(2);
-        }
-      }, _callee, null, [[0, 3]]);
-    }))();
-  },
-  // ---------- Customer Display helpers ----------
-  _cd_emit: function _cd_emit(payload) {
-    var completed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-    try {
-      if (window.Echo && window.Echo.channel) {
-        // Prefer whisper (local-only) to avoid backend dependency
-        window.Echo.channel('pos-cart').whisper('cart-updated', payload);
-        if (completed) window.Echo.channel('pos-cart').whisper('sale-completed', true);
-        return;
+    },
+    'invoice_pos.zatca_qr': function invoice_posZatca_qr(val) {
+      var _this5 = this;
+      if (val) {
+        this.$nextTick(function () {
+          return _this5.renderZatcaQrPos();
+        });
       }
-    } catch (e) {/* ignore */}
-    // Fallback: POST to public API to broadcast and store last cart
-    try {
-      window.axios && window.axios.post('pos/customer-display/broadcast', {
-        cart: payload,
-        completed: completed
+    }
+  },
+  mounted: function mounted() {
+    this.changeSidebarProperties();
+    this.paginate_products(this.product_perPage, 0);
+  },
+  methods: _objectSpread(_objectSpread({
+    onCustomerSearch: function onCustomerSearch(search) {
+      if (search && search.trim() !== "") this.searchPhone = search;
+    },
+    editCustomer: function editCustomer() {
+      var selectedId = Number(this.selectedClientId);
+      var customer = (this.clients || []).find(function (c) {
+        return Number(c.id) === selectedId;
       });
-    } catch (e) {/* ignore */}
-  },
-  _cd_queue_broadcast: function _cd_queue_broadcast() {
-    var _this8 = this;
-    if (this._cd_broadcast_timer) clearTimeout(this._cd_broadcast_timer);
-    this._cd_broadcast_timer = setTimeout(function () {
-      var payload = {
-        currency: _this8.currentUser && _this8.currentUser.currency || '',
-        discount: _this8.sale && _this8.sale.discount ? _this8.sale.discount : 0,
-        TaxNet: _this8.sale && _this8.sale.TaxNet ? _this8.sale.TaxNet : 0,
-        shipping: _this8.sale && _this8.sale.shipping ? _this8.sale.shipping : 0,
-        GrandTotal: _this8.GrandTotal || 0,
-        details: (_this8.details || []).map(function (d) {
-          return {
-            name: d.name,
-            quantity: d.quantity,
-            // Back-compat: keep total, but also send unit_price and line_total explicitly
-            total: d.total != null ? d.total : d.Net_price || 0,
-            unit_price: d.Net_price != null ? d.Net_price : d.Unit_price != null ? d.Unit_price : d.price != null ? d.price : 0,
-            line_total: d.total != null ? d.total : (d.Net_price || 0) * (d.quantity || 0)
-          };
-        })
-      };
-      _this8._cd_emit(payload);
-    }, 200); // small debounce
-  },
-  submitOpenRegister: function submitOpenRegister() {
-    var _this9 = this;
-    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
-      var _yield$axios$post, data, _e$response, msg, _t2;
-      return _regenerator().w(function (_context2) {
-        while (1) switch (_context2.p = _context2.n) {
-          case 0:
-            if (_this9.registerForm.warehouse_id) {
-              _context2.n = 1;
-              break;
-            }
-            _this9.makeToast('warning', _this9.$t('Please_select_warehouse'), _this9.$t('Warning'));
-            return _context2.a(2);
-          case 1:
-            _this9.registerBusy = true;
-            _context2.p = 2;
-            _context2.n = 3;
-            return axios.post('cash-registers/open', {
-              user_id: _this9.currentUser.id,
-              warehouse_id: _this9.registerForm.warehouse_id,
-              opening_balance: _this9.registerForm.opening_balance || 0,
-              notes: _this9.registerForm.notes || ''
-            });
-          case 3:
-            _yield$axios$post = _context2.v;
-            data = _yield$axios$post.data;
-            _this9.$bvModal.hide('OpenRegisterModal');
-            _this9.makeToast('success', _this9.$t('RegisterOpened'), _this9.$t('Success'));
-            // Immediately reflect UI without waiting for fetch
-            _this9.currentRegister = data && data.register ? data.register : _this9.currentRegister;
-            // Fallback refresh to ensure latest from server
-            _this9.refreshCurrentRegister();
-            _context2.n = 5;
-            break;
-          case 4:
-            _context2.p = 4;
-            _t2 = _context2.v;
-            msg = ((_e$response = _t2.response) === null || _e$response === void 0 || (_e$response = _e$response.data) === null || _e$response === void 0 ? void 0 : _e$response.message) || _this9.$t('OperationFailed');
-            _this9.makeToast('danger', msg, _this9.$t('Failed'));
-          case 5:
-            _context2.p = 5;
-            _this9.registerBusy = false;
-            return _context2.f(5);
-          case 6:
-            return _context2.a(2);
-        }
-      }, _callee2, null, [[2, 4, 5, 6]]);
-    }))();
-  },
-  submitCloseRegister: function submitCloseRegister() {
-    var _this0 = this;
-    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
-      var _e$response2, msg, _t3;
-      return _regenerator().w(function (_context3) {
-        while (1) switch (_context3.p = _context3.n) {
-          case 0:
-            if (_this0.currentRegister) {
-              _context3.n = 1;
-              break;
-            }
-            return _context3.a(2);
-          case 1:
-            _this0.registerBusy = true;
-            _context3.p = 2;
-            _context3.n = 3;
-            return axios.post('cash-registers/close', {
-              register_id: _this0.currentRegister.id,
-              counted_cash: _this0.closeForm.counted_cash || 0,
-              notes: _this0.closeForm.notes || ''
-            });
-          case 3:
-            _this0.$bvModal.hide('CloseRegisterModal');
-            _this0.makeToast('success', _this0.$t('RegisterClosed'), _this0.$t('Success'));
-            _this0.refreshCurrentRegister();
-            _context3.n = 5;
-            break;
-          case 4:
-            _context3.p = 4;
-            _t3 = _context3.v;
-            msg = ((_e$response2 = _t3.response) === null || _e$response2 === void 0 || (_e$response2 = _e$response2.data) === null || _e$response2 === void 0 ? void 0 : _e$response2.message) || _this0.$t('OperationFailed');
-            _this0.makeToast('danger', msg, _this0.$t('Failed'));
-          case 5:
-            _context3.p = 5;
-            _this0.registerBusy = false;
-            return _context3.f(5);
-          case 6:
-            return _context3.a(2);
-        }
-      }, _callee3, null, [[2, 4, 5, 6]]);
-    }))();
-  },
-  resolveProductImage: function resolveProductImage(imagePath) {
-    if (!imagePath) return '';
-    // If already an absolute URL, return as is
-    if (/^https?:\/\//i.test(imagePath)) return imagePath;
-    // Normalize and prefix with public images directory
-    var clean = String(imagePath).replace(/^\/+/, '');
-    return "/images/products/".concat(clean);
-  },
-  getResultValue: function getResultValue(result) {
-    return result.code + " (" + result.name + ")";
-  },
-  SearchProduct: function SearchProduct(result) {
-    if (this.load_product) {
-      this.load_product = false;
-      this.product = {};
-      if (result.product_type == 'is_service') {
-        this.product.quantity = 1;
-        this.product.code = result.code;
-      } else {
-        this.product.code = result.code;
-        this.product.current = result.qte_sale;
-        this.product.fix_stock = result.qte;
-        this.product.quantity = result.qte_sale < 1 ? result.qte_sale : 1;
-      }
-      this.product.product_variant_id = result.product_variant_id;
-      this.Get_Product_Details(result.id, result.product_variant_id, result);
-      this.search_input = '';
-      this.product_filter = [];
-    } else {
-      this.makeToast("warning", this.$t("Please_wait_until_the_product_is_loaded"), this.$t("Warning"));
-    }
-  }
-}, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapActions)(["changeSidebarProperties", "changeThemeMode", "logout"])), {}, (_objectSpread2 = {
-  // ... All methods from old_pos will be injected here
-  logoutUser: function logoutUser() {
-    this.$store.dispatch("logout");
-  },
-  handleFocus: function handleFocus() {
-    this.focused = true;
-  },
-  handleBlur: function handleBlur() {
-    this.focused = false;
-  },
-  showModal: function showModal() {
-    this.$bvModal.show('open_scan');
-  },
-  onScan: function onScan(decodedText, decodedResult) {
-    var code = decodedText;
-    this.search_input = code;
-    this.search();
-    this.$bvModal.hide('open_scan');
-  },
-  addPaymentLine: function addPaymentLine() {
-    this.paymentLines.push({
-      amount: 0,
-      payment_method_id: ''
-    });
-  },
-  removePaymentLine: function removePaymentLine(idx) {
-    if (this.paymentLines.length > 1) {
-      this.paymentLines.splice(idx, 1);
-    }
-  },
-  setQuickAmount: function setQuickAmount(val) {
-    // assign to current active line (e.g. last)
-    var line = this.paymentLines[this.paymentLines.length - 1];
-    line.amount = val;
-  },
-  appendDigit: function appendDigit(d) {
-    // append to the last line's amount
-    var line = this.paymentLines[this.paymentLines.length - 1];
-    var s = String(line.amount || '');
-    if (s === '0') s = d;else s += d;
-    line.amount = parseFloat(s);
-  },
-  clearInput: function clearInput() {
-    this.paymentLines[this.paymentLines.length - 1].amount = 0;
-  },
-  backspace: function backspace() {
-    var line = this.paymentLines[this.paymentLines.length - 1];
-    var s = String(line.amount || '');
-    s = s.slice(0, -1) || '0';
-    line.amount = parseFloat(s);
-  },
-  Selected_PaymentMethod: function Selected_PaymentMethod(value) {
-    var _this1 = this;
-    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
-      return _regenerator().w(function (_context4) {
-        while (1) switch (_context4.n) {
-          case 0:
-            if (!(value == '1' || value == 1)) {
-              _context4.n = 2;
-              break;
-            }
-            _this1.savedPaymentMethods = [];
-            _this1.submit_showing_credit_card = true;
-            _this1.selectedCard = null;
-            _this1.card_id = '';
-            // Check if the customer has saved payment methods
-            _context4.n = 1;
-            return axios.get("/retrieve-customer?customerId=".concat(_this1.selectedClientId)).then(function (response) {
-              // If the customer has saved payment methods, display them
-              _this1.savedPaymentMethods = response.data.data;
-              _this1.card_id = response.data.customer_default_source;
-              _this1.hasSavedPaymentMethod = true;
-              _this1.useSavedPaymentMethod = true;
-              _this1.is_new_credit_card = false;
-              _this1.submit_showing_credit_card = false;
-            })["catch"](function (error) {
-              // If the customer does not have saved payment methods, show the card element for them to enter their payment information
-              _this1.hasSavedPaymentMethod = false;
-              _this1.useSavedPaymentMethod = false;
-              _this1.is_new_credit_card = true;
-              _this1.card_id = '';
-              setTimeout(function () {
-                _this1.loadStripe_payment();
-              }, 1000);
-              _this1.submit_showing_credit_card = false;
-            });
-          case 1:
-            _context4.n = 3;
-            break;
-          case 2:
-            _this1.hasSavedPaymentMethod = false;
-            _this1.useSavedPaymentMethod = false;
-            _this1.is_new_credit_card = false;
-          case 3:
-            return _context4.a(2);
-        }
-      }, _callee4);
-    }))();
-  },
-  show_saved_credit_card: function show_saved_credit_card() {
-    this.hasSavedPaymentMethod = true;
-    this.useSavedPaymentMethod = true;
-    this.is_new_credit_card = false;
-    this.Selected_PaymentMethod(1);
-  },
-  show_new_credit_card: function show_new_credit_card() {
-    var _this10 = this;
-    this.selectedCard = null;
-    this.card_id = '';
-    this.useSavedPaymentMethod = false;
-    this.hasSavedPaymentMethod = false;
-    this.is_new_credit_card = true;
-    setTimeout(function () {
-      _this10.loadStripe_payment();
-    }, 500);
-  },
-  selectCard: function selectCard(card) {
-    this.selectedCard = card;
-    this.card_id = card.card_id;
-  },
-  loadStripe_payment: function loadStripe_payment() {
-    var _this11 = this;
-    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
-      var elements;
-      return _regenerator().w(function (_context5) {
-        while (1) switch (_context5.n) {
-          case 0:
-            _context5.n = 1;
-            return (0,_stripe_stripe_js__WEBPACK_IMPORTED_MODULE_6__.loadStripe)("".concat(_this11.stripe_key));
-          case 1:
-            _this11.stripe = _context5.v;
-            elements = _this11.stripe.elements();
-            _this11.cardElement = elements.create("card", {
-              classes: {
-                base: "bg-gray-100 rounded border border-gray-300 focus:border-indigo-500 text-base outline-none text-gray-700 p-3 leading-8 transition-colors duration-200 ease-in-out"
+      if (!customer) return;
+      this.selectedClientId = selectedId;
+
+      // Copy the selected customer into the edit form.
+      this.client = _objectSpread(_objectSpread({}, customer), {}, {
+        id: selectedId,
+        name: customer.name || '',
+        email: customer.email || '',
+        phone: customer.phone || '',
+        country: customer.country || '',
+        city: customer.city || '',
+        tax_number: customer.tax_number || '',
+        adresse: customer.adresse || '',
+        is_royalty_eligible: customer.is_royalty_eligible === true || customer.is_royalty_eligible === 1
+      });
+      this.$bvModal.show('Quick_Add_Customer');
+    },
+    // Custom filter function for customer v-select to search by name and phone
+    filterCustomerByPhone: function filterCustomerByPhone(option, label, search) {
+      if (!search) return true;
+      var searchLower = search.toLowerCase();
+      var name = (option.name || '').toLowerCase();
+      var phone = (option.phone || '').toLowerCase();
+      return name.includes(searchLower) || phone.includes(searchLower);
+    },
+    refreshCurrentRegister: function refreshCurrentRegister() {
+      var _this6 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+        var params, _yield$axios$get, data, _t;
+        return _regenerator().w(function (_context) {
+          while (1) switch (_context.p = _context.n) {
+            case 0:
+              _context.p = 0;
+              if (_this6.currentUser) {
+                _context.n = 1;
+                break;
               }
-            });
-            _this11.cardElement.mount("#card-element");
-          case 2:
-            return _context5.a(2);
+              return _context.a(2);
+            case 1:
+              params = {};
+              if (_this6.sale && _this6.sale.warehouse_id) params.warehouse_id = _this6.sale.warehouse_id;
+              _context.n = 2;
+              return axios.get("cash-registers/current/".concat(_this6.currentUser.id), {
+                params: params
+              });
+            case 2:
+              _yield$axios$get = _context.v;
+              data = _yield$axios$get.data;
+              _this6.currentRegister = data.register || null;
+              _context.n = 4;
+              break;
+            case 3:
+              _context.p = 3;
+              _t = _context.v;
+              _this6.currentRegister = null;
+            case 4:
+              return _context.a(2);
+          }
+        }, _callee, null, [[0, 3]]);
+      }))();
+    },
+    // ---------- Customer Display helpers ----------
+    _cd_emit: function _cd_emit(payload) {
+      var completed = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      try {
+        if (window.Echo && window.Echo.channel) {
+          // Prefer whisper (local-only) to avoid backend dependency
+          window.Echo.channel('pos-cart').whisper('cart-updated', payload);
+          if (completed) window.Echo.channel('pos-cart').whisper('sale-completed', true);
+          return;
         }
-      }, _callee5);
-    }))();
-  },
-  SetLocal: function SetLocal(locale) {
-    this.$i18n.locale = locale;
-    this.$store.dispatch("setLanguage", locale);
-    Fire.$emit("ChangeLanguage");
-    window.location.reload();
-  },
-  handleFullScreen: function handleFullScreen() {
-    _utils__WEBPACK_IMPORTED_MODULE_4__["default"].toggleFullScreen();
-  }
-}, _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "logoutUser", function logoutUser() {
-  this.logout();
-}), "Product_paginatePerPage", function Product_paginatePerPage() {
-  // Always paginate from the full in‑memory list; backend now returns
-  // the entire filtered collection and we handle pagination here.
-  this.paginate_products(this.product_perPage, 0);
-}), "onProductPageItemClick", function onProductPageItemClick(item) {
-  if (typeof item === 'number' && item >= 1 && item <= this.product_lastPage && item !== this.product_currentPage) {
-    this.Product_onPageChanged(item);
-  }
-}), "paginate_products", function paginate_products(pageSize, pageNumber) {
-  var itemsToParse = Array.isArray(this.products) ? this.products : [];
-  this.paginated_Products = itemsToParse.slice(pageNumber * pageSize, (pageNumber + 1) * pageSize);
-}), "Product_onPageChanged", function Product_onPageChanged(page) {
-  // Pure frontend pagination: just change the visible slice,
-  // do not refetch since we already hold the full filtered list.
-  this.product_currentPage = page;
-  this.paginate_products(this.product_perPage, page - 1);
-}), "BrandpaginatePerPage", function BrandpaginatePerPage() {
-  this.paginate_Brands(this.brand_perPage, 0);
-}), "paginate_Brands", function paginate_Brands(pageSize, pageNumber) {
-  var itemsToParse = this.brands;
-  this.paginated_Brands = itemsToParse.slice(pageNumber * pageSize, (pageNumber + 1) * pageSize);
-}), "BrandonPageChanged", function BrandonPageChanged(page) {
-  this.paginate_Brands(this.brand_perPage, page - 1);
-}), "Category_paginatePerPage", function Category_paginatePerPage() {
-  this.paginate_Category(this.category_perPage, 0);
-}), "paginate_Category", function paginate_Category(pageSize, pageNumber) {
-  var itemsToParse = this.categories;
-  this.paginated_Category = itemsToParse.slice(pageNumber * pageSize, (pageNumber + 1) * pageSize);
-}), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "Category_onPageChanged", function Category_onPageChanged(page) {
-  this.paginate_Category(this.category_perPage, page - 1);
-}), "Submit_Pos", function Submit_Pos() {
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  if (this.verifiedForm()) {
-    Fire.$emit("pay_now");
-  } else {
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  }
-}), "Submit_Draft", function Submit_Draft() {
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  if (this.verifiedForm()) {
-    this.Create_Draft();
-  } else {
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  }
-}), "verifiedForm", function verifiedForm() {
-  if (this.selectedClientId == "" || this.selectedClientId === null) {
-    this.makeToast("danger", this.$t("Choose_Customer"), this.$t("Failed"));
-    return false;
-  } else if (this.sale.warehouse_id == "" || this.sale.warehouse_id === null) {
-    this.makeToast("danger", this.$t("Choose_Warehouse"), this.$t("Failed"));
-    return false;
-  } else if (this.details.length === 0) {
-    this.makeToast("danger", this.$t("PleaseAddProducts"), this.$t("Failed"));
-    return false;
-  }
-  return true;
-}), "Create_Draft", function Create_Draft() {
-  var _this12 = this;
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  this.DraftProcessing = true;
-  axios.post("pos/create_draft", {
-    draft_sale_id: this.draft_sale_id || undefined,
-    client_id: this.selectedClientId,
-    warehouse_id: this.sale.warehouse_id,
-    tax_rate: this.sale.tax_rate ? this.sale.tax_rate : 0,
-    TaxNet: this.sale.TaxNet ? this.sale.TaxNet : 0,
-    discount: this.sale.discount ? this.sale.discount : 0,
-    discount_Method: String(this.sale.discount_Method || '2'),
-    // Ensure it's always a string: '1' for percentage, '2' for fixed
-    shipping: this.sale.shipping ? this.sale.shipping : 0,
-    notes: this.sale.notes,
-    details: this.details,
-    GrandTotal: this.GrandTotal
-  }).then(function (response) {
-    if (response.data.success === true) {
-      _this12.makeToast("success", _this12.$t("Draft_Created_successfully"), _this12.$t("Success"));
-      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-      _this12.DraftProcessing = false;
-      _this12.Reset_Pos();
-    }
-  })["catch"](function (error) {
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-    _this12.DraftProcessing = false;
-    _this12.makeToast("danger", _this12.$t("InvalidData"), _this12.$t("Failed"));
-  });
-}), "Submit_Payment", function Submit_Payment() {
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  var total = parseFloat(this.totalPaid);
-  var due = parseFloat(this.GrandTotal.toFixed(2));
-  var multi = this.paymentLines.length > 1;
-  if (multi && total > due) {
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-    this.makeToast("warning", this.$t("TotalPaidExceedsGrandTotalForMultiPayment"), this.$t("Warning"));
-    return;
-  }
-  this.CreatePOS();
-}), "CreatePOS", function CreatePOS() {
-  var _this13 = this;
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  if (this.paymentLines.length > 1 && this.totalPaid > this.GrandTotal) {
-    this.makeToast("warning", this.$t("TotalPaidExceedsGrandTotalForMultiPayment"), this.$t("Warning"));
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-    return;
-  }
-
-  // Credit Limit Validation (0 means no limit)
-  // Only applies when this sale is adding new credit (paid amount < sale total)
-  if (this.selectedClientId && this.selectedClientCreditLimit > 0) {
-    var total = parseFloat(this.totalPaid);
-    var due = parseFloat(this.GrandTotal.toFixed(2));
-    if (total < due) {
-      // Calculate the new due amount after this sale
-      var currentDue = parseFloat(this.selectedClientNetBalance || 0);
-      var newSaleDue = due - total; // Remaining due from this sale
-      var newTotalDue = currentDue + newSaleDue;
-      if (newTotalDue > this.selectedClientCreditLimit) {
-        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-        var exceededAmount = newTotalDue - this.selectedClientCreditLimit;
-        this.makeToast("danger", this.$t("Credit_Limit_Exceeded") + ": " + this.formatPriceWithCurrentCurrency(exceededAmount, 2) + " " + this.$t("exceeds_credit_limit_of") + " " + this.formatPriceWithCurrentCurrency(this.selectedClientCreditLimit, 2), this.$t("Warning"));
-        return;
+      } catch (e) {/* ignore */}
+      // Fallback: POST to public API to broadcast and store last cart
+      try {
+        window.axios && window.axios.post('pos/customer-display/broadcast', {
+          cart: payload,
+          completed: completed
+        });
+      } catch (e) {/* ignore */}
+    },
+    _cd_queue_broadcast: function _cd_queue_broadcast() {
+      var _this7 = this;
+      if (this._cd_broadcast_timer) clearTimeout(this._cd_broadcast_timer);
+      this._cd_broadcast_timer = setTimeout(function () {
+        var payload = {
+          currency: _this7.currentUser && _this7.currentUser.currency || '',
+          discount: _this7.sale && _this7.sale.discount ? _this7.sale.discount : 0,
+          TaxNet: _this7.sale && _this7.sale.TaxNet ? _this7.sale.TaxNet : 0,
+          shipping: _this7.sale && _this7.sale.shipping ? _this7.sale.shipping : 0,
+          GrandTotal: _this7.GrandTotal || 0,
+          details: (_this7.details || []).map(function (d) {
+            return {
+              name: d.name,
+              quantity: d.quantity,
+              // Back-compat: keep total, but also send unit_price and line_total explicitly
+              total: d.total != null ? d.total : d.Net_price || 0,
+              unit_price: d.Net_price != null ? d.Net_price : d.Unit_price != null ? d.Unit_price : d.price != null ? d.price : 0,
+              line_total: d.total != null ? d.total : (d.Net_price || 0) * (d.quantity || 0)
+            };
+          })
+        };
+        _this7._cd_emit(payload);
+      }, 200); // small debounce
+    },
+    submitOpenRegister: function submitOpenRegister() {
+      var _this8 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2() {
+        var _yield$axios$post, data, _e$response, msg, _t2;
+        return _regenerator().w(function (_context2) {
+          while (1) switch (_context2.p = _context2.n) {
+            case 0:
+              if (_this8.registerForm.warehouse_id) {
+                _context2.n = 1;
+                break;
+              }
+              _this8.makeToast('warning', _this8.$t('Please_select_warehouse'), _this8.$t('Warning'));
+              return _context2.a(2);
+            case 1:
+              _this8.registerBusy = true;
+              _context2.p = 2;
+              _context2.n = 3;
+              return axios.post('cash-registers/open', {
+                user_id: _this8.currentUser.id,
+                warehouse_id: _this8.registerForm.warehouse_id,
+                opening_balance: _this8.registerForm.opening_balance || 0,
+                notes: _this8.registerForm.notes || ''
+              });
+            case 3:
+              _yield$axios$post = _context2.v;
+              data = _yield$axios$post.data;
+              _this8.$bvModal.hide('OpenRegisterModal');
+              _this8.makeToast('success', _this8.$t('RegisterOpened'), _this8.$t('Success'));
+              // Immediately reflect UI without waiting for fetch
+              _this8.currentRegister = data && data.register ? data.register : _this8.currentRegister;
+              // Fallback refresh to ensure latest from server
+              _this8.refreshCurrentRegister();
+              _context2.n = 5;
+              break;
+            case 4:
+              _context2.p = 4;
+              _t2 = _context2.v;
+              msg = ((_e$response = _t2.response) === null || _e$response === void 0 || (_e$response = _e$response.data) === null || _e$response === void 0 ? void 0 : _e$response.message) || _this8.$t('OperationFailed');
+              _this8.makeToast('danger', msg, _this8.$t('Failed'));
+            case 5:
+              _context2.p = 5;
+              _this8.registerBusy = false;
+              return _context2.f(5);
+            case 6:
+              return _context2.a(2);
+          }
+        }, _callee2, null, [[2, 4, 5, 6]]);
+      }))();
+    },
+    submitCloseRegister: function submitCloseRegister() {
+      var _this9 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+        var _e$response2, msg, _t3;
+        return _regenerator().w(function (_context3) {
+          while (1) switch (_context3.p = _context3.n) {
+            case 0:
+              if (_this9.currentRegister) {
+                _context3.n = 1;
+                break;
+              }
+              return _context3.a(2);
+            case 1:
+              _this9.registerBusy = true;
+              _context3.p = 2;
+              _context3.n = 3;
+              return axios.post('cash-registers/close', {
+                register_id: _this9.currentRegister.id,
+                counted_cash: _this9.closeForm.counted_cash || 0,
+                notes: _this9.closeForm.notes || ''
+              });
+            case 3:
+              _this9.$bvModal.hide('CloseRegisterModal');
+              _this9.makeToast('success', _this9.$t('RegisterClosed'), _this9.$t('Success'));
+              _this9.refreshCurrentRegister();
+              _context3.n = 5;
+              break;
+            case 4:
+              _context3.p = 4;
+              _t3 = _context3.v;
+              msg = ((_e$response2 = _t3.response) === null || _e$response2 === void 0 || (_e$response2 = _e$response2.data) === null || _e$response2 === void 0 ? void 0 : _e$response2.message) || _this9.$t('OperationFailed');
+              _this9.makeToast('danger', msg, _this9.$t('Failed'));
+            case 5:
+              _context3.p = 5;
+              _this9.registerBusy = false;
+              return _context3.f(5);
+            case 6:
+              return _context3.a(2);
+          }
+        }, _callee3, null, [[2, 4, 5, 6]]);
+      }))();
+    },
+    resolveProductImage: function resolveProductImage(imagePath) {
+      if (!imagePath) return '';
+      // If already an absolute URL, return as is
+      if (/^https?:\/\//i.test(imagePath)) return imagePath;
+      // Normalize and prefix with public images directory
+      var clean = String(imagePath).replace(/^\/+/, '');
+      return "/images/products/".concat(clean);
+    },
+    getResultValue: function getResultValue(result) {
+      return result.code + " (" + result.name + ")";
+    },
+    SearchProduct: function SearchProduct(result) {
+      if (this.load_product) {
+        this.load_product = false;
+        this.product = {};
+        if (result.product_type == 'is_service') {
+          this.product.quantity = 1;
+          this.product.code = result.code;
+        } else {
+          this.product.code = result.code;
+          this.product.current = result.qte_sale;
+          this.product.fix_stock = result.qte;
+          this.product.quantity = result.qte_sale < 1 ? result.qte_sale : 1;
+        }
+        this.product.product_variant_id = result.product_variant_id;
+        this.Get_Product_Details(result.id, result.product_variant_id, result);
+        this.search_input = '';
+        this.product_filter = [];
+      } else {
+        this.makeToast("warning", this.$t("Please_wait_until_the_product_is_loaded"), this.$t("Warning"));
       }
     }
-  }
-  var anyNewCard = this.paymentLines.some(function (p) {
-    return (p.payment_method_id === '1' || p.payment_method_id === 1) && _this13.is_new_credit_card;
-  });
-  if (anyNewCard) {
-    if (this.stripe_key !== '') {
-      this.processPayment();
+  }, (0,vuex__WEBPACK_IMPORTED_MODULE_1__.mapActions)(["changeSidebarProperties", "changeThemeMode", "logout"])), {}, (_objectSpread2 = {
+    // ... All methods from old_pos will be injected here
+    logoutUser: function logoutUser() {
+      this.$store.dispatch("logout");
+    },
+    handleFocus: function handleFocus() {
+      this.focused = true;
+    },
+    handleBlur: function handleBlur() {
+      this.focused = false;
+    },
+    showModal: function showModal() {
+      this.$bvModal.show('open_scan');
+    },
+    onScan: function onScan(decodedText, decodedResult) {
+      var code = decodedText;
+      this.search_input = code;
+      this.search();
+      this.$bvModal.hide('open_scan');
+    },
+    addPaymentLine: function addPaymentLine() {
+      this.paymentLines.push({
+        amount: 0,
+        payment_method_id: ''
+      });
+    },
+    removePaymentLine: function removePaymentLine(idx) {
+      if (this.paymentLines.length > 1) {
+        this.paymentLines.splice(idx, 1);
+      }
+    },
+    setQuickAmount: function setQuickAmount(val) {
+      // assign to current active line (e.g. last)
+      var line = this.paymentLines[this.paymentLines.length - 1];
+      line.amount = val;
+    },
+    appendDigit: function appendDigit(d) {
+      // append to the last line's amount
+      var line = this.paymentLines[this.paymentLines.length - 1];
+      var s = String(line.amount || '');
+      if (s === '0') s = d;else s += d;
+      line.amount = parseFloat(s);
+    },
+    clearInput: function clearInput() {
+      this.paymentLines[this.paymentLines.length - 1].amount = 0;
+    },
+    backspace: function backspace() {
+      var line = this.paymentLines[this.paymentLines.length - 1];
+      var s = String(line.amount || '');
+      s = s.slice(0, -1) || '0';
+      line.amount = parseFloat(s);
+    },
+    Selected_PaymentMethod: function Selected_PaymentMethod(value) {
+      var _this0 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4() {
+        return _regenerator().w(function (_context4) {
+          while (1) switch (_context4.n) {
+            case 0:
+              if (!(value == '1' || value == 1)) {
+                _context4.n = 2;
+                break;
+              }
+              _this0.savedPaymentMethods = [];
+              _this0.submit_showing_credit_card = true;
+              _this0.selectedCard = null;
+              _this0.card_id = '';
+              // Check if the customer has saved payment methods
+              _context4.n = 1;
+              return axios.get("/retrieve-customer?customerId=".concat(_this0.selectedClientId)).then(function (response) {
+                // If the customer has saved payment methods, display them
+                _this0.savedPaymentMethods = response.data.data;
+                _this0.card_id = response.data.customer_default_source;
+                _this0.hasSavedPaymentMethod = true;
+                _this0.useSavedPaymentMethod = true;
+                _this0.is_new_credit_card = false;
+                _this0.submit_showing_credit_card = false;
+              })["catch"](function (error) {
+                // If the customer does not have saved payment methods, show the card element for them to enter their payment information
+                _this0.hasSavedPaymentMethod = false;
+                _this0.useSavedPaymentMethod = false;
+                _this0.is_new_credit_card = true;
+                _this0.card_id = '';
+                setTimeout(function () {
+                  _this0.loadStripe_payment();
+                }, 1000);
+                _this0.submit_showing_credit_card = false;
+              });
+            case 1:
+              _context4.n = 3;
+              break;
+            case 2:
+              _this0.hasSavedPaymentMethod = false;
+              _this0.useSavedPaymentMethod = false;
+              _this0.is_new_credit_card = false;
+            case 3:
+              return _context4.a(2);
+          }
+        }, _callee4);
+      }))();
+    },
+    show_saved_credit_card: function show_saved_credit_card() {
+      this.hasSavedPaymentMethod = true;
+      this.useSavedPaymentMethod = true;
+      this.is_new_credit_card = false;
+      this.Selected_PaymentMethod(1);
+    },
+    show_new_credit_card: function show_new_credit_card() {
+      var _this1 = this;
+      this.selectedCard = null;
+      this.card_id = '';
+      this.useSavedPaymentMethod = false;
+      this.hasSavedPaymentMethod = false;
+      this.is_new_credit_card = true;
+      setTimeout(function () {
+        _this1.loadStripe_payment();
+      }, 500);
+    },
+    selectCard: function selectCard(card) {
+      this.selectedCard = card;
+      this.card_id = card.card_id;
+    },
+    loadStripe_payment: function loadStripe_payment() {
+      var _this10 = this;
+      return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5() {
+        var elements;
+        return _regenerator().w(function (_context5) {
+          while (1) switch (_context5.n) {
+            case 0:
+              _context5.n = 1;
+              return (0,_stripe_stripe_js__WEBPACK_IMPORTED_MODULE_6__.loadStripe)("".concat(_this10.stripe_key));
+            case 1:
+              _this10.stripe = _context5.v;
+              elements = _this10.stripe.elements();
+              _this10.cardElement = elements.create("card", {
+                classes: {
+                  base: "bg-gray-100 rounded border border-gray-300 focus:border-indigo-500 text-base outline-none text-gray-700 p-3 leading-8 transition-colors duration-200 ease-in-out"
+                }
+              });
+              _this10.cardElement.mount("#card-element");
+            case 2:
+              return _context5.a(2);
+          }
+        }, _callee5);
+      }))();
+    },
+    SetLocal: function SetLocal(locale) {
+      this.$i18n.locale = locale;
+      this.$store.dispatch("setLanguage", locale);
+      Fire.$emit("ChangeLanguage");
+      window.location.reload();
+    },
+    handleFullScreen: function handleFullScreen() {
+      _utils__WEBPACK_IMPORTED_MODULE_4__["default"].toggleFullScreen();
+    }
+  }, _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "logoutUser", function logoutUser() {
+    this.logout();
+  }), "Product_paginatePerPage", function Product_paginatePerPage() {
+    // Always paginate from the full in‑memory list; backend now returns
+    // the entire filtered collection and we handle pagination here.
+    this.paginate_products(this.product_perPage, 0);
+  }), "onProductPageItemClick", function onProductPageItemClick(item) {
+    if (typeof item === 'number' && item >= 1 && item <= this.product_lastPage && item !== this.product_currentPage) {
+      this.Product_onPageChanged(item);
+    }
+  }), "paginate_products", function paginate_products(pageSize, pageNumber) {
+    var itemsToParse = Array.isArray(this.products) ? this.products : [];
+    this.paginated_Products = itemsToParse.slice(pageNumber * pageSize, (pageNumber + 1) * pageSize);
+  }), "Product_onPageChanged", function Product_onPageChanged(page) {
+    // Pure frontend pagination: just change the visible slice,
+    // do not refetch since we already hold the full filtered list.
+    this.product_currentPage = page;
+    this.paginate_products(this.product_perPage, page - 1);
+  }), "BrandpaginatePerPage", function BrandpaginatePerPage() {
+    this.paginate_Brands(this.brand_perPage, 0);
+  }), "paginate_Brands", function paginate_Brands(pageSize, pageNumber) {
+    var itemsToParse = this.brands;
+    this.paginated_Brands = itemsToParse.slice(pageNumber * pageSize, (pageNumber + 1) * pageSize);
+  }), "BrandonPageChanged", function BrandonPageChanged(page) {
+    this.paginate_Brands(this.brand_perPage, page - 1);
+  }), "Category_paginatePerPage", function Category_paginatePerPage() {
+    this.paginate_Category(this.category_perPage, 0);
+  }), "paginate_Category", function paginate_Category(pageSize, pageNumber) {
+    var itemsToParse = this.categories;
+    this.paginated_Category = itemsToParse.slice(pageNumber * pageSize, (pageNumber + 1) * pageSize);
+  }), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "Category_onPageChanged", function Category_onPageChanged(page) {
+    this.paginate_Category(this.category_perPage, page - 1);
+  }), "Submit_Pos", function Submit_Pos() {
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    if (this.verifiedForm()) {
+      Fire.$emit("pay_now");
     } else {
-      this.makeToast('danger', this.$t('credit_card_account_not_available'), this.$t('Failed'));
       nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
     }
-  } else {
-    this.paymentProcessing = true;
-    axios.post("pos/create_pos", {
+  }), "Submit_Draft", function Submit_Draft() {
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    if (this.verifiedForm()) {
+      this.Create_Draft();
+    } else {
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+    }
+  }), "verifiedForm", function verifiedForm() {
+    if (this.selectedClientId == "" || this.selectedClientId === null) {
+      this.makeToast("danger", this.$t("Choose_Customer"), this.$t("Failed"));
+      return false;
+    } else if (this.sale.warehouse_id == "" || this.sale.warehouse_id === null) {
+      this.makeToast("danger", this.$t("Choose_Warehouse"), this.$t("Failed"));
+      return false;
+    } else if (this.details.length === 0) {
+      this.makeToast("danger", this.$t("PleaseAddProducts"), this.$t("Failed"));
+      return false;
+    }
+    return true;
+  }), "Create_Draft", function Create_Draft() {
+    var _this11 = this;
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    this.DraftProcessing = true;
+    axios.post("pos/create_draft", {
+      draft_sale_id: this.draft_sale_id || undefined,
       client_id: this.selectedClientId,
       warehouse_id: this.sale.warehouse_id,
       tax_rate: this.sale.tax_rate ? this.sale.tax_rate : 0,
@@ -2572,879 +2498,933 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       shipping: this.sale.shipping ? this.sale.shipping : 0,
       notes: this.sale.notes,
       details: this.details,
-      GrandTotal: this.GrandTotal,
-      payments: this.paymentLines,
-      send_email: this.sendEmail,
-      send_sms: this.sendSMS,
-      account_id: this.selectedAccount,
-      payment_note: this.globalPaymentNote || '',
-      is_new_credit_card: this.is_new_credit_card,
-      selectedCard: this.selectedCard,
-      card_id: this.card_id,
-      discount_from_points: this.discount_from_points,
-      used_points: this.used_points,
-      draft_sale_id: this.draft_sale_id || undefined
+      GrandTotal: this.GrandTotal
     }).then(function (response) {
       if (response.data.success === true) {
+        _this11.makeToast("success", _this11.$t("Draft_Created_successfully"), _this11.$t("Success"));
         nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-        _this13.paymentProcessing = false;
-        var saleId = response.data.id;
-        var draftId = _this13.draft_sale_id;
-        var afterCleanup = function afterCleanup() {
-          _this13.Invoice_POS(saleId);
-          _this13.$bvModal.hide("Add_Payment");
-          _this13.Reset_Pos();
-        };
-        if (draftId) {
-          axios["delete"]("remove_draft_sale/" + draftId).then(function () {
-            try {
-              Fire.$emit("event_delete_draft_sale");
-            } catch (e) {}
-          })["catch"](function () {})["finally"](function () {
-            _this13.draft_sale_id = '';
-            afterCleanup();
-          });
-        } else {
-          afterCleanup();
-        }
+        _this11.DraftProcessing = false;
+        _this11.Reset_Pos();
       }
     })["catch"](function (error) {
       nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-      _this13.paymentProcessing = false;
-      _this13.makeToast("danger", _this13.$t("InvalidData"), _this13.$t("Failed"));
+      _this11.DraftProcessing = false;
+      _this11.makeToast("danger", _this11.$t("InvalidData"), _this11.$t("Failed"));
     });
-  }
-}), "processPayment", function processPayment() {
-  var _this14 = this;
-  return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
-    var _yield$_this14$stripe, paymentMethod, error, paymentsWithMethod;
-    return _regenerator().w(function (_context6) {
-      while (1) switch (_context6.n) {
-        case 0:
-          _this14.paymentProcessing = true;
-          _context6.n = 1;
-          return _this14.stripe.createPaymentMethod({
-            type: "card",
-            card: _this14.cardElement,
-            billing_details: {
-              name: _this14.client_name || ""
-            }
-          });
-        case 1:
-          _yield$_this14$stripe = _context6.v;
-          paymentMethod = _yield$_this14$stripe.paymentMethod;
-          error = _yield$_this14$stripe.error;
-          if (error) {
-            _this14.paymentProcessing = false;
-            nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-            _this14.makeToast("danger", _this14.$t("InvalidData"), _this14.$t("Failed"));
-          } else {
-            // Attach the Stripe Payment Method ID (pm_...) to all credit‑card lines
-            paymentsWithMethod = _this14.paymentLines.map(function (p) {
-              if (p.payment_method_id === "1" || p.payment_method_id === 1) {
-                return _objectSpread(_objectSpread({}, p), {}, {
-                  payment_method_id_stripe: paymentMethod.id
-                });
-              }
-              return p;
-            });
-            axios.post("pos/create_pos", {
-              client_id: _this14.selectedClientId,
-              warehouse_id: _this14.sale.warehouse_id,
-              tax_rate: _this14.sale.tax_rate ? _this14.sale.tax_rate : 0,
-              TaxNet: _this14.sale.TaxNet ? _this14.sale.TaxNet : 0,
-              discount: _this14.sale.discount ? _this14.sale.discount : 0,
-              shipping: _this14.sale.shipping ? _this14.sale.shipping : 0,
-              details: _this14.details,
-              GrandTotal: _this14.GrandTotal,
-              notes: _this14.sale.notes,
-              payments: paymentsWithMethod,
-              send_email: _this14.sendEmail,
-              send_sms: _this14.sendSMS,
-              account_id: _this14.selectedAccount,
-              payment_note: _this14.globalPaymentNote || "",
-              is_new_credit_card: _this14.is_new_credit_card,
-              selectedCard: _this14.selectedCard,
-              card_id: _this14.card_id,
-              discount_from_points: _this14.discount_from_points,
-              used_points: _this14.used_points,
-              draft_sale_id: _this14.draft_sale_id || undefined
-            }).then(function (response) {
-              _this14.paymentProcessing = false;
-              if (response.data.success === true) {
-                nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-                var saleId = response.data.id;
-                var draftId = _this14.draft_sale_id;
-                var afterCleanup = function afterCleanup() {
-                  _this14.Invoice_POS(saleId);
-                  _this14.$bvModal.hide("Add_Payment");
-                  _this14.Reset_Pos();
-                };
-                if (draftId) {
-                  axios["delete"]("remove_draft_sale/" + draftId).then(function () {
-                    try {
-                      Fire.$emit("event_delete_draft_sale");
-                    } catch (e) {}
-                  })["catch"](function () {})["finally"](function () {
-                    _this14.draft_sale_id = "";
-                    afterCleanup();
-                  });
-                } else {
-                  afterCleanup();
-                }
-              }
-            })["catch"](function (error) {
-              _this14.paymentProcessing = false;
-              nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-              _this14.makeToast("danger", _this14.$t("InvalidData"), _this14.$t("Failed"));
-            });
-          }
-        case 2:
-          return _context6.a(2);
-      }
-    }, _callee6);
-  }))();
-}), "formatNumber", function formatNumber(number, dec) {
-  var decimals = Number.isInteger(dec) ? dec : 0;
-  var n = Number(number);
-  var safe = Number.isFinite(n) ? n : 0;
-  try {
-    return safe.toLocaleString('en-US', {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
-    });
-  } catch (e) {
-    // Fallback for environments without Intl
-    var fixed = safe.toFixed(decimals);
-    var _fixed$split = fixed.split('.'),
-      _fixed$split2 = _slicedToArray(_fixed$split, 2),
-      intPart = _fixed$split2[0],
-      fracPart = _fixed$split2[1];
-    var withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return fracPart ? "".concat(withCommas, ".").concat(fracPart) : withCommas;
-  }
-}), "formatPriceDisplay", function formatPriceDisplay(number, dec) {
-  try {
-    var decimals = Number.isInteger(dec) ? dec : 0;
-    // Prefer cached key, otherwise read from helpers/localStorage
-    var key = this.price_format_key || (0,_utils_priceFormat__WEBPACK_IMPORTED_MODULE_5__.getPriceFormatSetting)({
-      store: this.$store
-    });
-    if (key) {
-      this.price_format_key = key;
+  }), "Submit_Payment", function Submit_Payment() {
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    var total = parseFloat(this.totalPaid);
+    var due = parseFloat(this.GrandTotal.toFixed(2));
+    var multi = this.paymentLines.length > 1;
+    if (multi && total > due) {
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      this.makeToast("warning", this.$t("TotalPaidExceedsGrandTotalForMultiPayment"), this.$t("Warning"));
+      return;
     }
-    var effectiveKey = key || null;
-    return (0,_utils_priceFormat__WEBPACK_IMPORTED_MODULE_5__.formatPriceDisplay)(number, decimals, effectiveKey);
-  } catch (e) {
-    // Fallback: keep legacy behavior
-    return this.formatNumber(number, dec);
-  }
-}), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "formatPriceWithCurrentCurrency", function formatPriceWithCurrentCurrency(number, dec) {
-  var symbol = this.currentUser && this.currentUser.currency ? this.currentUser.currency : '';
-  var value = this.formatPriceDisplay(number, dec);
-  return symbol ? "".concat(symbol, " ").concat(value) : value;
-}), "formatPriceWithSymbol", function formatPriceWithSymbol(symbol, number, dec) {
-  var safeSymbol = symbol || '';
-  var value = this.formatPriceDisplay(number, dec);
-  return safeSymbol ? "".concat(safeSymbol, " ").concat(value) : value;
-}), "makeToast", function makeToast(variant, msg, title) {
-  this.$root.$bvToast.toast(msg, {
-    title: title,
-    variant: variant,
-    solid: true
-  });
-}), "CalculTotal", function CalculTotal() {
-  this.total = 0;
-  for (var i = 0; i < this.details.length; i++) {
-    var tax = this.details[i].taxe * this.details[i].quantity;
-    this.details[i].subtotal = parseFloat(this.details[i].quantity * this.details[i].Net_price + tax);
-    this.total = parseFloat(this.total + this.details[i].subtotal);
-  }
-  // Calculate discount based on type (backward compatible: default to fixed if not set)
-  var discountMethod = String(this.sale.discount_Method || '2');
-  var discountValue = Number(this.sale.discount || 0);
-  var discountAmount = 0;
-  if (discountMethod === '1') {
-    // Percentage discount on subtotal
-    var percentAmount = parseFloat((this.total * (discountValue / 100)).toFixed(2));
-    // Points-based discount is always a fixed amount; apply it in addition, but never exceed remaining subtotal
-    var remainingAfterPercent = Math.max(this.total - percentAmount, 0);
-    var pointsAmount = parseFloat(Math.min(Number(this.discount_from_points || 0), remainingAfterPercent).toFixed(2));
-    discountAmount = parseInt(percentAmount + pointsAmount);
-  } else {
-    // Fixed discount: apply both manual discount and points discount separately
-    var manualDiscount = parseFloat(Math.min(discountValue, this.total).toFixed(2));
-    var remainingAfterManual = Math.max(this.total - manualDiscount, 0);
-    var pointsDiscount = parseFloat(Math.min(Number(this.discount_from_points || 0), remainingAfterManual).toFixed(2));
-    discountAmount = parseInt(manualDiscount + pointsDiscount);
-  }
-  var total_without_discount = parseFloat((this.total - discountAmount).toFixed(2));
-  this.sale.TaxNet = parseFloat(total_without_discount * this.sale.tax_rate / 100);
-  this.GrandTotal = parseFloat(total_without_discount + this.sale.TaxNet + this.sale.shipping);
-  var grand_total = this.GrandTotal.toFixed(2);
-  this.GrandTotal = parseFloat(grand_total);
-  try {
-    this._cd_queue_broadcast && this._cd_queue_broadcast();
-  } catch (e) {}
-}), "keyup_OrderTax", function keyup_OrderTax() {
-  if (isNaN(this.sale.tax_rate)) {
-    this.sale.tax_rate = 0;
-  } else if (this.sale.tax_rate == '') {
-    this.sale.tax_rate = 0;
-    this.CalculTotal();
-  } else {
-    this.CalculTotal();
-  }
-}), "keyup_Discount", function keyup_Discount() {
-  if (isNaN(this.sale.discount)) {
-    this.sale.discount = 0;
-  } else if (this.sale.discount == '') {
-    this.sale.discount = 0;
-    this.CalculTotal();
-  } else {
-    this.CalculTotal();
-  }
-}), "toggleDiscountType", function toggleDiscountType() {
-  // Toggle between '1' (percentage) and '2' (fixed)
-  this.sale.discount_Method = this.sale.discount_Method === '1' ? '2' : '1';
-  this.CalculTotal();
-}), "getCurrentSaleDiscountAmount", function getCurrentSaleDiscountAmount() {
-  try {
-    var discountMethod = String(this.sale.discount_Method || '2'); // Default to fixed for backward compatibility
+    this.CreatePOS();
+  }), "CreatePOS", function CreatePOS() {
+    var _this12 = this;
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    if (this.paymentLines.length > 1 && this.totalPaid > this.GrandTotal) {
+      this.makeToast("warning", this.$t("TotalPaidExceedsGrandTotalForMultiPayment"), this.$t("Warning"));
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      return;
+    }
+
+    // Credit Limit Validation (0 means no limit)
+    // Only applies when this sale is adding new credit (paid amount < sale total)
+    if (this.selectedClientId && this.selectedClientCreditLimit > 0) {
+      var total = parseFloat(this.totalPaid);
+      var due = parseFloat(this.GrandTotal.toFixed(2));
+      if (total < due) {
+        // Calculate the new due amount after this sale
+        var currentDue = parseFloat(this.selectedClientNetBalance || 0);
+        var newSaleDue = due - total; // Remaining due from this sale
+        var newTotalDue = currentDue + newSaleDue;
+        if (newTotalDue > this.selectedClientCreditLimit) {
+          nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+          var exceededAmount = newTotalDue - this.selectedClientCreditLimit;
+          this.makeToast("danger", this.$t("Credit_Limit_Exceeded") + ": " + this.formatPriceWithCurrentCurrency(exceededAmount, 2) + " " + this.$t("exceeds_credit_limit_of") + " " + this.formatPriceWithCurrentCurrency(this.selectedClientCreditLimit, 2), this.$t("Warning"));
+          return;
+        }
+      }
+    }
+    var anyNewCard = this.paymentLines.some(function (p) {
+      return (p.payment_method_id === '1' || p.payment_method_id === 1) && _this12.is_new_credit_card;
+    });
+    if (anyNewCard) {
+      if (this.stripe_key !== '') {
+        this.processPayment();
+      } else {
+        this.makeToast('danger', this.$t('credit_card_account_not_available'), this.$t('Failed'));
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      }
+    } else {
+      this.paymentProcessing = true;
+      axios.post("pos/create_pos", {
+        client_id: this.selectedClientId,
+        warehouse_id: this.sale.warehouse_id,
+        tax_rate: this.sale.tax_rate ? this.sale.tax_rate : 0,
+        TaxNet: this.sale.TaxNet ? this.sale.TaxNet : 0,
+        discount: this.sale.discount ? this.sale.discount : 0,
+        discount_Method: String(this.sale.discount_Method || '2'),
+        // Ensure it's always a string: '1' for percentage, '2' for fixed
+        shipping: this.sale.shipping ? this.sale.shipping : 0,
+        notes: this.sale.notes,
+        details: this.details,
+        GrandTotal: this.GrandTotal,
+        payments: this.paymentLines,
+        send_email: this.sendEmail,
+        send_sms: this.sendSMS,
+        account_id: this.selectedAccount,
+        payment_note: this.globalPaymentNote || '',
+        is_new_credit_card: this.is_new_credit_card,
+        selectedCard: this.selectedCard,
+        card_id: this.card_id,
+        discount_from_points: this.discount_from_points,
+        used_points: this.used_points,
+        draft_sale_id: this.draft_sale_id || undefined
+      }).then(function (response) {
+        if (response.data.success === true) {
+          nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+          _this12.paymentProcessing = false;
+          var saleId = response.data.id;
+          var draftId = _this12.draft_sale_id;
+          var afterCleanup = function afterCleanup() {
+            _this12.Invoice_POS(saleId);
+            _this12.$bvModal.hide("Add_Payment");
+            _this12.Reset_Pos();
+          };
+          if (draftId) {
+            axios["delete"]("remove_draft_sale/" + draftId).then(function () {
+              try {
+                Fire.$emit("event_delete_draft_sale");
+              } catch (e) {}
+            })["catch"](function () {})["finally"](function () {
+              _this12.draft_sale_id = '';
+              afterCleanup();
+            });
+          } else {
+            afterCleanup();
+          }
+        }
+      })["catch"](function (error) {
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+        _this12.paymentProcessing = false;
+        _this12.makeToast("danger", _this12.$t("InvalidData"), _this12.$t("Failed"));
+      });
+    }
+  }), "processPayment", function processPayment() {
+    var _this13 = this;
+    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee6() {
+      var _yield$_this13$stripe, paymentMethod, error, paymentsWithMethod;
+      return _regenerator().w(function (_context6) {
+        while (1) switch (_context6.n) {
+          case 0:
+            _this13.paymentProcessing = true;
+            _context6.n = 1;
+            return _this13.stripe.createPaymentMethod({
+              type: "card",
+              card: _this13.cardElement,
+              billing_details: {
+                name: _this13.client_name || ""
+              }
+            });
+          case 1:
+            _yield$_this13$stripe = _context6.v;
+            paymentMethod = _yield$_this13$stripe.paymentMethod;
+            error = _yield$_this13$stripe.error;
+            if (error) {
+              _this13.paymentProcessing = false;
+              nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+              _this13.makeToast("danger", _this13.$t("InvalidData"), _this13.$t("Failed"));
+            } else {
+              // Attach the Stripe Payment Method ID (pm_...) to all credit‑card lines
+              paymentsWithMethod = _this13.paymentLines.map(function (p) {
+                if (p.payment_method_id === "1" || p.payment_method_id === 1) {
+                  return _objectSpread(_objectSpread({}, p), {}, {
+                    payment_method_id_stripe: paymentMethod.id
+                  });
+                }
+                return p;
+              });
+              axios.post("pos/create_pos", {
+                client_id: _this13.selectedClientId,
+                warehouse_id: _this13.sale.warehouse_id,
+                tax_rate: _this13.sale.tax_rate ? _this13.sale.tax_rate : 0,
+                TaxNet: _this13.sale.TaxNet ? _this13.sale.TaxNet : 0,
+                discount: _this13.sale.discount ? _this13.sale.discount : 0,
+                shipping: _this13.sale.shipping ? _this13.sale.shipping : 0,
+                details: _this13.details,
+                GrandTotal: _this13.GrandTotal,
+                notes: _this13.sale.notes,
+                payments: paymentsWithMethod,
+                send_email: _this13.sendEmail,
+                send_sms: _this13.sendSMS,
+                account_id: _this13.selectedAccount,
+                payment_note: _this13.globalPaymentNote || "",
+                is_new_credit_card: _this13.is_new_credit_card,
+                selectedCard: _this13.selectedCard,
+                card_id: _this13.card_id,
+                discount_from_points: _this13.discount_from_points,
+                used_points: _this13.used_points,
+                draft_sale_id: _this13.draft_sale_id || undefined
+              }).then(function (response) {
+                _this13.paymentProcessing = false;
+                if (response.data.success === true) {
+                  nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+                  var saleId = response.data.id;
+                  var draftId = _this13.draft_sale_id;
+                  var afterCleanup = function afterCleanup() {
+                    _this13.Invoice_POS(saleId);
+                    _this13.$bvModal.hide("Add_Payment");
+                    _this13.Reset_Pos();
+                  };
+                  if (draftId) {
+                    axios["delete"]("remove_draft_sale/" + draftId).then(function () {
+                      try {
+                        Fire.$emit("event_delete_draft_sale");
+                      } catch (e) {}
+                    })["catch"](function () {})["finally"](function () {
+                      _this13.draft_sale_id = "";
+                      afterCleanup();
+                    });
+                  } else {
+                    afterCleanup();
+                  }
+                }
+              })["catch"](function (error) {
+                _this13.paymentProcessing = false;
+                nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+                _this13.makeToast("danger", _this13.$t("InvalidData"), _this13.$t("Failed"));
+              });
+            }
+          case 2:
+            return _context6.a(2);
+        }
+      }, _callee6);
+    }))();
+  }), "formatNumber", function formatNumber(number, dec) {
+    var decimals = Number.isInteger(dec) ? dec : 0;
+    var n = Number(number);
+    var safe = Number.isFinite(n) ? n : 0;
+    try {
+      return safe.toLocaleString('en-US', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    } catch (e) {
+      // Fallback for environments without Intl
+      var fixed = safe.toFixed(decimals);
+      var _fixed$split = fixed.split('.'),
+        _fixed$split2 = _slicedToArray(_fixed$split, 2),
+        intPart = _fixed$split2[0],
+        fracPart = _fixed$split2[1];
+      var withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return fracPart ? "".concat(withCommas, ".").concat(fracPart) : withCommas;
+    }
+  }), "formatPriceDisplay", function formatPriceDisplay(number, dec) {
+    try {
+      var decimals = Number.isInteger(dec) ? dec : 0;
+      // Prefer cached key, otherwise read from helpers/localStorage
+      var key = this.price_format_key || (0,_utils_priceFormat__WEBPACK_IMPORTED_MODULE_5__.getPriceFormatSetting)({
+        store: this.$store
+      });
+      if (key) {
+        this.price_format_key = key;
+      }
+      var effectiveKey = key || null;
+      return (0,_utils_priceFormat__WEBPACK_IMPORTED_MODULE_5__.formatPriceDisplay)(number, decimals, effectiveKey);
+    } catch (e) {
+      // Fallback: keep legacy behavior
+      return this.formatNumber(number, dec);
+    }
+  }), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "formatPriceWithCurrentCurrency", function formatPriceWithCurrentCurrency(number, dec) {
+    var symbol = this.currentUser && this.currentUser.currency ? this.currentUser.currency : '';
+    var value = this.formatPriceDisplay(number, dec);
+    return symbol ? "".concat(symbol, " ").concat(value) : value;
+  }), "formatPriceWithSymbol", function formatPriceWithSymbol(symbol, number, dec) {
+    var safeSymbol = symbol || '';
+    var value = this.formatPriceDisplay(number, dec);
+    return safeSymbol ? "".concat(safeSymbol, " ").concat(value) : value;
+  }), "makeToast", function makeToast(variant, msg, title) {
+    this.$root.$bvToast.toast(msg, {
+      title: title,
+      variant: variant,
+      solid: true
+    });
+  }), "CalculTotal", function CalculTotal() {
+    this.total = 0;
+    for (var i = 0; i < this.details.length; i++) {
+      var tax = this.details[i].taxe * this.details[i].quantity;
+      this.details[i].subtotal = parseFloat(this.details[i].quantity * this.details[i].Net_price + tax);
+      this.total = parseFloat(this.total + this.details[i].subtotal);
+    }
+    // Calculate discount based on type (backward compatible: default to fixed if not set)
+    var discountMethod = String(this.sale.discount_Method || '2');
     var discountValue = Number(this.sale.discount || 0);
-    var subtotal = this.total || 0;
+    var discountAmount = 0;
     if (discountMethod === '1') {
       // Percentage discount on subtotal
-      var percentAmount = parseFloat((subtotal * (discountValue / 100)).toFixed(2));
-      // Points-based discount is always a fixed amount; add it for display
-      var remainingAfterPercent = Math.max(subtotal - percentAmount, 0);
+      var percentAmount = parseFloat((this.total * (discountValue / 100)).toFixed(2));
+      // Points-based discount is always a fixed amount; apply it in addition, but never exceed remaining subtotal
+      var remainingAfterPercent = Math.max(this.total - percentAmount, 0);
       var pointsAmount = parseFloat(Math.min(Number(this.discount_from_points || 0), remainingAfterPercent).toFixed(2));
-      return percentAmount + pointsAmount;
+      discountAmount = parseInt(percentAmount + pointsAmount);
     } else {
       // Fixed discount: apply both manual discount and points discount separately
-      var manualDiscount = parseFloat(Math.min(discountValue, subtotal).toFixed(2));
-      var remainingAfterManual = Math.max(subtotal - manualDiscount, 0);
+      var manualDiscount = parseFloat(Math.min(discountValue, this.total).toFixed(2));
+      var remainingAfterManual = Math.max(this.total - manualDiscount, 0);
       var pointsDiscount = parseFloat(Math.min(Number(this.discount_from_points || 0), remainingAfterManual).toFixed(2));
-      return manualDiscount + pointsDiscount;
+      discountAmount = parseInt(manualDiscount + pointsDiscount);
     }
-  } catch (e) {
-    return Number(this.sale.discount || 0);
-  }
-}), "keyup_Shipping", function keyup_Shipping() {
-  if (isNaN(this.sale.shipping)) {
-    this.sale.shipping = 0;
-  } else if (this.sale.shipping == '') {
-    this.sale.shipping = 0;
+    var total_without_discount = parseFloat((this.total - discountAmount).toFixed(2));
+    this.sale.TaxNet = parseFloat(total_without_discount * this.sale.tax_rate / 100);
+    this.GrandTotal = parseFloat(total_without_discount + this.sale.TaxNet + this.sale.shipping);
+    var grand_total = this.GrandTotal.toFixed(2);
+    this.GrandTotal = parseFloat(grand_total);
+    try {
+      this._cd_queue_broadcast && this._cd_queue_broadcast();
+    } catch (e) {}
+  }), "keyup_OrderTax", function keyup_OrderTax() {
+    if (isNaN(this.sale.tax_rate)) {
+      this.sale.tax_rate = 0;
+    } else if (this.sale.tax_rate == '') {
+      this.sale.tax_rate = 0;
+      this.CalculTotal();
+    } else {
+      this.CalculTotal();
+    }
+  }), "keyup_Discount", function keyup_Discount() {
+    if (isNaN(this.sale.discount)) {
+      this.sale.discount = 0;
+    } else if (this.sale.discount == '') {
+      this.sale.discount = 0;
+      this.CalculTotal();
+    } else {
+      this.CalculTotal();
+    }
+  }), "toggleDiscountType", function toggleDiscountType() {
+    // Toggle between '1' (percentage) and '2' (fixed)
+    this.sale.discount_Method = this.sale.discount_Method === '1' ? '2' : '1';
     this.CalculTotal();
-  } else {
-    this.CalculTotal();
-  }
-}), "Get_Product_Details", function Get_Product_Details(product_id, variant_id) {
-  var _arguments = arguments,
-    _this15 = this;
-  return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9() {
-    var sourceProduct, warehouseId, applyDetail, reallyOffline, buildDetailFromSource, loadFromOfflineCacheOrSource, loaded, fromSourceOnline;
-    return _regenerator().w(function (_context9) {
-      while (1) switch (_context9.n) {
-        case 0:
-          sourceProduct = _arguments.length > 2 && _arguments[2] !== undefined ? _arguments[2] : null;
-          warehouseId = _this15.sale && _this15.sale.warehouse_id ? _this15.sale.warehouse_id : null;
-          applyDetail = function applyDetail(data) {
-            if (!data) return;
-            _this15.product.discount = data.discount;
-            _this15.product.DiscountNet = data.DiscountNet;
-            _this15.product.discount_Method = data.discount_method;
-            _this15.product.product_id = data.id;
-            _this15.product.product_type = data.product_type;
-            _this15.product.name = data.name;
-            _this15.product.Net_price = data.Net_price;
-            _this15.product.Total_price = data.Total_price;
-            _this15.product.Unit_price = data.Unit_price;
-            _this15.product.Unit_price_wholesale = data.Unit_price_wholesale;
-            _this15.product.wholesale_Net_price = data.wholesale_Net_price;
-            _this15.product.min_price = data.min_price || 0;
-            _this15.product.retail_unit_price = data.Unit_price;
-            _this15.product.wholesale_unit_price = data.Unit_price_wholesale;
-            _this15.product.price_type = 'retail';
-            _this15.product.taxe = data.tax_price;
-            _this15.product.tax_method = data.tax_method;
-            _this15.product.tax_percent = data.tax_percent;
-            _this15.product.unitSale = data.unitSale;
-            _this15.product.product_variant_id = variant_id;
-            _this15.product.code = data.code;
-            _this15.product.fix_price = data.fix_price;
-            _this15.product.sale_unit_id = data.sale_unit_id;
-            _this15.product.is_imei = data.is_imei;
-            _this15.product.imei_number = '';
+  }), "getCurrentSaleDiscountAmount", function getCurrentSaleDiscountAmount() {
+    try {
+      var discountMethod = String(this.sale.discount_Method || '2'); // Default to fixed for backward compatibility
+      var discountValue = Number(this.sale.discount || 0);
+      var subtotal = this.total || 0;
+      if (discountMethod === '1') {
+        // Percentage discount on subtotal
+        var percentAmount = parseFloat((subtotal * (discountValue / 100)).toFixed(2));
+        // Points-based discount is always a fixed amount; add it for display
+        var remainingAfterPercent = Math.max(subtotal - percentAmount, 0);
+        var pointsAmount = parseFloat(Math.min(Number(this.discount_from_points || 0), remainingAfterPercent).toFixed(2));
+        return percentAmount + pointsAmount;
+      } else {
+        // Fixed discount: apply both manual discount and points discount separately
+        var manualDiscount = parseFloat(Math.min(discountValue, subtotal).toFixed(2));
+        var remainingAfterManual = Math.max(subtotal - manualDiscount, 0);
+        var pointsDiscount = parseFloat(Math.min(Number(this.discount_from_points || 0), remainingAfterManual).toFixed(2));
+        return manualDiscount + pointsDiscount;
+      }
+    } catch (e) {
+      return Number(this.sale.discount || 0);
+    }
+  }), "keyup_Shipping", function keyup_Shipping() {
+    if (isNaN(this.sale.shipping)) {
+      this.sale.shipping = 0;
+    } else if (this.sale.shipping == '') {
+      this.sale.shipping = 0;
+      this.CalculTotal();
+    } else {
+      this.CalculTotal();
+    }
+  }), "Get_Product_Details", function Get_Product_Details(product_id, variant_id) {
+    var _arguments = arguments,
+      _this14 = this;
+    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee9() {
+      var sourceProduct, warehouseId, applyDetail, reallyOffline, buildDetailFromSource, loadFromOfflineCacheOrSource, loaded, fromSourceOnline;
+      return _regenerator().w(function (_context9) {
+        while (1) switch (_context9.n) {
+          case 0:
+            sourceProduct = _arguments.length > 2 && _arguments[2] !== undefined ? _arguments[2] : null;
+            warehouseId = _this14.sale && _this14.sale.warehouse_id ? _this14.sale.warehouse_id : null;
+            applyDetail = function applyDetail(data) {
+              if (!data) return;
+              _this14.product.discount = data.discount;
+              _this14.product.DiscountNet = data.DiscountNet;
+              _this14.product.discount_Method = data.discount_method;
+              _this14.product.product_id = data.id;
+              _this14.product.product_type = data.product_type;
+              _this14.product.name = data.name;
+              _this14.product.Net_price = data.Net_price;
+              _this14.product.Total_price = data.Total_price;
+              _this14.product.Unit_price = data.Unit_price;
+              _this14.product.Unit_price_wholesale = data.Unit_price_wholesale;
+              _this14.product.wholesale_Net_price = data.wholesale_Net_price;
+              _this14.product.min_price = data.min_price || 0;
+              _this14.product.retail_unit_price = data.Unit_price;
+              _this14.product.wholesale_unit_price = data.Unit_price_wholesale;
+              _this14.product.price_type = 'retail';
+              _this14.product.taxe = data.tax_price;
+              _this14.product.tax_method = data.tax_method;
+              _this14.product.tax_percent = data.tax_percent;
+              _this14.product.unitSale = data.unitSale;
+              _this14.product.product_variant_id = variant_id;
+              _this14.product.code = data.code;
+              _this14.product.fix_price = data.fix_price;
+              _this14.product.sale_unit_id = data.sale_unit_id;
+              _this14.product.is_imei = data.is_imei;
+              _this14.product.imei_number = '';
 
-            // Set current stock quantity from warehouse data (already adjusted for shadow stock if applied below)
-            _this15.product.current = data.qte_sale || 0;
-            _this15.product.fix_stock = data.qte || 0;
+              // Set current stock quantity from warehouse data (already adjusted for shadow stock if applied below)
+              _this14.product.current = data.qte_sale || 0;
+              _this14.product.fix_stock = data.qte || 0;
 
-            // Ensure a valid default quantity when adding directly from the grid
-            if (_this15.product.product_type === 'is_service') {
-              _this15.product.quantity = 1;
-            } else if (_this15.product.quantity === undefined || _this15.product.quantity === null || _this15.product.quantity <= 0) {
-              _this15.product.quantity = _this15.product.current < 1 ? _this15.product.current : 1;
-            }
-            _this15.add_product(data.code);
-            _this15.CalculTotal();
-          };
-          reallyOffline = !_this15.isOnline || typeof window !== 'undefined' && window.navigator && window.navigator.onLine === false; // Helper: build a detail object from a sourceProduct row that came
-          // directly from the backend (get_products_pos). This is used in BOTH
-          // online and offline modes, but in online mode we *only* use this and
-          // do not read from any offline cache.
-          buildDetailFromSource = function buildDetailFromSource() {
-            var p = sourceProduct;
-            if (!p || _typeof(p) !== 'object') return null;
-            var detail = {
-              id: p.id,
-              product_type: p.product_type,
-              name: p.name,
-              // Pricing fields – prefer Net_price, then Unit_price/price
-              Net_price: p.Net_price != null ? p.Net_price : p.Unit_price != null ? p.Unit_price : p.price != null ? p.price : 0,
-              Unit_price: p.Unit_price != null ? p.Unit_price : p.Net_price != null ? p.Net_price : p.price != null ? p.price : 0,
-              Unit_price_wholesale: p.Unit_price_wholesale != null ? p.Unit_price_wholesale : p.Unit_price != null ? p.Unit_price : p.Net_price != null ? p.Net_price : 0,
-              wholesale_Net_price: p.wholesale_Net_price != null ? p.wholesale_Net_price : p.Net_price != null ? p.Net_price : 0,
-              min_price: p.min_price != null ? p.min_price : 0,
-              // Discount & tax
-              discount: p.discount != null ? p.discount : 0,
-              DiscountNet: p.DiscountNet != null ? p.DiscountNet : 0,
-              discount_method: p.discount_Method != null ? p.discount_Method : '2',
-              tax_price: p.tax_price != null ? p.tax_price : 0,
-              tax_method: p.tax_method != null ? p.tax_method : 1,
-              tax_percent: p.tax_percent != null ? p.tax_percent : 0,
-              // Units & codes
-              unitSale: p.unitSale,
-              code: p.code,
-              sale_unit_id: p.sale_unit_id,
-              // Stock
-              qte_sale: p.qte_sale != null ? p.qte_sale : 0,
-              qte: p.qte != null ? p.qte : 0,
-              // Other flags
-              fix_price: p.fix_price,
-              is_imei: p.is_imei
+              // Ensure a valid default quantity when adding directly from the grid
+              if (_this14.product.product_type === 'is_service') {
+                _this14.product.quantity = 1;
+              } else if (_this14.product.quantity === undefined || _this14.product.quantity === null || _this14.product.quantity <= 0) {
+                _this14.product.quantity = _this14.product.current < 1 ? _this14.product.current : 1;
+              }
+              _this14.add_product(data.code);
+              _this14.CalculTotal();
             };
+            reallyOffline = !_this14.isOnline || typeof window !== 'undefined' && window.navigator && window.navigator.onLine === false; // Helper: build a detail object from a sourceProduct row that came
+            // directly from the backend (get_products_pos). This is used in BOTH
+            // online and offline modes, but in online mode we *only* use this and
+            // do not read from any offline cache.
+            buildDetailFromSource = function buildDetailFromSource() {
+              var p = sourceProduct;
+              if (!p || _typeof(p) !== 'object') return null;
+              var detail = {
+                id: p.id,
+                product_type: p.product_type,
+                name: p.name,
+                // Pricing fields – prefer Net_price, then Unit_price/price
+                Net_price: p.Net_price != null ? p.Net_price : p.Unit_price != null ? p.Unit_price : p.price != null ? p.price : 0,
+                Unit_price: p.Unit_price != null ? p.Unit_price : p.Net_price != null ? p.Net_price : p.price != null ? p.price : 0,
+                Unit_price_wholesale: p.Unit_price_wholesale != null ? p.Unit_price_wholesale : p.Unit_price != null ? p.Unit_price : p.Net_price != null ? p.Net_price : 0,
+                wholesale_Net_price: p.wholesale_Net_price != null ? p.wholesale_Net_price : p.Net_price != null ? p.Net_price : 0,
+                min_price: p.min_price != null ? p.min_price : 0,
+                // Discount & tax
+                discount: p.discount != null ? p.discount : 0,
+                DiscountNet: p.DiscountNet != null ? p.DiscountNet : 0,
+                discount_method: p.discount_Method != null ? p.discount_Method : '2',
+                tax_price: p.tax_price != null ? p.tax_price : 0,
+                tax_method: p.tax_method != null ? p.tax_method : 1,
+                tax_percent: p.tax_percent != null ? p.tax_percent : 0,
+                // Units & codes
+                unitSale: p.unitSale,
+                code: p.code,
+                sale_unit_id: p.sale_unit_id,
+                // Stock
+                qte_sale: p.qte_sale != null ? p.qte_sale : 0,
+                qte: p.qte != null ? p.qte : 0,
+                // Other flags
+                fix_price: p.fix_price,
+                is_imei: p.is_imei
+              };
 
-            // Ensure price fields (Net_price, taxe, Total_price) are consistent,
-            // using the same logic as draft loading.
-            try {
-              var unitPrice = Number(detail.Unit_price || 0);
-              var discountVal = Number(detail.discount || 0);
-              var discountMethod = String(detail.discount_method || '2'); // 1: %, 2: fixed
-              var taxPercent = Number(detail.tax_percent || 0);
-              var taxMethod = String(detail.tax_method || '1'); // 1: Exclusive, 2: Inclusive
+              // Ensure price fields (Net_price, taxe, Total_price) are consistent,
+              // using the same logic as draft loading.
+              try {
+                var unitPrice = Number(detail.Unit_price || 0);
+                var discountVal = Number(detail.discount || 0);
+                var discountMethod = String(detail.discount_method || '2'); // 1: %, 2: fixed
+                var taxPercent = Number(detail.tax_percent || 0);
+                var taxMethod = String(detail.tax_method || '1'); // 1: Exclusive, 2: Inclusive
 
-              if (!detail.DiscountNet && discountVal) {
-                detail.DiscountNet = discountMethod === '2' ? discountVal : unitPrice * (discountVal / 100);
-              } else if (detail.DiscountNet == null) {
-                detail.DiscountNet = 0;
-              }
-              if (!detail.Net_price || !detail.Total_price) {
-                if (taxMethod === '1') {
-                  // Tax exclusive
-                  var net = unitPrice - detail.DiscountNet;
-                  var taxe = (unitPrice - detail.DiscountNet) * (taxPercent / 100);
-                  detail.Net_price = parseFloat(net.toFixed(2));
-                  detail.taxe = parseFloat(taxe.toFixed(2));
-                  detail.Total_price = parseFloat((net + taxe).toFixed(2));
-                } else {
-                  // Tax inclusive
-                  var _taxe = (unitPrice - detail.DiscountNet) * (taxPercent / 100);
-                  var _net = unitPrice - _taxe - detail.DiscountNet;
-                  detail.taxe = parseFloat(_taxe.toFixed(2));
-                  detail.Net_price = parseFloat(_net.toFixed(2));
-                  detail.Total_price = parseFloat((_net + _taxe).toFixed(2));
+                if (!detail.DiscountNet && discountVal) {
+                  detail.DiscountNet = discountMethod === '2' ? discountVal : unitPrice * (discountVal / 100);
+                } else if (detail.DiscountNet == null) {
+                  detail.DiscountNet = 0;
                 }
-              }
-            } catch (e2) {}
-            return detail;
-          }; // Helper function to load from OFFLINE cache first, then fall back to
-          // sourceProduct. This is used only when reallyOffline is true so that
-          // existing offline behaviour remains unchanged.
-          loadFromOfflineCacheOrSource = /*#__PURE__*/function () {
-            var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7() {
-              var cached, detail, baseQte, detailFromSource, _t4, _t5;
-              return _regenerator().w(function (_context7) {
-                while (1) switch (_context7.p = _context7.n) {
-                  case 0:
-                    _context7.p = 0;
-                    if (!(_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getProductDetail)) {
-                      _context7.n = 6;
-                      break;
-                    }
-                    cached = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getProductDetail(warehouseId, product_id, variant_id);
-                    if (!cached) {
-                      _context7.n = 6;
-                      break;
-                    }
-                    detail = _objectSpread({}, cached);
-                    if (!reallyOffline) {
+                if (!detail.Net_price || !detail.Total_price) {
+                  if (taxMethod === '1') {
+                    // Tax exclusive
+                    var net = unitPrice - detail.DiscountNet;
+                    var taxe = (unitPrice - detail.DiscountNet) * (taxPercent / 100);
+                    detail.Net_price = parseFloat(net.toFixed(2));
+                    detail.taxe = parseFloat(taxe.toFixed(2));
+                    detail.Total_price = parseFloat((net + taxe).toFixed(2));
+                  } else {
+                    // Tax inclusive
+                    var _taxe = (unitPrice - detail.DiscountNet) * (taxPercent / 100);
+                    var _net = unitPrice - _taxe - detail.DiscountNet;
+                    detail.taxe = parseFloat(_taxe.toFixed(2));
+                    detail.Net_price = parseFloat(_net.toFixed(2));
+                    detail.Total_price = parseFloat((_net + _taxe).toFixed(2));
+                  }
+                }
+              } catch (e2) {}
+              return detail;
+            }; // Helper function to load from OFFLINE cache first, then fall back to
+            // sourceProduct. This is used only when reallyOffline is true so that
+            // existing offline behaviour remains unchanged.
+            loadFromOfflineCacheOrSource = /*#__PURE__*/function () {
+              var _ref2 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee7() {
+                var cached, detail, baseQte, detailFromSource, _t4, _t5;
+                return _regenerator().w(function (_context7) {
+                  while (1) switch (_context7.p = _context7.n) {
+                    case 0:
+                      _context7.p = 0;
+                      if (!(_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getProductDetail)) {
+                        _context7.n = 6;
+                        break;
+                      }
+                      cached = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getProductDetail(warehouseId, product_id, variant_id);
+                      if (!cached) {
+                        _context7.n = 6;
+                        break;
+                      }
+                      detail = _objectSpread({}, cached);
+                      if (!reallyOffline) {
+                        _context7.n = 5;
+                        break;
+                      }
+                      _context7.p = 1;
+                      if (!(_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.getAvailableQuantity && warehouseId && product_id)) {
+                        _context7.n = 3;
+                        break;
+                      }
+                      baseQte = detail.qte_sale || 0;
+                      _context7.n = 2;
+                      return _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.getAvailableQuantity(warehouseId, product_id, variant_id, baseQte);
+                    case 2:
+                      detail.qte_sale = _context7.v;
+                    case 3:
                       _context7.n = 5;
                       break;
-                    }
-                    _context7.p = 1;
-                    if (!(_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.getAvailableQuantity && warehouseId && product_id)) {
-                      _context7.n = 3;
+                    case 4:
+                      _context7.p = 4;
+                      _t4 = _context7.v;
+                    case 5:
+                      applyDetail(detail);
+                      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+                      return _context7.a(2, true);
+                    case 6:
+                      _context7.n = 8;
                       break;
-                    }
-                    baseQte = detail.qte_sale || 0;
-                    _context7.n = 2;
-                    return _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.getAvailableQuantity(warehouseId, product_id, variant_id, baseQte);
-                  case 2:
-                    detail.qte_sale = _context7.v;
-                  case 3:
-                    _context7.n = 5;
-                    break;
-                  case 4:
-                    _context7.p = 4;
-                    _t4 = _context7.v;
-                  case 5:
-                    applyDetail(detail);
-                    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-                    return _context7.a(2, true);
-                  case 6:
-                    _context7.n = 8;
-                    break;
-                  case 7:
-                    _context7.p = 7;
-                    _t5 = _context7.v;
-                  case 8:
-                    detailFromSource = buildDetailFromSource();
-                    if (!detailFromSource) {
-                      _context7.n = 9;
-                      break;
-                    }
-                    applyDetail(detailFromSource);
-                    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-                    return _context7.a(2, true);
-                  case 9:
-                    return _context7.a(2, false);
-                }
-              }, _callee7, null, [[1, 4], [0, 7]]);
-            }));
-            return function loadFromOfflineCacheOrSource() {
-              return _ref2.apply(this, arguments);
-            };
-          }(); // OFFLINE MODE: keep existing behaviour – use offline cache and
-          // sourceProduct, never call the backend.
-          if (!reallyOffline) {
-            _context9.n = 2;
-            break;
-          }
-          _context9.n = 1;
-          return loadFromOfflineCacheOrSource();
-        case 1:
-          loaded = _context9.v;
-          if (!loaded) {
-            _this15.makeToast("danger", _this15.$t("InvalidData"), _this15.$t("Failed"));
-            nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-          }
-          return _context9.a(2, Promise.resolve());
-        case 2:
-          // ONLINE MODE: product data should come directly from the backend and
-          // not from any offline cache. We therefore ignore `offlinePos` here and
-          // use only:
-          //   1) The preloaded backend rows (sourceProduct from get_products_pos)
-          //   2) As a fallback, a direct `/show_product_data` request for this
-          //      specific product.
-          fromSourceOnline = buildDetailFromSource();
-          if (!fromSourceOnline) {
-            _context9.n = 3;
-            break;
-          }
-          applyDetail(fromSourceOnline);
-          nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-          return _context9.a(2, Promise.resolve());
-        case 3:
-          return _context9.a(2, axios.get("/show_product_data/" + product_id + "/" + variant_id + "/" + warehouseId).then(/*#__PURE__*/function () {
-            var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(response) {
-              var detail;
-              return _regenerator().w(function (_context8) {
-                while (1) switch (_context8.n) {
-                  case 0:
-                    detail = response.data;
-                    applyDetail(detail);
-                    // Cache for offline usage (writing cache is fine; online paths do
-                    // not read from it).
-                    try {
-                      if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheProductDetail) {
-                        _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheProductDetail(warehouseId, product_id, variant_id, detail);
+                    case 7:
+                      _context7.p = 7;
+                      _t5 = _context7.v;
+                    case 8:
+                      detailFromSource = buildDetailFromSource();
+                      if (!detailFromSource) {
+                        _context7.n = 9;
+                        break;
                       }
-                    } catch (e) {}
-                    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-                  case 1:
-                    return _context8.a(2);
-                }
-              }, _callee8);
-            }));
-            return function (_x) {
-              return _ref3.apply(this, arguments);
-            };
-          }())["catch"](function () {
-            _this15.makeToast("danger", _this15.$t("InvalidData"), _this15.$t("Failed"));
+                      applyDetail(detailFromSource);
+                      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+                      return _context7.a(2, true);
+                    case 9:
+                      return _context7.a(2, false);
+                  }
+                }, _callee7, null, [[1, 4], [0, 7]]);
+              }));
+              return function loadFromOfflineCacheOrSource() {
+                return _ref2.apply(this, arguments);
+              };
+            }(); // OFFLINE MODE: keep existing behaviour – use offline cache and
+            // sourceProduct, never call the backend.
+            if (!reallyOffline) {
+              _context9.n = 2;
+              break;
+            }
+            _context9.n = 1;
+            return loadFromOfflineCacheOrSource();
+          case 1:
+            loaded = _context9.v;
+            if (!loaded) {
+              _this14.makeToast("danger", _this14.$t("InvalidData"), _this14.$t("Failed"));
+              nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+            }
+            return _context9.a(2, Promise.resolve());
+          case 2:
+            // ONLINE MODE: product data should come directly from the backend and
+            // not from any offline cache. We therefore ignore `offlinePos` here and
+            // use only:
+            //   1) The preloaded backend rows (sourceProduct from get_products_pos)
+            //   2) As a fallback, a direct `/show_product_data` request for this
+            //      specific product.
+            fromSourceOnline = buildDetailFromSource();
+            if (!fromSourceOnline) {
+              _context9.n = 3;
+              break;
+            }
+            applyDetail(fromSourceOnline);
             nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-          }));
-      }
-    }, _callee9);
-  }))();
-}), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "add_product", function add_product(code) {
-  var _this16 = this;
-  // Play sound only if barcode scanning sound is enabled
-  if (this.pos_settings.barcode_scanning_sound) {
-    this.audio.play();
-  }
-  // 1) If product already exists in the list (ignore price_type), merge and just increase quantity
-  var hasProductIds = this.product.product_id !== undefined && this.product.product_id !== null;
-  var targetVariantId = this.product.product_variant_id === undefined || this.product.product_variant_id === null ? null : this.product.product_variant_id;
-  var existingIndex = this.details.findIndex(function (d) {
-    var dVariant = d.product_variant_id === undefined || d.product_variant_id === null ? null : d.product_variant_id;
-    var rowHasId = d.product_id !== undefined && d.product_id !== null;
-    // Prefer strict match by ids when both sides have ids
-    if (hasProductIds && rowHasId) {
-      return d.product_id === _this16.product.product_id && dVariant === targetVariantId && d.sale_unit_id === _this16.product.sale_unit_id;
+            return _context9.a(2, Promise.resolve());
+          case 3:
+            return _context9.a(2, axios.get("/show_product_data/" + product_id + "/" + variant_id + "/" + warehouseId).then(/*#__PURE__*/function () {
+              var _ref3 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee8(response) {
+                var detail;
+                return _regenerator().w(function (_context8) {
+                  while (1) switch (_context8.n) {
+                    case 0:
+                      detail = response.data;
+                      applyDetail(detail);
+                      // Cache for offline usage (writing cache is fine; online paths do
+                      // not read from it).
+                      try {
+                        if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheProductDetail) {
+                          _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheProductDetail(warehouseId, product_id, variant_id, detail);
+                        }
+                      } catch (e) {}
+                      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+                    case 1:
+                      return _context8.a(2);
+                  }
+                }, _callee8);
+              }));
+              return function (_x) {
+                return _ref3.apply(this, arguments);
+              };
+            }())["catch"](function () {
+              _this14.makeToast("danger", _this14.$t("InvalidData"), _this14.$t("Failed"));
+              nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+            }));
+        }
+      }, _callee9);
+    }))();
+  }), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "add_product", function add_product(code) {
+    var _this15 = this;
+    // Play sound only if barcode scanning sound is enabled
+    if (this.pos_settings.barcode_scanning_sound) {
+      this.audio.play();
     }
-    // Fallback to matching by code + unit when ids are not available
-    return d.code === _this16.product.code && d.sale_unit_id === _this16.product.sale_unit_id;
-  });
-  if (existingIndex !== -1) {
-    var row = this.details[existingIndex];
-    var addQty = typeof this.product.quantity === 'number' && this.product.quantity > 0 ? this.product.quantity : 1;
-    if (row.product_type !== 'is_service') {
-      var desiredQty = row.quantity + addQty;
-      if (desiredQty > row.current) {
-        this.makeToast("warning", this.$t("LowStock"), this.$t("Warning"));
-        row.quantity = row.current;
-      } else {
-        row.quantity = desiredQty;
+    // 1) If product already exists in the list (ignore price_type), merge and just increase quantity
+    var hasProductIds = this.product.product_id !== undefined && this.product.product_id !== null;
+    var targetVariantId = this.product.product_variant_id === undefined || this.product.product_variant_id === null ? null : this.product.product_variant_id;
+    var existingIndex = this.details.findIndex(function (d) {
+      var dVariant = d.product_variant_id === undefined || d.product_variant_id === null ? null : d.product_variant_id;
+      var rowHasId = d.product_id !== undefined && d.product_id !== null;
+      // Prefer strict match by ids when both sides have ids
+      if (hasProductIds && rowHasId) {
+        return d.product_id === _this15.product.product_id && dVariant === targetVariantId && d.sale_unit_id === _this15.product.sale_unit_id;
       }
-    } else {
-      row.quantity = row.quantity + addQty;
+      // Fallback to matching by code + unit when ids are not available
+      return d.code === _this15.product.code && d.sale_unit_id === _this15.product.sale_unit_id;
+    });
+    if (existingIndex !== -1) {
+      var row = this.details[existingIndex];
+      var addQty = typeof this.product.quantity === 'number' && this.product.quantity > 0 ? this.product.quantity : 1;
+      if (row.product_type !== 'is_service') {
+        var desiredQty = row.quantity + addQty;
+        if (desiredQty > row.current) {
+          this.makeToast("warning", this.$t("LowStock"), this.$t("Warning"));
+          row.quantity = row.current;
+        } else {
+          row.quantity = desiredQty;
+        }
+      } else {
+        row.quantity = row.quantity + addQty;
+      }
+      this.CalculTotal();
+      this.$forceUpdate();
+      setTimeout(function () {
+        _this15.load_product = true;
+      }, 300);
+      if (row.is_imei) {
+        this.Modal_Updat_Detail(row);
+      }
+      return;
+    }
+
+    // 2) No existing row → create a new one
+    if (this.details.length > 0) {
+      this.order_detail_id();
+    } else if (this.details.length === 0) {
+      this.product.detail_id = 1;
+    }
+    // initialize price type fields before pushing
+    if (!this.product.price_type) {
+      this.product.price_type = 'retail';
+    }
+    if (!this.product.retail_unit_price) {
+      this.product.retail_unit_price = this.product.Unit_price;
+    }
+    if (!this.product.wholesale_unit_price) {
+      this.product.wholesale_unit_price = this.product.Unit_price_wholesale;
+    }
+
+    // push a cloned object to avoid accidental reference sharing
+    var newItem = JSON.parse(JSON.stringify(this.product));
+    if (!newItem.price_type) newItem.price_type = 'retail';
+    // ensure reactivity for newly-added prop on some browsers
+    this.$set(newItem, 'price_type', newItem.price_type || 'retail');
+    // Apply min_price on add: ensure Net_price >= min_price by adjusting Unit_price if required
+    try {
+      var min = Number(newItem.min_price || 0);
+      var taxMethod = String(newItem.tax_method || '1');
+      var discountMethod = String(newItem.discount_Method || '2');
+      var discountVal = Number(newItem.discount || 0);
+      var taxRate = Number(newItem.tax_percent || 0) / 100;
+      var currentNet = Number(newItem.Net_price || 0);
+      if (min > 0 && currentNet < min) {
+        var unitPriceCandidate = Number(newItem.Unit_price || 0);
+        if (taxMethod === '1') {
+          if (discountMethod === '1') {
+            var denom = 1 - discountVal / 100;
+            unitPriceCandidate = denom > 0 ? min / denom : min;
+          } else {
+            unitPriceCandidate = min + discountVal;
+          }
+          var discountNet = discountMethod === '1' ? unitPriceCandidate * (discountVal / 100) : discountVal;
+          var net = unitPriceCandidate - discountNet;
+          var tax = (unitPriceCandidate - discountNet) * taxRate;
+          newItem.Unit_price = parseFloat(unitPriceCandidate.toFixed(2));
+          newItem.DiscountNet = parseFloat(discountNet.toFixed(2));
+          newItem.Net_price = parseFloat(net.toFixed(2));
+          newItem.taxe = parseFloat(tax.toFixed(2));
+          newItem.Total_price = parseFloat((net + tax).toFixed(2));
+        } else {
+          if (discountMethod === '1') {
+            var _denom = (1 - discountVal / 100) * (1 - taxRate);
+            unitPriceCandidate = _denom > 0 ? min / _denom : min;
+          } else {
+            var _denom2 = 1 - taxRate;
+            unitPriceCandidate = (_denom2 > 0 ? min / _denom2 : min) + discountVal;
+          }
+          var _discountNet = discountMethod === '1' ? unitPriceCandidate * (discountVal / 100) : discountVal;
+          var taxBase = unitPriceCandidate - _discountNet;
+          var _tax = taxBase * taxRate;
+          var _net2 = taxBase - _tax;
+          newItem.Unit_price = parseFloat(unitPriceCandidate.toFixed(2));
+          newItem.DiscountNet = parseFloat(_discountNet.toFixed(2));
+          newItem.taxe = parseFloat(_tax.toFixed(2));
+          newItem.Net_price = parseFloat(_net2.toFixed(2));
+          newItem.Total_price = parseFloat((_net2 + _tax).toFixed(2));
+        }
+        if (newItem.price_type === 'wholesale') {
+          newItem.wholesale_unit_price = newItem.Unit_price;
+        } else {
+          newItem.retail_unit_price = newItem.Unit_price;
+        }
+      }
+    } catch (e) {}
+    this.details.unshift(newItem);
+    setTimeout(function () {
+      _this15.load_product = true;
+    }, 300);
+    if (newItem.is_imei) {
+      this.Modal_Updat_Detail(newItem);
+    }
+  }), "order_detail_id", function order_detail_id() {
+    var id = 0;
+    for (var i = 0; i < this.details.length; i++) {
+      if (this.details[i].detail_id > id) {
+        id = this.details[i].detail_id;
+      }
+    }
+    this.product.detail_id = id + 1;
+  }), "increment_qty_scanner", function increment_qty_scanner(code) {
+    var _this16 = this;
+    // Play sound only if barcode scanning sound is enabled
+    if (this.pos_settings.barcode_scanning_sound) {
+      this.audio.play();
+    }
+    for (var i = 0; i < this.details.length; i++) {
+      if (this.details[i].code === code) {
+        if (this.details[i].product_type !== 'is_service' && this.details[i].quantity + 1 > this.details[i].current) {
+          this.makeToast("warning", this.$t("LowStock"), this.$t("Warning"));
+        } else {
+          this.details[i].quantity++;
+        }
+      }
     }
     this.CalculTotal();
     this.$forceUpdate();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
     setTimeout(function () {
       _this16.load_product = true;
     }, 300);
-    if (row.is_imei) {
-      this.Modal_Updat_Detail(row);
-    }
-    return;
-  }
-
-  // 2) No existing row → create a new one
-  if (this.details.length > 0) {
-    this.order_detail_id();
-  } else if (this.details.length === 0) {
-    this.product.detail_id = 1;
-  }
-  // initialize price type fields before pushing
-  if (!this.product.price_type) {
-    this.product.price_type = 'retail';
-  }
-  if (!this.product.retail_unit_price) {
-    this.product.retail_unit_price = this.product.Unit_price;
-  }
-  if (!this.product.wholesale_unit_price) {
-    this.product.wholesale_unit_price = this.product.Unit_price_wholesale;
-  }
-
-  // push a cloned object to avoid accidental reference sharing
-  var newItem = JSON.parse(JSON.stringify(this.product));
-  if (!newItem.price_type) newItem.price_type = 'retail';
-  // ensure reactivity for newly-added prop on some browsers
-  this.$set(newItem, 'price_type', newItem.price_type || 'retail');
-  // Apply min_price on add: ensure Net_price >= min_price by adjusting Unit_price if required
-  try {
-    var min = Number(newItem.min_price || 0);
-    var taxMethod = String(newItem.tax_method || '1');
-    var discountMethod = String(newItem.discount_Method || '2');
-    var discountVal = Number(newItem.discount || 0);
-    var taxRate = Number(newItem.tax_percent || 0) / 100;
-    var currentNet = Number(newItem.Net_price || 0);
-    if (min > 0 && currentNet < min) {
-      var unitPriceCandidate = Number(newItem.Unit_price || 0);
-      if (taxMethod === '1') {
-        if (discountMethod === '1') {
-          var denom = 1 - discountVal / 100;
-          unitPriceCandidate = denom > 0 ? min / denom : min;
+  }), "increment", function increment(id) {
+    for (var i = 0; i < this.details.length; i++) {
+      if (this.details[i].detail_id == id) {
+        if (this.details[i].product_type !== 'is_service' && this.details[i].quantity + 1 > this.details[i].current) {
+          this.makeToast("warning", this.$t("LowStock"), this.$t("Warning"));
         } else {
-          unitPriceCandidate = min + discountVal;
+          this.details[i].quantity++;
         }
-        var discountNet = discountMethod === '1' ? unitPriceCandidate * (discountVal / 100) : discountVal;
-        var net = unitPriceCandidate - discountNet;
-        var tax = (unitPriceCandidate - discountNet) * taxRate;
-        newItem.Unit_price = parseFloat(unitPriceCandidate.toFixed(2));
-        newItem.DiscountNet = parseFloat(discountNet.toFixed(2));
-        newItem.Net_price = parseFloat(net.toFixed(2));
-        newItem.taxe = parseFloat(tax.toFixed(2));
-        newItem.Total_price = parseFloat((net + tax).toFixed(2));
-      } else {
-        if (discountMethod === '1') {
-          var _denom = (1 - discountVal / 100) * (1 - taxRate);
-          unitPriceCandidate = _denom > 0 ? min / _denom : min;
+      }
+    }
+    this.CalculTotal();
+    this.$forceUpdate();
+  }), "handleProductClick", function handleProductClick(product) {
+    var _this17 = this;
+    if (!product || product.product_type !== 'is_service' && product.qte_sale <= 0) return;
+    // Use composite key for variants to avoid overlay conflicting across variants
+    var key = product.product_variant_id ? product.id + '-' + product.product_variant_id : product.id;
+    this.uiLoadingProductId = key;
+    this.Get_Product_Details(product.id, product.product_variant_id, product)["catch"](function () {})["finally"](function () {
+      // Clear only if still the same key (guard against fast double clicks)
+      if (_this17.uiLoadingProductId === key) _this17.uiLoadingProductId = null;
+    });
+  }), "decrement", function decrement(detail, id) {
+    if (detail.quantity == 1) return;
+    for (var i = 0; i < this.details.length; i++) {
+      if (this.details[i].detail_id == id) {
+        // Prevent quantity from going negative, but allow zero and fractional quantities
+        if (detail.quantity - 1 < 0) {
+          this.makeToast("warning", this.$t("MinimumQuantity"), this.$t("Warning"));
         } else {
-          var _denom2 = 1 - taxRate;
-          unitPriceCandidate = (_denom2 > 0 ? min / _denom2 : min) + discountVal;
+          this.details[i].quantity--;
         }
-        var _discountNet = discountMethod === '1' ? unitPriceCandidate * (discountVal / 100) : discountVal;
-        var taxBase = unitPriceCandidate - _discountNet;
-        var _tax = taxBase * taxRate;
-        var _net2 = taxBase - _tax;
-        newItem.Unit_price = parseFloat(unitPriceCandidate.toFixed(2));
-        newItem.DiscountNet = parseFloat(_discountNet.toFixed(2));
-        newItem.taxe = parseFloat(_tax.toFixed(2));
-        newItem.Net_price = parseFloat(_net2.toFixed(2));
-        newItem.Total_price = parseFloat((_net2 + _tax).toFixed(2));
-      }
-      if (newItem.price_type === 'wholesale') {
-        newItem.wholesale_unit_price = newItem.Unit_price;
-      } else {
-        newItem.retail_unit_price = newItem.Unit_price;
       }
     }
-  } catch (e) {}
-  this.details.unshift(newItem);
-  setTimeout(function () {
-    _this16.load_product = true;
-  }, 300);
-  if (newItem.is_imei) {
-    this.Modal_Updat_Detail(newItem);
-  }
-}), "order_detail_id", function order_detail_id() {
-  var id = 0;
-  for (var i = 0; i < this.details.length; i++) {
-    if (this.details[i].detail_id > id) {
-      id = this.details[i].detail_id;
-    }
-  }
-  this.product.detail_id = id + 1;
-}), "increment_qty_scanner", function increment_qty_scanner(code) {
-  var _this17 = this;
-  // Play sound only if barcode scanning sound is enabled
-  if (this.pos_settings.barcode_scanning_sound) {
-    this.audio.play();
-  }
-  for (var i = 0; i < this.details.length; i++) {
-    if (this.details[i].code === code) {
-      if (this.details[i].product_type !== 'is_service' && this.details[i].quantity + 1 > this.details[i].current) {
-        this.makeToast("warning", this.$t("LowStock"), this.$t("Warning"));
-      } else {
-        this.details[i].quantity++;
-      }
-    }
-  }
-  this.CalculTotal();
-  this.$forceUpdate();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  setTimeout(function () {
-    _this17.load_product = true;
-  }, 300);
-}), "increment", function increment(id) {
-  for (var i = 0; i < this.details.length; i++) {
-    if (this.details[i].detail_id == id) {
-      if (this.details[i].product_type !== 'is_service' && this.details[i].quantity + 1 > this.details[i].current) {
-        this.makeToast("warning", this.$t("LowStock"), this.$t("Warning"));
-      } else {
-        this.details[i].quantity++;
-      }
-    }
-  }
-  this.CalculTotal();
-  this.$forceUpdate();
-}), "handleProductClick", function handleProductClick(product) {
-  var _this18 = this;
-  if (!product || product.product_type !== 'is_service' && product.qte_sale <= 0) return;
-  // Use composite key for variants to avoid overlay conflicting across variants
-  var key = product.product_variant_id ? product.id + '-' + product.product_variant_id : product.id;
-  this.uiLoadingProductId = key;
-  this.Get_Product_Details(product.id, product.product_variant_id, product)["catch"](function () {})["finally"](function () {
-    // Clear only if still the same key (guard against fast double clicks)
-    if (_this18.uiLoadingProductId === key) _this18.uiLoadingProductId = null;
-  });
-}), "decrement", function decrement(detail, id) {
-  if (detail.quantity == 1) return;
-  for (var i = 0; i < this.details.length; i++) {
-    if (this.details[i].detail_id == id) {
-      // Prevent quantity from going negative, but allow zero and fractional quantities
-      if (detail.quantity - 1 < 0) {
-        this.makeToast("warning", this.$t("MinimumQuantity"), this.$t("Warning"));
-      } else {
-        this.details[i].quantity--;
-      }
-    }
-  }
-  this.CalculTotal();
-  this.$forceUpdate();
-}), "Verified_Qty", function Verified_Qty(detail, id) {
-  for (var i = 0; i < this.details.length; i++) {
-    if (this.details[i].detail_id === id) {
-      var qty = parseFloat(detail.quantity);
+    this.CalculTotal();
+    this.$forceUpdate();
+  }), "Verified_Qty", function Verified_Qty(detail, id) {
+    for (var i = 0; i < this.details.length; i++) {
+      if (this.details[i].detail_id === id) {
+        var qty = parseFloat(detail.quantity);
 
-      // If empty or not a number, fall back to 1 without warning
-      if (isNaN(qty) || detail.quantity === null || detail.quantity === '') {
-        this.details[i].quantity = 1;
-        // Enforce only that quantity must not be negative (zero is allowed)
-      } else if (qty < 2) {
-        this.makeToast("warning", this.$t("MinimumQuantity"), this.$t("Warning"));
-        this.details[i].quantity = 1;
-      } else if (this.details[i].product_type !== 'is_service' && qty > detail.current) {
-        this.makeToast("warning", this.$t("LowStock"), this.$t("Warning"));
-        this.details[i].quantity = detail.current;
-      } else {
-        this.details[i].quantity = qty;
+        // If empty or not a number, fall back to 1 without warning
+        if (isNaN(qty) || detail.quantity === null || detail.quantity === '') {
+          this.details[i].quantity = 1;
+          // Enforce only that quantity must not be negative (zero is allowed)
+        } else if (qty < 2) {
+          this.makeToast("warning", this.$t("MinimumQuantity"), this.$t("Warning"));
+          this.details[i].quantity = 1;
+        } else if (this.details[i].product_type !== 'is_service' && qty > detail.current) {
+          this.makeToast("warning", this.$t("LowStock"), this.$t("Warning"));
+          this.details[i].quantity = detail.current;
+        } else {
+          this.details[i].quantity = qty;
+        }
       }
     }
-  }
-  this.$forceUpdate();
-  this.CalculTotal();
-}), "delete_Product_Detail", function delete_Product_Detail(id) {
-  for (var i = 0; i < this.details.length; i++) {
-    if (id === this.details[i].detail_id) {
-      this.details.splice(i, 1);
-      this.CalculTotal();
-      try {
-        this._cd_queue_broadcast && this._cd_queue_broadcast();
-      } catch (e) {}
+    this.$forceUpdate();
+    this.CalculTotal();
+  }), "delete_Product_Detail", function delete_Product_Detail(id) {
+    for (var i = 0; i < this.details.length; i++) {
+      if (id === this.details[i].detail_id) {
+        this.details.splice(i, 1);
+        this.CalculTotal();
+        try {
+          this._cd_queue_broadcast && this._cd_queue_broadcast();
+        } catch (e) {}
+      }
     }
-  }
-}), "Modal_Updat_Detail", function Modal_Updat_Detail(detail) {
-  var _this19 = this;
-  this.detailLoading = true;
-  this.detail = {};
-  this.detail.name = detail.name;
-  this.$bvModal.show("form_Update_Detail");
-  this.get_units(detail.product_id)["catch"](function () {})["finally"](function () {
-    _this19.detail.detail_id = detail.detail_id;
-    _this19.detail.sale_unit_id = detail.sale_unit_id;
-    _this19.detail.product_type = detail.product_type;
-    _this19.detail.Unit_price = detail.Unit_price;
-    _this19.detail.price_type = detail.price_type || 'retail';
-    _this19.detail.retail_unit_price = detail.retail_unit_price !== undefined ? detail.retail_unit_price : detail.Unit_price;
-    _this19.detail.wholesale_unit_price = detail.wholesale_unit_price !== undefined ? detail.wholesale_unit_price : detail.Unit_price_wholesale;
-    _this19.detail.min_price = detail.min_price !== undefined ? detail.min_price : 0;
-    _this19.detail.fix_price = detail.fix_price;
-    _this19.detail.fix_stock = detail.fix_stock;
-    _this19.detail.current = detail.current;
-    _this19.detail.tax_method = detail.tax_method;
-    _this19.detail.discount_Method = detail.discount_Method;
-    _this19.detail.discount = detail.discount;
-    _this19.detail.quantity = detail.quantity;
-    _this19.detail.tax_percent = detail.tax_percent;
-    _this19.detail.is_imei = detail.is_imei;
-    _this19.detail.imei_number = detail.imei_number;
-    _this19.detailLoading = false;
-  });
-}), "submit_Update_Detail", function submit_Update_Detail() {
-  var _this20 = this;
-  for (var i = 0; i < this.details.length; i++) {
-    if (this.details[i].detail_id === this.detail.detail_id) {
-      // 1) Compute proposed pricing WITHOUT mutating the row yet
-      var proposedUnitPrice = this.detail.Unit_price;
-      var rawMinCandidate = this.details[i].min_price !== undefined && this.details[i].min_price !== null ? this.details[i].min_price : this.detail.min_price || 0;
-      var minPriceRow = parseFloat(String(rawMinCandidate).toString().replace(/,/g, '')) || 0;
-      var unitPriceNum = parseFloat(String(proposedUnitPrice).toString().replace(/,/g, '')) || 0;
-      // 1.a) Block if unit price is not strictly greater than min price
-      if (minPriceRow > 0 && unitPriceNum <= minPriceRow) {
-        this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
-        return;
-      }
-      var proposedDiscountNet = this.detail.discount_Method == "2" ? this.detail.discount : parseFloat(proposedUnitPrice * this.detail.discount / 100);
-      var proposedNet = void 0,
-        proposedTax = void 0;
-      if (this.detail.tax_method == "1") {
-        proposedNet = parseFloat(proposedUnitPrice - proposedDiscountNet);
-        proposedTax = parseFloat(this.detail.tax_percent * (proposedUnitPrice - proposedDiscountNet) / 100);
-      } else {
-        proposedTax = parseFloat((proposedUnitPrice - proposedDiscountNet) * (this.detail.tax_percent / 100));
-        proposedNet = parseFloat(proposedUnitPrice - proposedTax - proposedDiscountNet);
-      }
+  }), "Modal_Updat_Detail", function Modal_Updat_Detail(detail) {
+    var _this18 = this;
+    this.detailLoading = true;
+    this.detail = {};
+    this.detail.name = detail.name;
+    this.$bvModal.show("form_Update_Detail");
+    this.get_units(detail.product_id)["catch"](function () {})["finally"](function () {
+      _this18.detail.detail_id = detail.detail_id;
+      _this18.detail.sale_unit_id = detail.sale_unit_id;
+      _this18.detail.product_type = detail.product_type;
+      _this18.detail.Unit_price = detail.Unit_price;
+      _this18.detail.price_type = detail.price_type || 'retail';
+      _this18.detail.retail_unit_price = detail.retail_unit_price !== undefined ? detail.retail_unit_price : detail.Unit_price;
+      _this18.detail.wholesale_unit_price = detail.wholesale_unit_price !== undefined ? detail.wholesale_unit_price : detail.Unit_price_wholesale;
+      _this18.detail.min_price = detail.min_price !== undefined ? detail.min_price : 0;
+      _this18.detail.fix_price = detail.fix_price;
+      _this18.detail.fix_stock = detail.fix_stock;
+      _this18.detail.current = detail.current;
+      _this18.detail.tax_method = detail.tax_method;
+      _this18.detail.discount_Method = detail.discount_Method;
+      _this18.detail.discount = detail.discount;
+      _this18.detail.quantity = detail.quantity;
+      _this18.detail.tax_percent = detail.tax_percent;
+      _this18.detail.is_imei = detail.is_imei;
+      _this18.detail.imei_number = detail.imei_number;
+      _this18.detailLoading = false;
+    });
+  }), "submit_Update_Detail", function submit_Update_Detail() {
+    var _this19 = this;
+    for (var i = 0; i < this.details.length; i++) {
+      if (this.details[i].detail_id === this.detail.detail_id) {
+        // 1) Compute proposed pricing WITHOUT mutating the row yet
+        var proposedUnitPrice = this.detail.Unit_price;
+        var rawMinCandidate = this.details[i].min_price !== undefined && this.details[i].min_price !== null ? this.details[i].min_price : this.detail.min_price || 0;
+        var minPriceRow = parseFloat(String(rawMinCandidate).toString().replace(/,/g, '')) || 0;
+        var unitPriceNum = parseFloat(String(proposedUnitPrice).toString().replace(/,/g, '')) || 0;
+        // 1.a) Block if unit price is not strictly greater than min price
+        if (minPriceRow > 0 && unitPriceNum <= minPriceRow) {
+          this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
+          return;
+        }
+        var proposedDiscountNet = this.detail.discount_Method == "2" ? this.detail.discount : parseFloat(proposedUnitPrice * this.detail.discount / 100);
+        var proposedNet = void 0,
+          proposedTax = void 0;
+        if (this.detail.tax_method == "1") {
+          proposedNet = parseFloat(proposedUnitPrice - proposedDiscountNet);
+          proposedTax = parseFloat(this.detail.tax_percent * (proposedUnitPrice - proposedDiscountNet) / 100);
+        } else {
+          proposedTax = parseFloat((proposedUnitPrice - proposedDiscountNet) * (this.detail.tax_percent / 100));
+          proposedNet = parseFloat(proposedUnitPrice - proposedTax - proposedDiscountNet);
+        }
 
-      // 2) Enforce min price by net as a fallback: if invalid, show toast and ABORT update (keep modal open)
-      if (minPriceRow > 0 && proposedNet < minPriceRow) {
-        this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
-        return;
-      }
+        // 2) Enforce min price by net as a fallback: if invalid, show toast and ABORT update (keep modal open)
+        if (minPriceRow > 0 && proposedNet < minPriceRow) {
+          this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
+          return;
+        }
 
-      // 3) Apply unit conversion now that price is valid (skip stock logic for services)
-      if (this.details[i].product_type !== 'is_service') {
-        for (var k = 0; k < this.units.length; k++) {
-          if (this.units[k].id == this.detail.sale_unit_id) {
-            if (this.units[k].operator == "/") {
-              this.details[i].current = this.detail.fix_stock * this.units[k].operator_value;
-              this.details[i].unitSale = this.units[k].ShortName;
-            } else {
-              this.details[i].current = this.detail.fix_stock / this.units[k].operator_value;
-              this.details[i].unitSale = this.units[k].ShortName;
+        // 3) Apply unit conversion now that price is valid (skip stock logic for services)
+        if (this.details[i].product_type !== 'is_service') {
+          for (var k = 0; k < this.units.length; k++) {
+            if (this.units[k].id == this.detail.sale_unit_id) {
+              if (this.units[k].operator == "/") {
+                this.details[i].current = this.detail.fix_stock * this.units[k].operator_value;
+                this.details[i].unitSale = this.units[k].ShortName;
+              } else {
+                this.details[i].current = this.detail.fix_stock / this.units[k].operator_value;
+                this.details[i].unitSale = this.units[k].ShortName;
+              }
             }
           }
         }
-      }
 
-      // 4) Persist values to the row
-      this.details[i].Unit_price = proposedUnitPrice;
-      // update baseline for the NEWLY selected price type
-      if (this.detail.price_type === 'wholesale') {
-        this.details[i].wholesale_unit_price = proposedUnitPrice;
-      } else {
-        this.details[i].retail_unit_price = proposedUnitPrice;
-      }
-      this.details[i].price_type = this.detail.price_type;
-      this.details[i].tax_percent = this.detail.tax_percent;
-      this.details[i].tax_method = this.detail.tax_method;
-      this.details[i].discount_Method = this.detail.discount_Method;
-      this.details[i].discount = this.detail.discount;
-      this.details[i].sale_unit_id = this.detail.sale_unit_id;
-      this.details[i].imei_number = this.detail.imei_number;
-      this.details[i].product_type = this.detail.product_type;
+        // 4) Persist values to the row
+        this.details[i].Unit_price = proposedUnitPrice;
+        // update baseline for the NEWLY selected price type
+        if (this.detail.price_type === 'wholesale') {
+          this.details[i].wholesale_unit_price = proposedUnitPrice;
+        } else {
+          this.details[i].retail_unit_price = proposedUnitPrice;
+        }
+        this.details[i].price_type = this.detail.price_type;
+        this.details[i].tax_percent = this.detail.tax_percent;
+        this.details[i].tax_method = this.detail.tax_method;
+        this.details[i].discount_Method = this.detail.discount_Method;
+        this.details[i].discount = this.detail.discount;
+        this.details[i].sale_unit_id = this.detail.sale_unit_id;
+        this.details[i].imei_number = this.detail.imei_number;
+        this.details[i].product_type = this.detail.product_type;
 
-      // 5) Apply computed values
-      this.details[i].DiscountNet = proposedDiscountNet;
-      this.details[i].taxe = proposedTax;
-      this.details[i].Net_price = proposedNet;
-      this.details[i].Total_price = parseFloat(proposedNet + proposedTax);
-      this.$forceUpdate();
+        // 5) Apply computed values
+        this.details[i].DiscountNet = proposedDiscountNet;
+        this.details[i].taxe = proposedTax;
+        this.details[i].Net_price = proposedNet;
+        this.details[i].Total_price = parseFloat(proposedNet + proposedTax);
+        this.$forceUpdate();
+      }
     }
-  }
-  this.CalculTotal();
-  setTimeout(function () {
-    _this20.$bvModal.hide("form_Update_Detail");
-  }, 1000);
-}), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "onChangePriceType", function onChangePriceType(detail) {
-  var isWholesale = detail.price_type === 'wholesale';
-  var wholesaleBase = detail.wholesale_unit_price;
-  var retailBase = detail.retail_unit_price;
+    this.CalculTotal();
+    setTimeout(function () {
+      _this19.$bvModal.hide("form_Update_Detail");
+    }, 1000);
+  }), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "onChangePriceType", function onChangePriceType(detail) {
+    var isWholesale = detail.price_type === 'wholesale';
+    var wholesaleBase = detail.wholesale_unit_price;
+    var retailBase = detail.retail_unit_price;
 
-  // 1) Apply selected baseline
-  if (isWholesale) {
-    detail.Unit_price = wholesaleBase !== undefined && wholesaleBase !== null && wholesaleBase !== '' ? wholesaleBase : detail.Unit_price;
-  } else {
-    detail.Unit_price = retailBase !== undefined && retailBase !== null && retailBase !== '' ? retailBase : detail.Unit_price;
-  }
+    // 1) Apply selected baseline
+    if (isWholesale) {
+      detail.Unit_price = wholesaleBase !== undefined && wholesaleBase !== null && wholesaleBase !== '' ? wholesaleBase : detail.Unit_price;
+    } else {
+      detail.Unit_price = retailBase !== undefined && retailBase !== null && retailBase !== '' ? retailBase : detail.Unit_price;
+    }
 
-  // 2) Recompute derived values
-  if (detail.discount_Method == "2") {
-    detail.DiscountNet = detail.discount;
-  } else {
-    detail.DiscountNet = parseFloat(detail.Unit_price * detail.discount / 100);
-  }
-  if (detail.tax_method == "1") {
-    detail.Net_price = parseFloat(detail.Unit_price - detail.DiscountNet);
-    detail.taxe = parseFloat(detail.tax_percent * (detail.Unit_price - detail.DiscountNet) / 100);
-    detail.Total_price = parseFloat(detail.Net_price + detail.taxe);
-  } else {
-    detail.taxe = parseFloat((detail.Unit_price - detail.DiscountNet) * (detail.tax_percent / 100));
-    detail.Net_price = parseFloat(detail.Unit_price - detail.taxe - detail.DiscountNet);
-    detail.Total_price = parseFloat(detail.Net_price + detail.taxe);
-  }
-
-  // 3) Enforce min price
-  if ((detail.min_price || 0) > 0 && detail.Net_price < detail.min_price) {
-    this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
-    // revert to retail
-    detail.price_type = 'retail';
-    detail.Unit_price = retailBase !== undefined && retailBase !== null && retailBase !== '' ? retailBase : detail.Unit_price;
-    // recompute again
+    // 2) Recompute derived values
     if (detail.discount_Method == "2") {
       detail.DiscountNet = detail.discount;
     } else {
@@ -3459,2382 +3439,2609 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       detail.Net_price = parseFloat(detail.Unit_price - detail.taxe - detail.DiscountNet);
       detail.Total_price = parseFloat(detail.Net_price + detail.taxe);
     }
-  }
 
-  // 4) Update baseline for the (final) selected type
-  if (detail.price_type === 'wholesale') {
-    detail.wholesale_unit_price = detail.Unit_price;
-  } else {
-    detail.retail_unit_price = detail.Unit_price;
-  }
-  this.$forceUpdate();
-  this.CalculTotal();
-}), "ensurePriceType", function ensurePriceType(detail) {
-  if (!detail) return;
-  if (!detail.price_type) this.$set(detail, 'price_type', 'retail');
-}), "Reset_Pos", function Reset_Pos() {
-  var _this21 = this;
-  return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0() {
-    var previousPage, client, response, data, _t6, _t7;
-    return _regenerator().w(function (_context0) {
-      while (1) switch (_context0.p = _context0.n) {
-        case 0:
-          previousPage = _this21.product_currentPage || 1;
-          _this21.details = [];
-          _this21.product = {};
-          _this21.draft_sale_id = '';
-          _this21.paymentLines = [{
-            amount: 0,
-            payment_method_id: '2'
-          }];
-          _this21.selectedAccount = null;
-          _this21.globalPaymentNote = '';
-          _this21.savedPaymentMethods = [], _this21.hasSavedPaymentMethod = false, _this21.useSavedPaymentMethod = false, _this21.selectedCard = null, _this21.card_id = '', _this21.is_new_credit_card = false, _this21.submit_showing_credit_card = false, _this21.sale.tax_rate = 0;
-          _this21.sale.TaxNet = 0;
-          _this21.sale.shipping = 0;
-          _this21.sale.discount = 0;
-          _this21.sale.discount_Method = '2'; // Reset to fixed (default)
-          _this21.sale.notes = '';
-          _this21.GrandTotal = 0;
-          _this21.total = 0;
-          _this21.category_id = "";
-          _this21.brand_id = "";
-          _this21.selectedClientPoints = 0;
-          _this21.points_to_convert = 0;
-          _this21.used_points = 0;
-          _this21.discount_from_points = 0;
-          _this21.clientIsEligible = false;
-          _this21.pointsConverted = false;
-          try {
-            _this21._cd_emit && _this21._cd_emit({
-              currency: _this21.currentUser && _this21.currentUser.currency || '',
-              details: [],
-              discount: 0,
-              TaxNet: 0,
-              GrandTotal: 0
-            }, true);
-          } catch (e) {}
-          client = _this21.clients.find(function (client) {
-            return client.id === 1;
-          });
-          if (!client) {
+    // 3) Enforce min price
+    if ((detail.min_price || 0) > 0 && detail.Net_price < detail.min_price) {
+      this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
+      // revert to retail
+      detail.price_type = 'retail';
+      detail.Unit_price = retailBase !== undefined && retailBase !== null && retailBase !== '' ? retailBase : detail.Unit_price;
+      // recompute again
+      if (detail.discount_Method == "2") {
+        detail.DiscountNet = detail.discount;
+      } else {
+        detail.DiscountNet = parseFloat(detail.Unit_price * detail.discount / 100);
+      }
+      if (detail.tax_method == "1") {
+        detail.Net_price = parseFloat(detail.Unit_price - detail.DiscountNet);
+        detail.taxe = parseFloat(detail.tax_percent * (detail.Unit_price - detail.DiscountNet) / 100);
+        detail.Total_price = parseFloat(detail.Net_price + detail.taxe);
+      } else {
+        detail.taxe = parseFloat((detail.Unit_price - detail.DiscountNet) * (detail.tax_percent / 100));
+        detail.Net_price = parseFloat(detail.Unit_price - detail.taxe - detail.DiscountNet);
+        detail.Total_price = parseFloat(detail.Net_price + detail.taxe);
+      }
+    }
+
+    // 4) Update baseline for the (final) selected type
+    if (detail.price_type === 'wholesale') {
+      detail.wholesale_unit_price = detail.Unit_price;
+    } else {
+      detail.retail_unit_price = detail.Unit_price;
+    }
+    this.$forceUpdate();
+    this.CalculTotal();
+  }), "ensurePriceType", function ensurePriceType(detail) {
+    if (!detail) return;
+    if (!detail.price_type) this.$set(detail, 'price_type', 'retail');
+  }), "Reset_Pos", function Reset_Pos() {
+    var _this20 = this;
+    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee0() {
+      var previousPage, client, response, data, _t6, _t7;
+      return _regenerator().w(function (_context0) {
+        while (1) switch (_context0.p = _context0.n) {
+          case 0:
+            previousPage = _this20.product_currentPage || 1;
+            _this20.details = [];
+            _this20.product = {};
+            _this20.draft_sale_id = '';
+            _this20.paymentLines = [{
+              amount: 0,
+              payment_method_id: '2'
+            }];
+            _this20.selectedAccount = null;
+            _this20.globalPaymentNote = '';
+            _this20.savedPaymentMethods = [], _this20.hasSavedPaymentMethod = false, _this20.useSavedPaymentMethod = false, _this20.selectedCard = null, _this20.card_id = '', _this20.is_new_credit_card = false, _this20.submit_showing_credit_card = false, _this20.sale.tax_rate = 0;
+            _this20.sale.TaxNet = 0;
+            _this20.sale.shipping = 0;
+            _this20.sale.discount = 0;
+            _this20.sale.discount_Method = '2'; // Reset to fixed (default)
+            _this20.sale.notes = '';
+            _this20.GrandTotal = 0;
+            _this20.total = 0;
+            _this20.category_id = "";
+            _this20.brand_id = "";
+            _this20.selectedClientPoints = 0;
+            _this20.points_to_convert = 0;
+            _this20.used_points = 0;
+            _this20.discount_from_points = 0;
+            _this20.clientIsEligible = false;
+            _this20.pointsConverted = false;
+            try {
+              _this20._cd_emit && _this20._cd_emit({
+                currency: _this20.currentUser && _this20.currentUser.currency || '',
+                details: [],
+                discount: 0,
+                TaxNet: 0,
+                GrandTotal: 0
+              }, true);
+            } catch (e) {}
+            client = _this20.clients.find(function (client) {
+              return client.id === 1;
+            });
+            if (!client) {
+              _context0.n = 4;
+              break;
+            }
+            _this20.client_name = client.name;
+            _this20.selectedClientId = 1;
+            _context0.p = 1;
+            _context0.n = 2;
+            return axios.get("/get_points_client/".concat(_this20.selectedClientId));
+          case 2:
+            response = _context0.v;
+            data = response.data;
+            if (data.is_royalty_eligible) {
+              _this20.selectedClientPoints = data.points;
+              _this20.clientIsEligible = true;
+            } else {
+              _this20.selectedClientPoints = 0;
+              _this20.clientIsEligible = false;
+            }
             _context0.n = 4;
             break;
-          }
-          _this21.client_name = client.name;
-          _this21.selectedClientId = 1;
-          _context0.p = 1;
-          _context0.n = 2;
-          return axios.get("/get_points_client/".concat(_this21.selectedClientId));
-        case 2:
-          response = _context0.v;
-          data = response.data;
-          if (data.is_royalty_eligible) {
-            _this21.selectedClientPoints = data.points;
-            _this21.clientIsEligible = true;
-          } else {
-            _this21.selectedClientPoints = 0;
-            _this21.clientIsEligible = false;
-          }
-          _context0.n = 4;
-          break;
-        case 3:
-          _context0.p = 3;
-          _t6 = _context0.v;
-        case 4:
-          _context0.p = 4;
-          _context0.n = 5;
-          return _this21.getProducts();
-        case 5:
-          _context0.n = 7;
-          break;
-        case 6:
-          _context0.p = 6;
-          _t7 = _context0.v;
-        case 7:
-          if (!_this21.isOnline && previousPage > 1) {
-            _this21.product_currentPage = previousPage;
-            _this21.paginate_products(_this21.product_perPage, previousPage - 1);
-          }
-        case 8:
-          return _context0.a(2);
-      }
-    }, _callee0, null, [[4, 6], [1, 3]]);
-  }))();
-}), "search", function search() {
-  var _this22 = this;
-  if (this.timer) {
-    clearTimeout(this.timer);
-    this.timer = null;
-  }
-  if (this.search_input.length < 2) {
-    return this.product_filter = [];
-  }
-  if (this.sale.warehouse_id != "" && this.sale.warehouse_id != null) {
-    this.timer = setTimeout(function () {
-      var barcode = _this22.search_input.trim();
-      var weight = null;
-      if (barcode.length === 13 && !isNaN(barcode)) {
-        // Play sound only if barcode scanning sound is enabled
-        if (_this22.pos_settings.barcode_scanning_sound) {
-          _this22.audio.play();
+          case 3:
+            _context0.p = 3;
+            _t6 = _context0.v;
+          case 4:
+            _context0.p = 4;
+            _context0.n = 5;
+            return _this20.getProducts();
+          case 5:
+            _context0.n = 7;
+            break;
+          case 6:
+            _context0.p = 6;
+            _t7 = _context0.v;
+          case 7:
+            if (!_this20.isOnline && previousPage > 1) {
+              _this20.product_currentPage = previousPage;
+              _this20.paginate_products(_this20.product_perPage, previousPage - 1);
+            }
+          case 8:
+            return _context0.a(2);
         }
-        // Play sound only if barcode scanning sound is enabled
-        if (_this22.pos_settings.barcode_scanning_sound) {
-          _this22.audio.play();
-        }
-        var product = _this22.products_pos.find(function (prod) {
-          return prod.code === barcode && (prod.product_type === 'is_service' || Number(prod.qte_sale || 0) > 0);
-        });
-        if (product) {
-          _this22.Check_Product_Exist(product, product.id, weight);
-          return;
-        } else {
-          var productCode = barcode.substring(0, 7);
-          var _weight = parseFloat(barcode.substring(7, 12)) / 1000;
-          var _product = _this22.products_pos.find(function (prod) {
-            return prod.code === productCode && (prod.product_type === 'is_service' || Number(prod.qte_sale || 0) > 0);
+      }, _callee0, null, [[4, 6], [1, 3]]);
+    }))();
+  }), "search", function search() {
+    var _this21 = this;
+    if (this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+    if (this.search_input.length < 2) {
+      return this.product_filter = [];
+    }
+    if (this.sale.warehouse_id != "" && this.sale.warehouse_id != null) {
+      this.timer = setTimeout(function () {
+        var barcode = _this21.search_input.trim();
+        var weight = null;
+        if (barcode.length === 13 && !isNaN(barcode)) {
+          // Play sound only if barcode scanning sound is enabled
+          if (_this21.pos_settings.barcode_scanning_sound) {
+            _this21.audio.play();
+          }
+          // Play sound only if barcode scanning sound is enabled
+          if (_this21.pos_settings.barcode_scanning_sound) {
+            _this21.audio.play();
+          }
+          var product = _this21.products_pos.find(function (prod) {
+            return prod.code === barcode && (prod.product_type === 'is_service' || Number(prod.qte_sale || 0) > 0);
           });
-          if (_product) {
-            // Play sound only if barcode scanning sound is enabled
-            if (_this22.pos_settings.barcode_scanning_sound) {
-              _this22.audio.play();
-            }
-            // Ensure weight does not exceed available quantity
-            var available = Number(_product.qte_sale || 0);
-            if (available > 0 && _weight > available) {
-              _this22.makeToast("warning", _this22.$t("LowStock"), _this22.$t("Warning"));
-              _weight = available;
-            }
-            _product.quantity = _weight;
-            _this22.Check_Product_Exist(_product, _product.id, _weight);
+          if (product) {
+            _this21.Check_Product_Exist(product, product.id, weight);
             return;
+          } else {
+            var productCode = barcode.substring(0, 7);
+            var _weight = parseFloat(barcode.substring(7, 12)) / 1000;
+            var _product = _this21.products_pos.find(function (prod) {
+              return prod.code === productCode && (prod.product_type === 'is_service' || Number(prod.qte_sale || 0) > 0);
+            });
+            if (_product) {
+              // Play sound only if barcode scanning sound is enabled
+              if (_this21.pos_settings.barcode_scanning_sound) {
+                _this21.audio.play();
+              }
+              // Ensure weight does not exceed available quantity
+              var available = Number(_product.qte_sale || 0);
+              if (available > 0 && _weight > available) {
+                _this21.makeToast("warning", _this21.$t("LowStock"), _this21.$t("Warning"));
+                _weight = available;
+              }
+              _product.quantity = _weight;
+              _this21.Check_Product_Exist(_product, _product.id, _weight);
+              return;
+            }
           }
+          _this21.makeToast("danger", "Invalid product code scanned", _this21.$t("Error"));
+          _this21.search_input = '';
+          _this21.product_filter = [];
         }
-        _this22.makeToast("danger", "Invalid product code scanned", _this22.$t("Error"));
-        _this22.search_input = '';
-        _this22.product_filter = [];
-      }
-      var product_filter = _this22.products_pos.filter(function (product) {
-        return (product.product_type === 'is_service' || Number(product.qte_sale || 0) > 0) && (product.code === _this22.search_input || String(product.barcode || '').includes(_this22.search_input));
-      });
-      if (product_filter.length === 1) {
-        // Play sound only if barcode scanning sound is enabled
-        if (_this22.pos_settings.barcode_scanning_sound) {
-          _this22.audio.play();
-        }
-        _this22.Check_Product_Exist(product_filter[0], product_filter[0].id, weight = null);
-      } else {
-        _this22.product_filter = _this22.products_pos.filter(function (product) {
-          if (product.product_type !== 'is_service' && Number(product.qte_sale || 0) <= 0) return false;
-          var name = String(product.name || '').toLowerCase();
-          var code = String(product.code || '').toLowerCase();
-          var barcodeStr = String(product.barcode || '').toLowerCase();
-          var term = _this22.search_input.toLowerCase();
-          return name.includes(term) || code.includes(term) || barcodeStr.includes(term);
+        var product_filter = _this21.products_pos.filter(function (product) {
+          return (product.product_type === 'is_service' || Number(product.qte_sale || 0) > 0) && (product.code === _this21.search_input || String(product.barcode || '').includes(_this21.search_input));
         });
-      }
-    }, 800);
-  } else {
-    this.makeToast("warning", this.$t("SelectWarehouse"), this.$t("Warning"));
-  }
-}), "Check_Product_Exist", function Check_Product_Exist(product, id) {
-  var weight = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-  if (this.load_product) {
-    this.load_product = false;
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-    this.product = {};
-    if (product.product_type == 'is_service') {
-      this.product.quantity = 1;
+        if (product_filter.length === 1) {
+          // Play sound only if barcode scanning sound is enabled
+          if (_this21.pos_settings.barcode_scanning_sound) {
+            _this21.audio.play();
+          }
+          _this21.Check_Product_Exist(product_filter[0], product_filter[0].id, weight = null);
+        } else {
+          _this21.product_filter = _this21.products_pos.filter(function (product) {
+            if (product.product_type !== 'is_service' && Number(product.qte_sale || 0) <= 0) return false;
+            var name = String(product.name || '').toLowerCase();
+            var code = String(product.code || '').toLowerCase();
+            var barcodeStr = String(product.barcode || '').toLowerCase();
+            var term = _this21.search_input.toLowerCase();
+            return name.includes(term) || code.includes(term) || barcodeStr.includes(term);
+          });
+        }
+      }, 800);
     } else {
-      this.product.current = product.qte_sale;
-      this.product.fix_stock = product.qte;
-      if (weight !== null) {
-        this.product.quantity = weight;
-      } else {
-        this.product.quantity = product.qte_sale < 1 ? product.qte_sale : 1;
-      }
+      this.makeToast("warning", this.$t("SelectWarehouse"), this.$t("Warning"));
     }
-    this.Get_Product_Details(id, product.product_variant_id, product);
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-    this.search_input = '';
-    this.product_filter = [];
-  } else {
-    this.makeToast("warning", this.$t("Please_wait_until_the_product_is_loaded"), this.$t("Warning"));
-  }
-}), "Products_by_Category", function Products_by_Category(id) {
-  this.category_id = id;
-  this.getProducts();
-}), "Products_by_Brands", function Products_by_Brands(id) {
-  this.brand_id = id;
-  this.getProducts();
-}), "getAllCategory", function getAllCategory() {
-  this.category_id = "";
-  this.search_category = '';
-  this.getProducts();
-}), "GetAllBrands", function GetAllBrands() {
-  this.brand_id = "";
-  this.search_brand = '';
-  this.getProducts(1);
-}), "Show_Draft_Sales", function Show_Draft_Sales() {
-  var _this23 = this;
-  this.draft_sales_page = 1;
-  this.get_Draft_Sales(1);
-  setTimeout(function () {
-    _this23.$bvModal.show("show_draft_sales");
-  }, 1000);
-}), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "onPageChangeDraftSales", function onPageChangeDraftSales(page) {
-  this.draft_sales_page = page;
-  this.get_Draft_Sales(page);
-}), "get_Draft_Sales", function get_Draft_Sales(page) {
-  var _this24 = this;
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  axios.get("get_draft_sales?page=" + page + "&limit=" + this.limit).then(function (response) {
-    _this24.draft_sales = response.data.draft_sales;
-    _this24.totalRows_draft_sales = response.data.totalRows;
-
-    // If current page is empty but we have data and we're not on page 1, go to previous page
-    if (_this24.draft_sales.length === 0 && _this24.totalRows_draft_sales > 0 && page > 1) {
-      _this24.draft_sales_page = page - 1;
-      _this24.get_Draft_Sales(_this24.draft_sales_page);
-      return;
-    }
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  })["catch"](function () {
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  });
-}), "loadDraftSale", function loadDraftSale(id) {
-  var _this25 = this;
-  this.openingDraftId = id;
-  // If this draft is already loaded, do nothing (do not update on open)
-  if (this.draft_sale_id && String(this.draft_sale_id) === String(id)) {
-    this.openingDraftId = null;
-    return;
-  }
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  axios.get("pos/data_draft_convert_sale/".concat(id)).then(function (response) {
-    _this25.draft_sale_id = id;
-    var data = response.data || {};
-
-    // Basic references (keep layout/logic unchanged; just inject data)
-    if (Array.isArray(data.clients)) _this25.clients = data.clients;
-    if (Array.isArray(data.accounts)) _this25.accounts = data.accounts;
-    if (Array.isArray(data.warehouses)) _this25.warehouses = data.warehouses;
-    if (Array.isArray(data.categories)) _this25.categories = data.categories;
-    if (Array.isArray(data.brands)) _this25.brands = data.brands;
-    if (Array.isArray(data.payment_methods)) _this25.payment_methods = data.payment_methods;
-
-    // Customer & loyalty
-    _this25.selectedClientId = data.client_id || data.sale && data.sale.client_id || _this25.selectedClientId;
-    _this25.client_name = data.client_name || _this25.client_name;
-    _this25.clientIsEligible = data.default_client_eligible === true || data.default_client_eligible === 1;
-    _this25.selectedClientPoints = _this25.clientIsEligible ? parseFloat(data.default_client_points || 0) : 0;
-    if (typeof data.point_to_amount_rate !== 'undefined') {
-      _this25.point_to_amount_rate = data.point_to_amount_rate;
-    }
-
-    // Sale-level fields
-    var saleData = data.sale || {};
-    _this25.sale.warehouse_id = data.warehouse_id !== undefined && data.warehouse_id !== null ? data.warehouse_id : saleData.warehouse_id || _this25.sale.warehouse_id;
-    _this25.sale.tax_rate = saleData.tax_rate || 0;
-    _this25.sale.TaxNet = saleData.TaxNet || 0;
-    _this25.sale.discount = saleData.discount || 0;
-    // Backward compatibility: default to fixed ('2') if discount_Method is not present
-    _this25.sale.discount_Method = saleData.discount_Method || '2';
-    _this25.sale.shipping = saleData.shipping || 0;
-    _this25.sale.notes = saleData.notes || '';
-
-    // Map draft details to POS details shape (ensuring fields required by POS)
-    var incoming = Array.isArray(data.details) ? data.details : [];
-    var mapped = incoming.map(function (it, idx) {
-      var d = _objectSpread({}, it);
-      if (d.detail_id === undefined || d.detail_id === null) d.detail_id = idx + 1;
-      if (!d.price_type) d.price_type = 'retail';
-      if (d.retail_unit_price === undefined) d.retail_unit_price = d.Unit_price;
-      if (d.wholesale_unit_price === undefined) d.wholesale_unit_price = d.Unit_price_wholesale !== undefined ? d.Unit_price_wholesale : d.Unit_price;
-      if (d.min_price === undefined) d.min_price = 0;
-      if (d.current === undefined || d.current === null) d.current = d.fix_stock !== undefined ? d.fix_stock : d.quantity;
-      if (d.fix_stock === undefined || d.fix_stock === null) d.fix_stock = d.current;
-      var unitPrice = Number(d.Unit_price || 0);
-      var discountVal = Number(d.discount || 0);
-      var discountMethod = String(d.discount_Method || '2'); // 1: %, 2: fixed
-      var taxPercent = Number(d.tax_percent || 0);
-      var taxMethod = String(d.tax_method || '1'); // 1: Exclusive, 2: Inclusive
-
-      if (typeof d.DiscountNet === 'undefined') {
-        d.DiscountNet = discountMethod === '2' ? discountVal : unitPrice * (discountVal / 100);
-      }
-      if (taxMethod === '1') {
-        d.Net_price = parseFloat((unitPrice - d.DiscountNet).toFixed(2));
-        d.taxe = parseFloat(((unitPrice - d.DiscountNet) * taxPercent / 100).toFixed(2));
-        d.Total_price = parseFloat((d.Net_price + d.taxe).toFixed(2));
-      } else {
-        d.taxe = parseFloat(((unitPrice - d.DiscountNet) * (taxPercent / 100)).toFixed(2));
-        d.Net_price = parseFloat((unitPrice - d.taxe - d.DiscountNet).toFixed(2));
-        d.Total_price = parseFloat((d.Net_price + d.taxe).toFixed(2));
-      }
-      return d;
-    });
-    _this25.details = mapped;
-
-    // Totals
-    _this25.GrandTotal = Number(data.GrandTotal || 0);
-    _this25.CalculTotal();
-
-    // Refresh product lists for the chosen warehouse (unified API)
-    if (_this25.sale.warehouse_id) {
-      _this25.getProducts();
-    }
-
-    // Close draft list modal
-    try {
-      _this25.$bvModal.hide('show_draft_sales');
-    } catch (e) {}
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  })["catch"](function () {
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  })["finally"](function () {
-    _this25.openingDraftId = null;
-  });
-}), "Remove_Draft_Sale", function Remove_Draft_Sale(id) {
-  var _this26 = this;
-  this.$swal({
-    title: this.$t("Delete_Title"),
-    text: this.$t("Delete_Text"),
-    type: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    cancelButtonText: this.$t("Delete_cancelButtonText"),
-    confirmButtonText: this.$t("Delete_confirmButtonText")
-  }).then(function (result) {
-    if (result.value) {
+  }), "Check_Product_Exist", function Check_Product_Exist(product, id) {
+    var weight = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    if (this.load_product) {
+      this.load_product = false;
       nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
       nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-      axios["delete"]("remove_draft_sale/" + id).then(function () {
-        _this26.$swal(_this26.$t("Delete_Deleted"), _this26.$t("Deleted_in_successfully"), "success");
-        Fire.$emit("event_delete_draft_sale");
-      })["catch"](function () {
-        setTimeout(function () {
-          return nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-        }, 500);
-        _this26.$swal(_this26.$t("Delete_Failed"), _this26.$t("Delete_Therewassomethingwronge"), "warning");
-      });
+      this.product = {};
+      if (product.product_type == 'is_service') {
+        this.product.quantity = 1;
+      } else {
+        this.product.current = product.qte_sale;
+        this.product.fix_stock = product.qte;
+        if (weight !== null) {
+          this.product.quantity = weight;
+        } else {
+          this.product.quantity = product.qte_sale < 1 ? product.qte_sale : 1;
+        }
+      }
+      this.Get_Product_Details(id, product.product_variant_id, product);
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      this.search_input = '';
+      this.product_filter = [];
+    } else {
+      this.makeToast("warning", this.$t("Please_wait_until_the_product_is_loaded"), this.$t("Warning"));
     }
-  });
-}), "updateParams", function updateParams(newProps) {
-  this.serverParams = Object.assign({}, this.serverParams, newProps);
-}), "onPageChange", function onPageChange(_ref4) {
-  var currentPage = _ref4.currentPage;
-  if (this.serverParams.page !== currentPage) {
-    this.updateParams({
-      page: currentPage
-    });
-    this.get_Draft_Sales(currentPage);
-  }
-}), "onPerPageChange", function onPerPageChange(_ref5) {
-  var currentPerPage = _ref5.currentPerPage;
-  if (this.limit !== currentPerPage) {
-    this.limit = currentPerPage;
-    this.updateParams({
-      page: 1,
-      perPage: currentPerPage
-    });
+  }), "Products_by_Category", function Products_by_Category(id) {
+    this.category_id = id;
+    this.getProducts();
+  }), "Products_by_Brands", function Products_by_Brands(id) {
+    this.brand_id = id;
+    this.getProducts();
+  }), "getAllCategory", function getAllCategory() {
+    this.category_id = "";
+    this.search_category = '';
+    this.getProducts();
+  }), "GetAllBrands", function GetAllBrands() {
+    this.brand_id = "";
+    this.search_brand = '';
+    this.getProducts(1);
+  }), "Show_Draft_Sales", function Show_Draft_Sales() {
+    var _this22 = this;
+    this.draft_sales_page = 1;
     this.get_Draft_Sales(1);
-  }
-}), "getProducts", function getProducts() {
-  var _this27 = this;
-  this.productsLoading = true;
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  return axios.get("pos/get_products_pos" + "?category_id=" + this.category_id + "&brand_id=" + this.brand_id + "&warehouse_id=" + this.sale.warehouse_id + "&stock=" + 1 + "&product_service=" + 1 + "&product_combo=" + 1).then(function (response) {
-    var rawProducts = Array.isArray(response.data.products) ? response.data.products : [];
-    // Always show real backend stock in online mode;
-    // only apply shadow stock adjustments when we are offline.
-    _this27.products = rawProducts.map(function (p) {
-      return _objectSpread({}, p);
-    });
-    // Use the same unified list for barcode scanning / quick search.
-    _this27.products_pos = rawProducts.map(function (p) {
-      return _objectSpread({}, p);
-    });
-    _this27.product_totalRows = response.data.totalRows;
-    _this27.Product_paginatePerPage();
-    var reallyOffline = !_this27.isOnline || typeof window !== 'undefined' && window.navigator && window.navigator.onLine === false;
-    if (reallyOffline) {
-      try {
-        if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.applyToList && _this27.sale.warehouse_id) {
-          _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.applyToList(_this27.sale.warehouse_id, _this27.products);
-        }
-      } catch (e) {}
-    }
-    _this27.productsReady = true;
-    // Cache grid products for offline usage (per warehouse) using RAW server data
-    try {
-      if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheWarehouseSnapshot && _this27.sale.warehouse_id) {
-        _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheWarehouseSnapshot(_this27.sale.warehouse_id, {
-          products: rawProducts,
-          products_pos: rawProducts,
-          product_totalRows: _this27.product_totalRows,
-          lastLoadedPage: 1,
-          category_id: _this27.category_id,
-          brand_id: _this27.brand_id
-        });
-      }
-    } catch (e) {}
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  })["catch"](function () {
-    // Offline/failed request: try to hydrate from cached snapshot
-    try {
-      if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getWarehouseSnapshot && _this27.sale.warehouse_id) {
-        var snap = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getWarehouseSnapshot(_this27.sale.warehouse_id);
-        if (snap && Array.isArray(snap.products)) {
-          var baseProducts = snap.products;
-          _this27.products = baseProducts.map(function (p) {
-            return _objectSpread({}, p);
-          });
-          // Hydrate scan/search list from cached unified products if available
-          if (Array.isArray(snap.products_pos)) {
-            _this27.products_pos = snap.products_pos.map(function (p) {
-              return _objectSpread({}, p);
-            });
-          } else {
-            _this27.products_pos = baseProducts.map(function (p) {
-              return _objectSpread({}, p);
-            });
-          }
-          _this27.product_totalRows = snap.product_totalRows || baseProducts.length;
-          _this27.Product_paginatePerPage();
-          var reallyOffline = !_this27.isOnline || typeof window !== 'undefined' && window.navigator && window.navigator.onLine === false;
-          if (reallyOffline) {
-            // When truly offline, apply shadow stock on top of cached data
-            try {
-              if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.applyToList) {
-                _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.applyToList(_this27.sale.warehouse_id, _this27.products);
-              }
-            } catch (e2) {}
-          }
-        }
-      }
-    } catch (e) {}
-    _this27.productsReady = true; // avoid blocking UI forever on error
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  })["finally"](function () {
-    _this27.productsLoading = false;
-  });
-}), "Selected_Warehouse", function Selected_Warehouse(value) {
-  this.search_input = '';
-  this.product_filter = [];
-
-  // If warehouse is cleared, reset product lists and avoid calling API/cache.
-  if (!value) {
-    this.products = [];
-    this.products_pos = [];
-    this.product_totalRows = 0;
-    this.paginated_Products = [];
-    this.product_currentPage = 1;
-    this.productsLoading = false;
-    return;
-  }
-
-  // With unified API, a single call loads both grid and scan lists.
-  this.getProducts();
-  localStorage.setItem('selected_warehouse_id', value);
-}), "onOnlineReloadNow", function onOnlineReloadNow() {
-  this.onlineReloadModalVisible = false;
-  this.onlineReloadAfterSale = false;
-  if (typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
-    try {
-      window.location.reload();
-    } catch (e) {}
-  }
-}), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "onOnlineReloadAfterSale", function onOnlineReloadAfterSale() {
-  this.onlineReloadAfterSale = true;
-  this.onlineReloadModalVisible = false;
-}), "onOnlineReloadDismiss", function onOnlineReloadDismiss() {
-  this.onlineReloadModalVisible = false;
-  this.onlineReloadAfterSale = false;
-}), "get_units", function get_units(value) {
-  var _this28 = this;
-  var UNITS_CACHE_KEY = 'pos_units_by_product';
-  var loadUnitsCache = function loadUnitsCache() {
-    try {
-      var raw = typeof window !== 'undefined' ? window.localStorage.getItem(UNITS_CACHE_KEY) : null;
-      return raw ? JSON.parse(raw) : {};
-    } catch (e) {
-      return {};
-    }
-  };
-  var saveUnitsCache = function saveUnitsCache(map) {
-    try {
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(UNITS_CACHE_KEY, JSON.stringify(map || {}));
-      }
-    } catch (e) {}
-  };
-  var reallyOffline = !this.isOnline || typeof window !== 'undefined' && window.navigator && window.navigator.onLine === false;
-  var pid = String(value);
-  if (reallyOffline) {
-    // 1) Try in-memory cache first
-    if (this.unitsByProductId && this.unitsByProductId[pid]) {
-      var units = this.unitsByProductId[pid];
-      this.units = units;
-      if (!this.detail.sale_unit_id && Array.isArray(units) && units[0] && units[0].id) {
-        this.detail.sale_unit_id = units[0].id;
-      }
-      return Promise.resolve(units);
-    }
-
-    // 2) Try persisted localStorage cache
-    var stored = loadUnitsCache();
-    if (stored && stored[pid]) {
-      var _units = stored[pid];
-      this.unitsByProductId = Object.assign({}, this.unitsByProductId || {}, _defineProperty({}, pid, _units));
-      this.units = _units;
-      if (!this.detail.sale_unit_id && Array.isArray(_units) && _units[0] && _units[0].id) {
-        this.detail.sale_unit_id = _units[0].id;
-      }
-      return Promise.resolve(_units);
-    }
-
-    // 3) Fallback: synthesize a minimal units array from the existing detail row
-    try {
-      var row = (this.details || []).find(function (d) {
-        return d.product_id === value;
-      });
-      if (row) {
-        var syntheticId = row.sale_unit_id || row.product_id || 0;
-        var name = row.unitSale || row.unitSaleName || '';
-        var _units2 = [{
-          id: syntheticId,
-          name: name || (this.$t ? this.$t('UnitSale') : 'Unit'),
-          ShortName: name || '',
-          operator: '*',
-          operator_value: 1
-        }];
-        this.units = _units2;
-        this.unitsByProductId = Object.assign({}, this.unitsByProductId || {}, _defineProperty({}, pid, _units2));
-        if (!this.detail.sale_unit_id) {
-          this.detail.sale_unit_id = syntheticId;
-        }
-        return Promise.resolve(_units2);
-      }
-    } catch (e) {}
-
-    // 4) Last resort: keep whatever units we already have (may be empty),
-    // but do not reject so the caller's .finally() still runs.
-    return Promise.resolve(this.units || []);
-  }
-
-  // Online mode: fetch from API and cache by product_id for future offline use
-  return axios.get("get_units?id=" + value).then(function (_ref6) {
-    var data = _ref6.data;
-    var units = Array.isArray(data) ? data : [];
-    _this28.units = units;
-    var map = Object.assign({}, _this28.unitsByProductId || {}, _defineProperty({}, pid, units));
-    _this28.unitsByProductId = map;
-    var stored = loadUnitsCache();
-    stored[pid] = units;
-    saveUnitsCache(stored);
-    return units;
-  });
-}), "Modal_Updat_Detail", function Modal_Updat_Detail(detail) {
-  var _this29 = this;
-  this.detailLoading = true;
-  this.detail = {};
-  this.detail.name = detail.name;
-  this.$bvModal.show("form_Update_Detail");
-  this.get_units(detail.product_id)["catch"](function () {})["finally"](function () {
-    _this29.detail.detail_id = detail.detail_id;
-    _this29.detail.sale_unit_id = detail.sale_unit_id;
-    _this29.detail.product_type = detail.product_type;
-    _this29.detail.Unit_price = detail.Unit_price;
-    _this29.detail.price_type = detail.price_type || 'retail';
-    var baseRetail = detail.retail_unit_price !== undefined && detail.retail_unit_price !== null ? detail.retail_unit_price : detail.Unit_price;
-    var baseWholesale = detail.wholesale_unit_price !== undefined && detail.wholesale_unit_price !== null ? detail.wholesale_unit_price : detail.Unit_price_wholesale;
-    if (baseWholesale === undefined || baseWholesale === null || baseWholesale === 0) {
-      baseWholesale = baseRetail;
-    }
-    _this29.detail.retail_unit_price = baseRetail;
-    _this29.detail.wholesale_unit_price = baseWholesale;
-    _this29.detail.min_price = detail.min_price !== undefined ? detail.min_price : 0;
-    _this29.detail.fix_price = detail.fix_price;
-    _this29.detail.fix_stock = detail.fix_stock;
-    _this29.detail.current = detail.current;
-    // Normalize tax_method so v-select shows the correct label in both
-    // online and offline modes (1 => Exclusive, 2 => Inclusive).
-    var rawTaxMethod = detail.tax_method;
-    _this29.detail.tax_method = rawTaxMethod === 2 || rawTaxMethod === '2' ? 2 : 1;
-    _this29.detail.discount_Method = detail.discount_Method;
-    _this29.detail.discount = detail.discount;
-    _this29.detail.quantity = detail.quantity;
-    _this29.detail.tax_percent = detail.tax_percent;
-    _this29.detail.is_imei = detail.is_imei;
-    _this29.detail.imei_number = detail.imei_number;
-    _this29.detailLoading = false;
-  });
-}), "submit_Update_Detail", function submit_Update_Detail() {
-  var _this30 = this;
-  this.$refs.Update_Detail && this.$refs.Update_Detail.validate().then(function (success) {
-    if (!success) {
-      return;
-    } else {
-      _this30.Update_Detail();
-    }
-  })["catch"](function () {
-    // Fallback: proceed without form validation if ref is absent in new design
-    _this30.Update_Detail();
-  });
-}), "Update_Detail", function Update_Detail() {
-  var _this31 = this;
-  for (var i = 0; i < this.details.length; i++) {
-    if (this.details[i].detail_id === this.detail.detail_id) {
-      // Min price validation (unit and net)
-      var rawMinCandidate = this.details[i].min_price !== undefined && this.details[i].min_price !== null ? this.details[i].min_price : this.detail.min_price || 0;
-      var minPriceRow = parseFloat(String(rawMinCandidate).toString().replace(/,/g, '')) || 0;
-      var unitPriceNum = parseFloat(String(this.detail.Unit_price).toString().replace(/,/g, '')) || 0;
-      if (minPriceRow > 0 && unitPriceNum < minPriceRow) {
-        this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
-        return;
-      }
-      // compute proposed net to check against min price
-      var proposedDiscountNet = this.detail.discount_Method == "2" ? this.detail.discount : parseFloat(unitPriceNum * this.detail.discount / 100);
-      var proposedNet = void 0,
-        proposedTax = void 0;
-      if (this.detail.tax_method == "1") {
-        proposedNet = parseFloat(unitPriceNum - proposedDiscountNet);
-        proposedTax = parseFloat(this.detail.tax_percent * (unitPriceNum - proposedDiscountNet) / 100);
-      } else {
-        proposedTax = parseFloat((unitPriceNum - proposedDiscountNet) * (this.detail.tax_percent / 100));
-        proposedNet = parseFloat(unitPriceNum - proposedTax - proposedDiscountNet);
-      }
-      if (minPriceRow > 0 && proposedNet < minPriceRow) {
-        this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
-        return;
-      }
-      if (this.details[i].product_type !== 'is_service') {
-        for (var k = 0; k < this.units.length; k++) {
-          if (this.units[k].id == this.detail.sale_unit_id) {
-            if (this.units[k].operator == "/") {
-              this.details[i].current = this.detail.fix_stock * this.units[k].operator_value;
-              this.details[i].unitSale = this.units[k].ShortName;
-            } else {
-              this.details[i].current = this.detail.fix_stock / this.units[k].operator_value;
-              this.details[i].unitSale = this.units[k].ShortName;
-            }
-          }
-        }
-        if (this.details[i].current < this.details[i].quantity) {
-          this.details[i].quantity = this.details[i].current;
-        }
-      }
-      this.details[i].Unit_price = unitPriceNum;
-      this.details[i].price_type = this.detail.price_type;
-      this.details[i].tax_percent = this.detail.tax_percent;
-      this.details[i].tax_method = this.detail.tax_method;
-      this.details[i].discount_Method = this.detail.discount_Method;
-      this.details[i].discount = this.detail.discount;
-      this.details[i].sale_unit_id = this.detail.sale_unit_id;
-      this.details[i].imei_number = this.detail.imei_number;
-      this.details[i].product_type = this.detail.product_type;
-
-      // reuse computed values
-      this.details[i].DiscountNet = proposedDiscountNet;
-      this.details[i].taxe = proposedTax;
-      this.details[i].Net_price = proposedNet;
-      this.details[i].Total_price = parseFloat(proposedNet + proposedTax);
-      this.$forceUpdate();
-    }
-  }
-  this.CalculTotal();
-  setTimeout(function () {
-    _this31.$bvModal.hide("form_Update_Detail");
-  }, 1000);
-}), "onClientSelected", function onClientSelected(selectedClientId) {
-  var _this32 = this;
-  return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1() {
-    var client, response, data, briefResponse, briefData, _t8, _t9;
-    return _regenerator().w(function (_context1) {
-      while (1) switch (_context1.p = _context1.n) {
-        case 0:
-          _this32.client_name = '';
-          _this32.selectedClientPoints = 0;
-          _this32.points_to_convert = 0;
-          _this32.discount_from_points = 0;
-          _this32.used_points = 0;
-          _this32.clientIsEligible = false;
-          _this32.pointsConverted = false;
-          _this32.sale.discount = 0;
-          _this32.selectedClientCreditLimit = 0;
-          _this32.selectedClientNetBalance = 0;
-          if (selectedClientId) {
-            _context1.n = 1;
-            break;
-          }
-          _this32.selectedClientId = "";
-          _this32.CalculTotal();
-          return _context1.a(2);
-        case 1:
-          client = _this32.clients.find(function (c) {
-            return c.id === selectedClientId;
-          });
-          if (!client) {
-            _context1.n = 9;
-            break;
-          }
-          _this32.client_name = client.name;
-          _this32.selectedClientId = selectedClientId;
-          _context1.p = 2;
-          _context1.n = 3;
-          return axios.get("/get_points_client/".concat(selectedClientId));
-        case 3:
-          response = _context1.v;
-          data = response.data;
-          if (data.is_royalty_eligible) {
-            _this32.selectedClientPoints = data.points;
-            _this32.clientIsEligible = true;
-          } else {
-            _this32.selectedClientPoints = 0;
-            _this32.clientIsEligible = false;
-          }
-          _context1.n = 5;
-          break;
-        case 4:
-          _context1.p = 4;
-          _t8 = _context1.v;
-          console.error('Error fetching client points:', _t8);
-        case 5:
-          _context1.p = 5;
-          _context1.n = 6;
-          return axios.get("/clients/".concat(selectedClientId, "/brief"));
-        case 6:
-          briefResponse = _context1.v;
-          briefData = briefResponse.data;
-          _this32.selectedClientCreditLimit = parseFloat(briefData.credit_limit || 0);
-          _this32.selectedClientNetBalance = parseFloat(briefData.netBalance || 0);
-          _context1.n = 8;
-          break;
-        case 7:
-          _context1.p = 7;
-          _t9 = _context1.v;
-          console.error('Error fetching client credit limit:', _t9);
-          _this32.selectedClientCreditLimit = 0;
-          _this32.selectedClientNetBalance = 0;
-        case 8:
-          _context1.n = 10;
-          break;
-        case 9:
-          _this32.selectedClientId = "";
-          _this32.selectedClientCreditLimit = 0;
-          _this32.selectedClientNetBalance = 0;
-        case 10:
-          _this32.CalculTotal();
-        case 11:
-          return _context1.a(2);
-      }
-    }, _callee1, null, [[5, 7], [2, 4]]);
-  }))();
-}), "convertPointsToDiscount", function convertPointsToDiscount() {
-  if (this.pointsConverted) {
-    var current = Number(this.sale.discount || 0);
-    var toRemove = Number(this.discount_from_points || 0);
-    // For fixed discounts, revert the combined fixed discount amount
-    if (String(this.sale.discount_Method || '2') !== '1') {
-      this.sale.discount = Math.max(0, parseFloat((current - toRemove).toFixed(2)));
-    }
-    this.discount_from_points = 0;
-    this.used_points = 0;
-    this.points_to_convert = 0;
-    this.pointsConverted = false;
-  } else {
-    var maxPoints = Number(this.selectedClientPoints) || 0;
-    var pts = Number(this.points_to_convert);
-    if (!Number.isFinite(pts) || pts <= 0) {
-      this.makeToast('warning', this.$t ? this.$t('Please_enter_points_to_convert') : 'Please enter points to convert', this.$t ? this.$t('Warning') : 'Warning');
-      return;
-    }
-    if (pts > maxPoints) pts = maxPoints;
-    var discount = parseFloat((pts * this.point_to_amount_rate).toFixed(2));
-    this.discount_from_points = discount;
-    // Don't merge points into sale.discount - keep them separate so input shows only manual discount
-    // Points discount is stored in discount_from_points and applied separately in calculations
-    this.used_points = pts;
-    this.pointsConverted = true;
-  }
-  this.CalculTotal();
-}), "onPointsToConvertInput", function onPointsToConvertInput() {
-  var max = Number(this.selectedClientPoints) || 0;
-  var val = Number(this.points_to_convert);
-  if (!Number.isFinite(val)) val = 0;
-  if (val < 0) val = 0;
-  // enforce integer points
-  val = Math.floor(val);
-  if (val > max) {
-    val = max;
-    this.makeToast('warning', this.$t ? this.$t('Entered_points_exceed_available') : 'Entered points exceed available', this.$t ? this.$t('Warning') : 'Warning');
-  }
-  this.points_to_convert = val;
-}), "Invoice_POS", function Invoice_POS(id) {
-  var _this33 = this;
-  // Determine preferred invoice format from settings; default to thermal
-  var format = 'thermal';
-  try {
-    // Prefer explicit invoice_format cached from POS bootstrap
-    if (typeof this.invoice_format === 'string' && ['thermal', 'a4'].includes(this.invoice_format)) {
-      format = this.invoice_format;
-    } else {
-      var s = this.invoice_pos && this.invoice_pos.setting ? this.invoice_pos.setting : null;
-      if (s && typeof s.invoice_format === 'string' && ['thermal', 'a4'].includes(s.invoice_format)) {
-        format = s.invoice_format;
-      }
-    }
-  } catch (e) {}
-
-  // If A4 is selected, print using the existing A4 PDF endpoint (`/api/sale_pdf/{id}`)
-  // but keep the UX similar to the thermal POS invoice:
-  // - open a print popup window
-  // - show the PDF inside it
-  // - trigger print
-  // - reload after Print/Cancel when "After this sale" is selected
-  if (format === 'a4') {
-    if (typeof window !== 'undefined') {
-      var vm = this;
-      var reloadAfterSale = !!vm.onlineReloadAfterSale;
-
-      // Create (or refresh) a same-origin hook so the popup can request a reload immediately
-      // after Print/Cancel without relying on the POS window focus changing.
-      try {
-        window.__posReloadAfterA4Print = function () {
-          try {
-            if (vm.onlineReloadAfterSale && window.location && typeof window.location.reload === 'function') {
-              vm.onlineReloadAfterSale = false;
-              vm.onlineReloadModalVisible = false;
-              try {
-                window.location.reload();
-              } catch (e) {}
-            }
-          } catch (e) {}
-        };
-      } catch (e) {}
-
-      // Open the popup immediately (before async axios resolves) so it is not blocked,
-      // and so the user always sees the print window (like the thermal POS invoice).
-      var sw = 1200,
-        sh = 800;
-      try {
-        sw = window.screen && window.screen.availWidth ? window.screen.availWidth : sw;
-        sh = window.screen && window.screen.availHeight ? window.screen.availHeight : sh;
-      } catch (e) {}
-      var width = Math.max(700, Math.min(1200, Math.floor(sw * 0.9)));
-      var height = Math.max(600, Math.min(900, Math.floor(sh * 0.9)));
-      var left = Math.max(0, Math.floor((sw - width) / 2));
-      var top = Math.max(0, Math.floor((sh - height) / 2));
-      var features = "height=".concat(height, ",width=").concat(width, ",left=").concat(left, ",top=").concat(top, ",toolbar=0,location=0,menubar=0,status=0,scrollbars=1,resizable=1");
-      var win = window.open('', 'A4Invoice', features);
-      if (!win) {
-        return;
-      }
-
-      // Bootstrap the popup with a loading screen and print/reload wiring.
-      try {
-        win.document.open();
-        win.document.write('<!doctype html><html><head><title>Print</title>');
-        win.document.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
-        win.document.write('<style>html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#fff;}');
-        win.document.write('#loading{height:100%;display:flex;align-items:center;justify-content:center;font-family:Arial;color:#444;}');
-        win.document.write('embed,object,iframe{width:100%;height:100%;border:0;display:none;}</style>');
-        win.document.write('</head><body>');
-        win.document.write('<div id="loading">Loading invoice…</div>');
-        win.document.write('<object id="pdfObject" type="application/pdf"></object>');
-        win.document.write('<embed id="pdfEmbed" type="application/pdf" />');
-        win.document.write('<iframe id="pdfFrame"></iframe>');
-        win.document.write('<script>(function(){');
-        win.document.write('var reloadAfterSale=' + (reloadAfterSale ? 'true' : 'false') + ';');
-        win.document.write('var printed=false;');
-        win.document.write('function done(){try{if(window.opener){try{if(reloadAfterSale){try{window.opener.__posReloadAfterA4Print && window.opener.__posReloadAfterA4Print();}catch(e){}}}catch(e){}}}catch(e){} try{window.close();}catch(e){} }');
-        win.document.write('window.onafterprint=function(){done();};');
-        // Do NOT close on initial focus; only after printing was initiated.
-        win.document.write('window.addEventListener("focus", function(){try{if(printed){setTimeout(done, 150);}}catch(e){}});');
-        win.document.write('function doPrint(){ if(printed) return; printed=true; try{window.focus();}catch(e){} try{window.print();}catch(e){} }');
-        win.document.write('window.__setPdf=function(src){');
-        win.document.write('try{document.getElementById("loading").style.display="none";}catch(e){}');
-        // Prefer object (native viewer). If it fails, embed/iframe can still show.
-        win.document.write('try{var o=document.getElementById("pdfObject"); if(o){o.data=src; o.style.display="block";}}catch(e){}');
-        win.document.write('try{var e=document.getElementById("pdfEmbed"); if(e){e.src=src;}}catch(e){}');
-        win.document.write('try{var f=document.getElementById("pdfFrame"); if(f){f.src=src; f.onload=function(){setTimeout(doPrint,300);};}}catch(e){}');
-        // Timed fallbacks: PDFs can take time to render before print dialog appears.
-        win.document.write('setTimeout(doPrint, 900); setTimeout(doPrint, 1800); setTimeout(doPrint, 2800);');
-        win.document.write('};');
-        win.document.write('window.__setError=function(msg){try{document.getElementById("loading").innerText=msg||"Failed to load invoice";}catch(e){}};');
-        win.document.write('})();<\/script>');
-        win.document.write('</body></html>');
-        win.document.close();
-      } catch (e) {}
-
-      // Fetch the existing A4 layout as HTML using the current Bearer token (axios default header),
-      // then inject it into the already-open popup so we can call window.print() reliably
-      // (same pattern as the POS thermal invoice).
-      axios.get("sale_print_html/".concat(id), {
-        responseType: 'text',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }).then(function (response) {
-        try {
-          var html = typeof response.data === 'string' ? response.data : response.request && typeof response.request.responseText === 'string' ? response.request.responseText : '';
-          if (!html) {
-            try {
-              win.__setError && win.__setError('Empty invoice HTML');
-            } catch (_) {}
-            return;
-          }
-          // Replace popup content with the A4 HTML and trigger print (mirrors index_sale.print_it)
-          try {
-            win.document.open();
-            win.document.write(html);
-            win.document.close();
-          } catch (e) {
-            try {
-              win.__setError && win.__setError('Failed to render invoice');
-            } catch (_) {}
-            return;
-          }
-          // Ensure the popup preview (screen) and print dialog use the same A4 sizing.
-          // We do NOT modify the template content; we only inject extra CSS rules.
-          try {
-            var style = win.document.createElement('style');
-            style.type = 'text/css';
-            style.innerHTML = '@media screen {' + '  body { width: 210mm; margin: 0 auto; }' + '}' + '@media print {' + '  @page { size: A4; margin: 10mm 15mm; }' + '  body { width: auto; margin: 0; }' + '}';
-            (win.document.head || win.document.getElementsByTagName("head")[0]).appendChild(style);
-          } catch (e) {}
-
-          // Close/hide the preview popup after the user clicks Print or Cancel
-          // (mirroring the thermal invoice flow).
-          var closed = false;
-          var closePreview = function closePreview() {
-            if (closed) return;
-            closed = true;
-            try {
-              win.close();
-            } catch (_) {}
-          };
-          // Browsers do not expose a reliable "print job finished" event.
-          // `afterprint` fires when the print dialog closes (Print OR Cancel).
-          // Heuristic:
-          // - If the dialog closes almost immediately (< 800ms) we treat it as Cancel and close at once.
-          // - Otherwise we assume "Print" and keep the preview a bit longer (2s) before closing.
-          var CANCEL_THRESHOLD_MS = 800;
-          var PRINT_CLOSE_DELAY_MS = 2000;
-          // Track whether we actually initiated printing, and whether the popup lost focus
-          // (print dialog typically causes a blur). This prevents premature closing.
-          var printInitiated = false;
-          var blurredAfterPrint = false;
-          var printStartAt = 0;
-          try {
-            win.onafterprint = function () {
-              var elapsed = printStartAt ? Date.now() - printStartAt : 0;
-              var delay = elapsed > CANCEL_THRESHOLD_MS ? PRINT_CLOSE_DELAY_MS : 0;
-              setTimeout(function () {
-                try {
-                  if (reloadAfterSale && window.__posReloadAfterA4Print) {
-                    window.__posReloadAfterA4Print();
-                  }
-                } catch (e) {}
-                closePreview();
-              }, delay);
-            };
-          } catch (e) {}
-          // Fallback: some browsers don't fire afterprint; close only after a blur->focus cycle
-          // that happens AFTER print() was called (i.e. after Print/Cancel dialog closes).
-          try {
-            var onBlur = function onBlur() {
-              try {
-                if (printInitiated) blurredAfterPrint = true;
-              } catch (e) {}
-            };
-            var onFocus = function onFocus() {
-              try {
-                if (!printInitiated || !blurredAfterPrint) return;
-              } catch (e) {
-                return;
-              }
-              var elapsed = printStartAt ? Date.now() - printStartAt : 0;
-              var delay = elapsed > CANCEL_THRESHOLD_MS ? PRINT_CLOSE_DELAY_MS : 0;
-              setTimeout(function () {
-                try {
-                  if (reloadAfterSale && window.__posReloadAfterA4Print) {
-                    window.__posReloadAfterA4Print();
-                  }
-                } catch (e) {}
-                closePreview();
-              }, delay);
-            };
-            win.addEventListener && win.addEventListener('blur', onBlur);
-            win.addEventListener && win.addEventListener('focus', onFocus);
-          } catch (e) {}
-
-          // Give browser a moment to render, then show system print dialog
-          setTimeout(function () {
-            try {
-              win.focus();
-            } catch (_) {}
-            try {
-              printInitiated = true;
-              printStartAt = Date.now();
-            } catch (e) {}
-            try {
-              win.print();
-            } catch (_) {}
-          }, 700);
-        } catch (e) {
-          try {
-            win.__setError && win.__setError('Failed to load invoice');
-          } catch (_) {}
-        }
-      })["catch"](function () {
-        try {
-          win.__setError && win.__setError('Failed to load invoice');
-        } catch (_) {}
-      });
-    }
-    return;
-  }
-
-  // Default: thermal POS invoice (existing behavior)
-  axios.get("sales_print_invoice/".concat(id)).then(function (response) {
-    _this33.invoice_pos.sale = response.data.sale || {};
-    // Backward compatibility: ensure discount_Method defaults to '2' (fixed) if not present
-    if (_this33.invoice_pos.sale && !_this33.invoice_pos.sale.discount_Method) {
-      _this33.invoice_pos.sale.discount_Method = '2';
-    }
-    _this33.invoice_pos.details = response.data.details;
-    _this33.invoice_pos.setting = response.data.setting;
-    _this33.invoice_pos.symbol = response.data.symbol;
-    _this33.invoice_pos.zatca_qr = response.data.zatca_qr;
-    _this33.payments = response.data.payments;
-    if (response.data.pos_settings) {
-      // Merge with existing pos_settings to preserve defaults
-      _this33.pos_settings = _objectSpread(_objectSpread({}, _this33.pos_settings), response.data.pos_settings);
-      // Convert integer values to boolean for proper condition checking
-      if (typeof _this33.pos_settings.quick_add_customer === 'number') {
-        _this33.pos_settings.quick_add_customer = _this33.pos_settings.quick_add_customer === 1;
-      }
-    }
-    // Mirror index_sale behavior: show modal first, then optionally auto-print
     setTimeout(function () {
-      try {
-        _this33.$bvModal.show('Show_invoice');
-      } catch (e) {}
-      _this33.$nextTick(function () {
-        return _this33.renderZatcaQrPos();
-      });
-    }, 500);
+      _this22.$bvModal.show("show_draft_sales");
+    }, 1000);
+  }), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "onPageChangeDraftSales", function onPageChangeDraftSales(page) {
+    this.draft_sales_page = page;
+    this.get_Draft_Sales(page);
+  }), "get_Draft_Sales", function get_Draft_Sales(page) {
+    var _this23 = this;
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    axios.get("get_draft_sales?page=" + page + "&limit=" + this.limit).then(function (response) {
+      _this23.draft_sales = response.data.draft_sales;
+      _this23.totalRows_draft_sales = response.data.totalRows;
 
-    // Respect "Print Invoice automatically" POS setting for online sales.
-    // Fallback default is enabled (1) if the flag is missing.
-    try {
-      var rawPrintable = _this33.pos_settings && _this33.pos_settings.is_printable !== undefined ? _this33.pos_settings.is_printable : response.data.pos_settings && response.data.pos_settings.is_printable !== undefined ? response.data.pos_settings.is_printable : 1;
-      var autoPrintable = rawPrintable === true || rawPrintable === 1 || rawPrintable === '1';
-      if (autoPrintable) {
-        setTimeout(function () {
-          try {
-            if (typeof window !== 'undefined' && (window.innerWidth <= 768 || window.matchMedia('(max-width: 768px)').matches)) {
-              _this33.print_pos_mobile();
-            } else {
-              _this33.print_pos();
-            }
-          } catch (e) {
-            try {
-              _this33.print_pos();
-            } catch (_) {}
-          }
-        }, 1000);
+      // If current page is empty but we have data and we're not on page 1, go to previous page
+      if (_this23.draft_sales.length === 0 && _this23.totalRows_draft_sales > 0 && page > 1) {
+        _this23.draft_sales_page = page - 1;
+        _this23.get_Draft_Sales(_this23.draft_sales_page);
+        return;
       }
-    } catch (e) {}
-  });
-}), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "renderZatcaQrPos", function renderZatcaQrPos() {
-  var _this34 = this;
-  try {
-    if (!this.invoice_pos || !this.invoice_pos.setting || !this.invoice_pos.setting.zatca_enabled || !this.invoice_pos.zatca_qr) return;
-    var mount = this.$refs.zatcaQrcodePos;
-    if (!mount) return;
-    mount.innerHTML = '';
-    var draw = function draw() {
-      try {
-        if (!window.QRCode) return;
-        var text = String(_this34.invoice_pos.zatca_qr || '');
-        try {
-          var m = _this34.$refs.zatcaQrcodePos;
-          if (m) m.setAttribute('title', text);
-        } catch (e) {}
-        try {
-          new window.QRCode(mount, {
-            text: text,
-            width: 180,
-            height: 180,
-            colorDark: '#000000',
-            colorLight: '#ffffff',
-            correctLevel: window.QRCode.CorrectLevel ? window.QRCode.CorrectLevel.H : undefined
-          });
-        } catch (e1) {
-          new window.QRCode(mount, text);
-        }
-        _this34.zatcaRenderedPos = true;
-        setTimeout(function () {
-          if (mount && !mount.childNodes.length && window.QRCode) {
-            try {
-              new window.QRCode(mount, text);
-            } catch (e2) {}
-          }
-          try {
-            var img = mount.querySelector('img');
-            if (img) {
-              img.style.display = '';
-              img.style.marginLeft = 'auto';
-              img.style.marginRight = 'auto';
-            }
-          } catch (e3) {}
-        }, 150);
-      } catch (e) {}
-    };
-    if (window.QRCode) {
-      draw();
-    } else {
-      var loadScript = function loadScript(src, onload, onerror) {
-        var s = document.createElement('script');
-        s.src = src;
-        s.onload = onload;
-        s.onerror = onerror;
-        document.head.appendChild(s);
-      };
-
-      // Prefer CDN, then vendor, then assets_setup
-      loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', function () {
-        if (window.QRCode) return draw();
-        loadScript('/vendor/qrcode/qrcode.min.js', function () {
-          if (window.QRCode) return draw();
-          loadScript('/assets_setup/js/qrcode.js', draw, draw);
-        }, function () {
-          return loadScript('/assets_setup/js/qrcode.js', draw, function () {});
-        });
-      }, function () {
-        loadScript('/vendor/qrcode/qrcode.min.js', function () {
-          if (window.QRCode) return draw();
-          loadScript('/assets_setup/js/qrcode.js', draw, function () {});
-        }, function () {
-          return loadScript('/assets_setup/js/qrcode.js', draw, function () {});
-        });
-      });
-    }
-  } catch (e) {}
-}), "getValidationState", function getValidationState(_ref7) {
-  var dirty = _ref7.dirty,
-    validated = _ref7.validated,
-    _ref7$valid = _ref7.valid,
-    valid = _ref7$valid === void 0 ? null : _ref7$valid;
-  return dirty || validated ? valid : null;
-}), "Submit_Customer", function Submit_Customer() {
-  var _this35 = this;
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  this.$refs.Create_Customer && this.$refs.Create_Customer.validate().then(function (success) {
-    if (!success) {
       nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-      _this35.makeToast("danger", _this35.$t("Please_fill_the_form_correctly"), _this35.$t("Failed"));
-    } else {
-      _this35.Create_Client();
-    }
-  })["catch"](function () {
-    // Fallback when ref not present in new design
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-  });
-}), "Create_Client", function Create_Client() {
-  var _this36 = this;
-  axios.post("clients", {
-    name: this.client.name,
-    email: this.client.email,
-    phone: this.client.phone,
-    tax_number: this.client.tax_number,
-    country: this.client.country,
-    city: this.client.city,
-    adresse: this.client.adresse,
-    is_royalty_eligible: this.client.is_royalty_eligible
-  }).then(/*#__PURE__*/function () {
-    var _ref8 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10(response) {
-      var newClient, newCustomer;
-      return _regenerator().w(function (_context10) {
-        while (1) switch (_context10.n) {
-          case 0:
-            nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-            newClient = response.data;
-            newCustomer = {
-              id: Number(newClient.id),
-              name: newClient.name,
-              phone: newClient.phone || '',
-              email: newClient.email || ''
-            }; // Add new customer
-            _this36.clients.push(newCustomer);
-
-            // Select new customer
-            _this36.selectedClientId = newCustomer.id;
-            _this36.client_name = newCustomer.name;
-
-            // Load customer details
-            _context10.n = 1;
-            return _this36.onClientSelected(newCustomer.id);
-          case 1:
-            _context10.n = 2;
-            return _this36.$nextTick();
-          case 2:
-            _this36.makeToast("success", _this36.$t("Successfully_Created"), _this36.$t("Success"));
-            _this36.$bvModal.hide("New_Customer");
-          case 3:
-            return _context10.a(2);
-        }
-      }, _callee10);
-    }));
-    return function (_x2) {
-      return _ref8.apply(this, arguments);
-    };
-  }())["catch"](function () {
-    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-    _this36.makeToast("danger", _this36.$t("InvalidData"), _this36.$t("Failed"));
-  });
-}), "Submit_Quick_Add_Customer", function Submit_Quick_Add_Customer() {
-  var _this37 = this;
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  this.SubmitProcessing = true;
-  this.$refs.Quick_Add_Customer_Form && this.$refs.Quick_Add_Customer_Form.validate().then(function (success) {
-    if (!success) {
-      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-      _this37.SubmitProcessing = false;
-      _this37.makeToast("danger", _this37.$t("Please_fill_the_form_correctly"), _this37.$t("Failed"));
-      return;
-    }
-    if (_this37.client.id) axios.put("clients/".concat(_this37.client.id), _this37.client).then(function (response) {
-      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-      _this37.SubmitProcessing = false;
-      _this37.makeToast("success", _this37.$t("Successfully_Updated"), _this37.$t("Success"));
-      _this37.$bvModal.hide("Quick_Add_Customer");
-
-      //window.location.reload();
-      // this.GetElementsPos(); 
-    });else axios.post("clients", _this37.client).then(function (response) {
-      var _newClient$client;
-      var newClient = response.data;
-
-      // If there are custom field values from the quick-add form, persist them
-      var clientId = Number(newClient.id) || Number((_newClient$client = newClient.client) === null || _newClient$client === void 0 ? void 0 : _newClient$client.id);
-      var hasCustoms = clientId && _this37.quickAddCustomFieldValues && Object.keys(_this37.quickAddCustomFieldValues).length > 0;
-      var afterCustoms = /*#__PURE__*/function () {
-        var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11() {
-          var newCustomer, existingIndex;
-          return _regenerator().w(function (_context11) {
-            while (1) switch (_context11.n) {
-              case 0:
-                nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-                _this37.SubmitProcessing = false;
-                newCustomer = {
-                  id: Number(newClient.id),
-                  name: newClient.name,
-                  phone: newClient.phone || '',
-                  email: newClient.email || ''
-                }; // Add customer to the current clients list
-                existingIndex = _this37.clients.findIndex(function (client) {
-                  return client.id == newCustomer.id;
-                });
-                if (existingIndex === -1) {
-                  _this37.clients.push(newCustomer);
-                } else {
-                  _this37.$set(_this37.clients, existingIndex, newCustomer);
-                }
-
-                // IMPORTANT: select the newly created customer
-                _this37.selectedClientId = newCustomer.id;
-                _this37.client_name = newCustomer.name;
-
-                // Run customer selection logic
-                _context11.n = 1;
-                return _this37.onClientSelected(newCustomer.id);
-              case 1:
-                _context11.n = 2;
-                return _this37.$nextTick();
-              case 2:
-                // Close modal
-                _this37.$bvModal.hide("Quick_Add_Customer");
-                _this37.makeToast("success", _this37.$t("Successfully_Created"), _this37.$t("Success"));
-                _this37.reset_Form_client();
-                _this37.quickAddCustomFieldValues = {};
-              case 3:
-                return _context11.a(2);
-            }
-          }, _callee11);
-        }));
-        return function afterCustoms() {
-          return _ref9.apply(this, arguments);
-        };
-      }();
-      if (hasCustoms) {
-        axios.post("custom-field-values", {
-          entity_type: "App\\Models\\Client",
-          entity_id: clientId,
-          values: _this37.quickAddCustomFieldValues
-        }).then(afterCustoms)["catch"](function () {
-          return afterCustoms();
-        });
-      } else {
-        afterCustoms();
-      }
     })["catch"](function () {
       nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-      _this37.SubmitProcessing = false;
-      _this37.makeToast("danger", _this37.$t("InvalidData"), _this37.$t("Failed"));
     });
-  });
-}), "New_Client", function New_Client() {
-  this.reset_Form_client();
-  this.$bvModal.show("New_Customer");
-}), "Quick_Add_Client", function Quick_Add_Client() {
-  this.reset_Form_client();
-  this.$bvModal.show("Quick_Add_Customer");
-}), "reset_Form_client", function reset_Form_client() {
-  this.client = {
-    id: "",
-    name: "",
-    email: "",
-    phone: this.searchPhone,
-    country: "",
-    city: "",
-    tax_number: "",
-    adresse: "",
-    is_royalty_eligible: false
-  };
-}), "Get_Client_Without_Paginate", function Get_Client_Without_Paginate() {
-  var _this38 = this;
-  axios.get("get_clients_without_paginate").then(function (_ref0) {
-    var data = _ref0.data;
-    return _this38.clients = data;
-  });
-}), "get_today_sales", function get_today_sales() {
-  var _this39 = this;
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
-  nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
-  axios.get("get_today_sales").then(function (response) {
-    _this39.today_sales = response.data;
-    setTimeout(function () {
-      _this39.$bvModal.show("modal_today_sales");
-      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-    }, 1000);
-  })["catch"](function () {});
-}), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "getResultValue", function getResultValue(result) {
-  return result.code + " " + "(" + result.name + ")";
-}), "SearchProduct", function SearchProduct(result) {
-  if (this.load_product) {
-    this.load_product = false;
-    this.product = {};
-    if (result.product_type == 'is_service') {
-      this.product.quantity = 1;
-      this.product.code = result.code;
-    } else {
-      this.product.code = result.code;
-      this.product.current = result.qte_sale;
-      this.product.fix_stock = result.qte;
-      if (result.qte_sale < 1) {
-        this.product.quantity = result.qte_sale;
-      } else {
-        this.product.quantity = 1;
+  }), "loadDraftSale", function loadDraftSale(id) {
+    var _this24 = this;
+    this.openingDraftId = id;
+    // If this draft is already loaded, do nothing (do not update on open)
+    if (this.draft_sale_id && String(this.draft_sale_id) === String(id)) {
+      this.openingDraftId = null;
+      return;
+    }
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    axios.get("pos/data_draft_convert_sale/".concat(id)).then(function (response) {
+      _this24.draft_sale_id = id;
+      var data = response.data || {};
+
+      // Basic references (keep layout/logic unchanged; just inject data)
+      if (Array.isArray(data.clients)) _this24.clients = data.clients;
+      if (Array.isArray(data.accounts)) _this24.accounts = data.accounts;
+      if (Array.isArray(data.warehouses)) _this24.warehouses = data.warehouses;
+      if (Array.isArray(data.categories)) _this24.categories = data.categories;
+      if (Array.isArray(data.brands)) _this24.brands = data.brands;
+      if (Array.isArray(data.payment_methods)) _this24.payment_methods = data.payment_methods;
+
+      // Customer & loyalty
+      _this24.selectedClientId = data.client_id || data.sale && data.sale.client_id || _this24.selectedClientId;
+      _this24.client_name = data.client_name || _this24.client_name;
+      _this24.clientIsEligible = data.default_client_eligible === true || data.default_client_eligible === 1;
+      _this24.selectedClientPoints = _this24.clientIsEligible ? parseFloat(data.default_client_points || 0) : 0;
+      if (typeof data.point_to_amount_rate !== 'undefined') {
+        _this24.point_to_amount_rate = data.point_to_amount_rate;
       }
+
+      // Sale-level fields
+      var saleData = data.sale || {};
+      _this24.sale.warehouse_id = data.warehouse_id !== undefined && data.warehouse_id !== null ? data.warehouse_id : saleData.warehouse_id || _this24.sale.warehouse_id;
+      _this24.sale.tax_rate = saleData.tax_rate || 0;
+      _this24.sale.TaxNet = saleData.TaxNet || 0;
+      _this24.sale.discount = saleData.discount || 0;
+      // Backward compatibility: default to fixed ('2') if discount_Method is not present
+      _this24.sale.discount_Method = saleData.discount_Method || '2';
+      _this24.sale.shipping = saleData.shipping || 0;
+      _this24.sale.notes = saleData.notes || '';
+
+      // Map draft details to POS details shape (ensuring fields required by POS)
+      var incoming = Array.isArray(data.details) ? data.details : [];
+      var mapped = incoming.map(function (it, idx) {
+        var d = _objectSpread({}, it);
+        if (d.detail_id === undefined || d.detail_id === null) d.detail_id = idx + 1;
+        if (!d.price_type) d.price_type = 'retail';
+        if (d.retail_unit_price === undefined) d.retail_unit_price = d.Unit_price;
+        if (d.wholesale_unit_price === undefined) d.wholesale_unit_price = d.Unit_price_wholesale !== undefined ? d.Unit_price_wholesale : d.Unit_price;
+        if (d.min_price === undefined) d.min_price = 0;
+        if (d.current === undefined || d.current === null) d.current = d.fix_stock !== undefined ? d.fix_stock : d.quantity;
+        if (d.fix_stock === undefined || d.fix_stock === null) d.fix_stock = d.current;
+        var unitPrice = Number(d.Unit_price || 0);
+        var discountVal = Number(d.discount || 0);
+        var discountMethod = String(d.discount_Method || '2'); // 1: %, 2: fixed
+        var taxPercent = Number(d.tax_percent || 0);
+        var taxMethod = String(d.tax_method || '1'); // 1: Exclusive, 2: Inclusive
+
+        if (typeof d.DiscountNet === 'undefined') {
+          d.DiscountNet = discountMethod === '2' ? discountVal : unitPrice * (discountVal / 100);
+        }
+        if (taxMethod === '1') {
+          d.Net_price = parseFloat((unitPrice - d.DiscountNet).toFixed(2));
+          d.taxe = parseFloat(((unitPrice - d.DiscountNet) * taxPercent / 100).toFixed(2));
+          d.Total_price = parseFloat((d.Net_price + d.taxe).toFixed(2));
+        } else {
+          d.taxe = parseFloat(((unitPrice - d.DiscountNet) * (taxPercent / 100)).toFixed(2));
+          d.Net_price = parseFloat((unitPrice - d.taxe - d.DiscountNet).toFixed(2));
+          d.Total_price = parseFloat((d.Net_price + d.taxe).toFixed(2));
+        }
+        return d;
+      });
+      _this24.details = mapped;
+
+      // Totals
+      _this24.GrandTotal = Number(data.GrandTotal || 0);
+      _this24.CalculTotal();
+
+      // Refresh product lists for the chosen warehouse (unified API)
+      if (_this24.sale.warehouse_id) {
+        _this24.getProducts();
+      }
+
+      // Close draft list modal
+      try {
+        _this24.$bvModal.hide('show_draft_sales');
+      } catch (e) {}
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+    })["catch"](function () {
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+    })["finally"](function () {
+      _this24.openingDraftId = null;
+    });
+  }), "Remove_Draft_Sale", function Remove_Draft_Sale(id) {
+    var _this25 = this;
+    this.$swal({
+      title: this.$t("Delete_Title"),
+      text: this.$t("Delete_Text"),
+      type: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      cancelButtonText: this.$t("Delete_cancelButtonText"),
+      confirmButtonText: this.$t("Delete_confirmButtonText")
+    }).then(function (result) {
+      if (result.value) {
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+        axios["delete"]("remove_draft_sale/" + id).then(function () {
+          _this25.$swal(_this25.$t("Delete_Deleted"), _this25.$t("Deleted_in_successfully"), "success");
+          Fire.$emit("event_delete_draft_sale");
+        })["catch"](function () {
+          setTimeout(function () {
+            return nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+          }, 500);
+          _this25.$swal(_this25.$t("Delete_Failed"), _this25.$t("Delete_Therewassomethingwronge"), "warning");
+        });
+      }
+    });
+  }), "updateParams", function updateParams(newProps) {
+    this.serverParams = Object.assign({}, this.serverParams, newProps);
+  }), "onPageChange", function onPageChange(_ref4) {
+    var currentPage = _ref4.currentPage;
+    if (this.serverParams.page !== currentPage) {
+      this.updateParams({
+        page: currentPage
+      });
+      this.get_Draft_Sales(currentPage);
     }
-    this.product.product_variant_id = result.product_variant_id;
-    this.Get_Product_Details(result.id, result.product_variant_id, result);
+  }), "onPerPageChange", function onPerPageChange(_ref5) {
+    var currentPerPage = _ref5.currentPerPage;
+    if (this.limit !== currentPerPage) {
+      this.limit = currentPerPage;
+      this.updateParams({
+        page: 1,
+        perPage: currentPerPage
+      });
+      this.get_Draft_Sales(1);
+    }
+  }), "getProducts", function getProducts() {
+    var _this26 = this;
+    this.productsLoading = true;
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    return axios.get("pos/get_products_pos" + "?category_id=" + this.category_id + "&brand_id=" + this.brand_id + "&warehouse_id=" + this.sale.warehouse_id + "&stock=" + 1 + "&product_service=" + 1 + "&product_combo=" + 1).then(function (response) {
+      var rawProducts = Array.isArray(response.data.products) ? response.data.products : [];
+      // Always show real backend stock in online mode;
+      // only apply shadow stock adjustments when we are offline.
+      _this26.products = rawProducts.map(function (p) {
+        return _objectSpread({}, p);
+      });
+      // Use the same unified list for barcode scanning / quick search.
+      _this26.products_pos = rawProducts.map(function (p) {
+        return _objectSpread({}, p);
+      });
+      _this26.product_totalRows = response.data.totalRows;
+      _this26.Product_paginatePerPage();
+      var reallyOffline = !_this26.isOnline || typeof window !== 'undefined' && window.navigator && window.navigator.onLine === false;
+      if (reallyOffline) {
+        try {
+          if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.applyToList && _this26.sale.warehouse_id) {
+            _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.applyToList(_this26.sale.warehouse_id, _this26.products);
+          }
+        } catch (e) {}
+      }
+      _this26.productsReady = true;
+      // Cache grid products for offline usage (per warehouse) using RAW server data
+      try {
+        if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheWarehouseSnapshot && _this26.sale.warehouse_id) {
+          _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheWarehouseSnapshot(_this26.sale.warehouse_id, {
+            products: rawProducts,
+            products_pos: rawProducts,
+            product_totalRows: _this26.product_totalRows,
+            lastLoadedPage: 1,
+            category_id: _this26.category_id,
+            brand_id: _this26.brand_id
+          });
+        }
+      } catch (e) {}
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+    })["catch"](function () {
+      // Offline/failed request: try to hydrate from cached snapshot
+      try {
+        if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getWarehouseSnapshot && _this26.sale.warehouse_id) {
+          var snap = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getWarehouseSnapshot(_this26.sale.warehouse_id);
+          if (snap && Array.isArray(snap.products)) {
+            var baseProducts = snap.products;
+            _this26.products = baseProducts.map(function (p) {
+              return _objectSpread({}, p);
+            });
+            // Hydrate scan/search list from cached unified products if available
+            if (Array.isArray(snap.products_pos)) {
+              _this26.products_pos = snap.products_pos.map(function (p) {
+                return _objectSpread({}, p);
+              });
+            } else {
+              _this26.products_pos = baseProducts.map(function (p) {
+                return _objectSpread({}, p);
+              });
+            }
+            _this26.product_totalRows = snap.product_totalRows || baseProducts.length;
+            _this26.Product_paginatePerPage();
+            var reallyOffline = !_this26.isOnline || typeof window !== 'undefined' && window.navigator && window.navigator.onLine === false;
+            if (reallyOffline) {
+              // When truly offline, apply shadow stock on top of cached data
+              try {
+                if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.applyToList) {
+                  _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.applyToList(_this26.sale.warehouse_id, _this26.products);
+                }
+              } catch (e2) {}
+            }
+          }
+        }
+      } catch (e) {}
+      _this26.productsReady = true; // avoid blocking UI forever on error
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+    })["finally"](function () {
+      _this26.productsLoading = false;
+    });
+  }), "Selected_Warehouse", function Selected_Warehouse(value) {
     this.search_input = '';
-    if (this.$refs && this.$refs.product_autocomplete) {
-      this.$refs.product_autocomplete.value = "";
-    }
     this.product_filter = [];
-  } else {
-    this.makeToast("warning", this.$t("Please_wait_until_the_product_is_loaded"), this.$t("Warning"));
-  }
-}), "print_pos", function print_pos() {
-  var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  if (typeof window !== 'undefined' && (window.innerWidth <= 768 || window.matchMedia('(max-width: 768px)').matches)) {
-    return this.print_pos_mobile();
-  }
-  // Try to grab existing DOM markup; if not present, we will not print here.
-  var el = document.getElementById('invoice-POS');
-  if (!el) {
-    return;
-  }
-  var divContents = el.innerHTML;
-  var a = window.open('', '', 'height=600,width=480');
-  if (!a) {
-    return;
-  }
-  var bodyClass = this.currentReceiptPaperSizeClass || '';
-  a.document.write('<html><head><link rel="stylesheet" href="/css/pos_print.css"></head><body class="' + bodyClass + '">');
-  // Wrap in #invoice-POS so print CSS applies correctly and centers content
-  a.document.write('<div id="invoice-POS">');
-  a.document.write(divContents);
-  a.document.write('</div></body></html>');
-  a.document.close();
-  var vm = this;
-  var _afterPrint = function afterPrint() {
-    try {
-      window.removeEventListener('focus', _afterPrint);
-    } catch (e) {}
-    try {
-      a.close();
-    } catch (e) {}
-    // If user chose to reload after this sale, do it once printing is done.
-    if (vm.onlineReloadAfterSale && typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
-      vm.onlineReloadAfterSale = false;
-      vm.onlineReloadModalVisible = false;
+
+    // If warehouse is cleared, reset product lists and avoid calling API/cache.
+    if (!value) {
+      this.products = [];
+      this.products_pos = [];
+      this.product_totalRows = 0;
+      this.paginated_Products = [];
+      this.product_currentPage = 1;
+      this.productsLoading = false;
+      return;
+    }
+
+    // With unified API, a single call loads both grid and scan lists.
+    this.getProducts();
+    localStorage.setItem('selected_warehouse_id', value);
+  }), "onOnlineReloadNow", function onOnlineReloadNow() {
+    this.onlineReloadModalVisible = false;
+    this.onlineReloadAfterSale = false;
+    if (typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
       try {
         window.location.reload();
       } catch (e) {}
     }
-  };
-  try {
-    window.addEventListener('focus', _afterPrint);
-  } catch (e) {}
-  try {
-    a.onafterprint = _afterPrint;
-  } catch (e) {}
-  setTimeout(function () {
-    try {
-      a.focus();
-    } catch (e) {}
-    try {
-      a.print();
-    } catch (e) {
-      _afterPrint();
+  }), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "onOnlineReloadAfterSale", function onOnlineReloadAfterSale() {
+    this.onlineReloadAfterSale = true;
+    this.onlineReloadModalVisible = false;
+  }), "onOnlineReloadDismiss", function onOnlineReloadDismiss() {
+    this.onlineReloadModalVisible = false;
+    this.onlineReloadAfterSale = false;
+  }), "get_units", function get_units(value) {
+    var _this27 = this;
+    var UNITS_CACHE_KEY = 'pos_units_by_product';
+    var loadUnitsCache = function loadUnitsCache() {
+      try {
+        var raw = typeof window !== 'undefined' ? window.localStorage.getItem(UNITS_CACHE_KEY) : null;
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    };
+    var saveUnitsCache = function saveUnitsCache(map) {
+      try {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(UNITS_CACHE_KEY, JSON.stringify(map || {}));
+        }
+      } catch (e) {}
+    };
+    var reallyOffline = !this.isOnline || typeof window !== 'undefined' && window.navigator && window.navigator.onLine === false;
+    var pid = String(value);
+    if (reallyOffline) {
+      // 1) Try in-memory cache first
+      if (this.unitsByProductId && this.unitsByProductId[pid]) {
+        var units = this.unitsByProductId[pid];
+        this.units = units;
+        if (!this.detail.sale_unit_id && Array.isArray(units) && units[0] && units[0].id) {
+          this.detail.sale_unit_id = units[0].id;
+        }
+        return Promise.resolve(units);
+      }
+
+      // 2) Try persisted localStorage cache
+      var stored = loadUnitsCache();
+      if (stored && stored[pid]) {
+        var _units = stored[pid];
+        this.unitsByProductId = Object.assign({}, this.unitsByProductId || {}, _defineProperty({}, pid, _units));
+        this.units = _units;
+        if (!this.detail.sale_unit_id && Array.isArray(_units) && _units[0] && _units[0].id) {
+          this.detail.sale_unit_id = _units[0].id;
+        }
+        return Promise.resolve(_units);
+      }
+
+      // 3) Fallback: synthesize a minimal units array from the existing detail row
+      try {
+        var row = (this.details || []).find(function (d) {
+          return d.product_id === value;
+        });
+        if (row) {
+          var syntheticId = row.sale_unit_id || row.product_id || 0;
+          var name = row.unitSale || row.unitSaleName || '';
+          var _units2 = [{
+            id: syntheticId,
+            name: name || (this.$t ? this.$t('UnitSale') : 'Unit'),
+            ShortName: name || '',
+            operator: '*',
+            operator_value: 1
+          }];
+          this.units = _units2;
+          this.unitsByProductId = Object.assign({}, this.unitsByProductId || {}, _defineProperty({}, pid, _units2));
+          if (!this.detail.sale_unit_id) {
+            this.detail.sale_unit_id = syntheticId;
+          }
+          return Promise.resolve(_units2);
+        }
+      } catch (e) {}
+
+      // 4) Last resort: keep whatever units we already have (may be empty),
+      // but do not reject so the caller's .finally() still runs.
+      return Promise.resolve(this.units || []);
     }
-  }, 300);
-}), "print_pos_mobile", function print_pos_mobile() {
-  try {
+
+    // Online mode: fetch from API and cache by product_id for future offline use
+    return axios.get("get_units?id=" + value).then(function (_ref6) {
+      var data = _ref6.data;
+      var units = Array.isArray(data) ? data : [];
+      _this27.units = units;
+      var map = Object.assign({}, _this27.unitsByProductId || {}, _defineProperty({}, pid, units));
+      _this27.unitsByProductId = map;
+      var stored = loadUnitsCache();
+      stored[pid] = units;
+      saveUnitsCache(stored);
+      return units;
+    });
+  }), "Modal_Updat_Detail", function Modal_Updat_Detail(detail) {
+    var _this28 = this;
+    this.detailLoading = true;
+    this.detail = {};
+    this.detail.name = detail.name;
+    this.$bvModal.show("form_Update_Detail");
+    this.get_units(detail.product_id)["catch"](function () {})["finally"](function () {
+      _this28.detail.detail_id = detail.detail_id;
+      _this28.detail.sale_unit_id = detail.sale_unit_id;
+      _this28.detail.product_type = detail.product_type;
+      _this28.detail.Unit_price = detail.Unit_price;
+      _this28.detail.price_type = detail.price_type || 'retail';
+      var baseRetail = detail.retail_unit_price !== undefined && detail.retail_unit_price !== null ? detail.retail_unit_price : detail.Unit_price;
+      var baseWholesale = detail.wholesale_unit_price !== undefined && detail.wholesale_unit_price !== null ? detail.wholesale_unit_price : detail.Unit_price_wholesale;
+      if (baseWholesale === undefined || baseWholesale === null || baseWholesale === 0) {
+        baseWholesale = baseRetail;
+      }
+      _this28.detail.retail_unit_price = baseRetail;
+      _this28.detail.wholesale_unit_price = baseWholesale;
+      _this28.detail.min_price = detail.min_price !== undefined ? detail.min_price : 0;
+      _this28.detail.fix_price = detail.fix_price;
+      _this28.detail.fix_stock = detail.fix_stock;
+      _this28.detail.current = detail.current;
+      // Normalize tax_method so v-select shows the correct label in both
+      // online and offline modes (1 => Exclusive, 2 => Inclusive).
+      var rawTaxMethod = detail.tax_method;
+      _this28.detail.tax_method = rawTaxMethod === 2 || rawTaxMethod === '2' ? 2 : 1;
+      _this28.detail.discount_Method = detail.discount_Method;
+      _this28.detail.discount = detail.discount;
+      _this28.detail.quantity = detail.quantity;
+      _this28.detail.tax_percent = detail.tax_percent;
+      _this28.detail.is_imei = detail.is_imei;
+      _this28.detail.imei_number = detail.imei_number;
+      _this28.detailLoading = false;
+    });
+  }), "submit_Update_Detail", function submit_Update_Detail() {
+    var _this29 = this;
+    this.$refs.Update_Detail && this.$refs.Update_Detail.validate().then(function (success) {
+      if (!success) {
+        return;
+      } else {
+        _this29.Update_Detail();
+      }
+    })["catch"](function () {
+      // Fallback: proceed without form validation if ref is absent in new design
+      _this29.Update_Detail();
+    });
+  }), "Update_Detail", function Update_Detail() {
+    var _this30 = this;
+    for (var i = 0; i < this.details.length; i++) {
+      if (this.details[i].detail_id === this.detail.detail_id) {
+        // Min price validation (unit and net)
+        var rawMinCandidate = this.details[i].min_price !== undefined && this.details[i].min_price !== null ? this.details[i].min_price : this.detail.min_price || 0;
+        var minPriceRow = parseFloat(String(rawMinCandidate).toString().replace(/,/g, '')) || 0;
+        var unitPriceNum = parseFloat(String(this.detail.Unit_price).toString().replace(/,/g, '')) || 0;
+        if (minPriceRow > 0 && unitPriceNum < minPriceRow) {
+          this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
+          return;
+        }
+        // compute proposed net to check against min price
+        var proposedDiscountNet = this.detail.discount_Method == "2" ? this.detail.discount : parseFloat(unitPriceNum * this.detail.discount / 100);
+        var proposedNet = void 0,
+          proposedTax = void 0;
+        if (this.detail.tax_method == "1") {
+          proposedNet = parseFloat(unitPriceNum - proposedDiscountNet);
+          proposedTax = parseFloat(this.detail.tax_percent * (unitPriceNum - proposedDiscountNet) / 100);
+        } else {
+          proposedTax = parseFloat((unitPriceNum - proposedDiscountNet) * (this.detail.tax_percent / 100));
+          proposedNet = parseFloat(unitPriceNum - proposedTax - proposedDiscountNet);
+        }
+        if (minPriceRow > 0 && proposedNet < minPriceRow) {
+          this.makeToast('warning', this.$t('Price_below_min_not_allowed'), this.$t('Warning'));
+          return;
+        }
+        if (this.details[i].product_type !== 'is_service') {
+          for (var k = 0; k < this.units.length; k++) {
+            if (this.units[k].id == this.detail.sale_unit_id) {
+              if (this.units[k].operator == "/") {
+                this.details[i].current = this.detail.fix_stock * this.units[k].operator_value;
+                this.details[i].unitSale = this.units[k].ShortName;
+              } else {
+                this.details[i].current = this.detail.fix_stock / this.units[k].operator_value;
+                this.details[i].unitSale = this.units[k].ShortName;
+              }
+            }
+          }
+          if (this.details[i].current < this.details[i].quantity) {
+            this.details[i].quantity = this.details[i].current;
+          }
+        }
+        this.details[i].Unit_price = unitPriceNum;
+        this.details[i].price_type = this.detail.price_type;
+        this.details[i].tax_percent = this.detail.tax_percent;
+        this.details[i].tax_method = this.detail.tax_method;
+        this.details[i].discount_Method = this.detail.discount_Method;
+        this.details[i].discount = this.detail.discount;
+        this.details[i].sale_unit_id = this.detail.sale_unit_id;
+        this.details[i].imei_number = this.detail.imei_number;
+        this.details[i].product_type = this.detail.product_type;
+
+        // reuse computed values
+        this.details[i].DiscountNet = proposedDiscountNet;
+        this.details[i].taxe = proposedTax;
+        this.details[i].Net_price = proposedNet;
+        this.details[i].Total_price = parseFloat(proposedNet + proposedTax);
+        this.$forceUpdate();
+      }
+    }
+    this.CalculTotal();
+    setTimeout(function () {
+      _this30.$bvModal.hide("form_Update_Detail");
+    }, 1000);
+  }), "handleCustomerInput", function handleCustomerInput(value) {
+    var _this31 = this;
+    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee1() {
+      var id, client;
+      return _regenerator().w(function (_context1) {
+        while (1) switch (_context1.n) {
+          case 0:
+            if (!(value === null || value === undefined || value === "")) {
+              _context1.n = 1;
+              break;
+            }
+            return _context1.a(2);
+          case 1:
+            id = Number(value);
+            if (Number.isFinite(id)) {
+              _context1.n = 2;
+              break;
+            }
+            return _context1.a(2);
+          case 2:
+            client = _this31.clients.find(function (c) {
+              return Number(c.id) === id;
+            });
+            if (client) {
+              _context1.n = 3;
+              break;
+            }
+            return _context1.a(2);
+          case 3:
+            _this31.selectedClientId = id;
+            _this31.client_name = client.name || '';
+
+            // Force both mounted desktop/mobile selects to use the same selected ID.
+            _this31.customerSelectKey += 1;
+            _context1.n = 4;
+            return _this31.$nextTick();
+          case 4:
+            _context1.n = 5;
+            return _this31.onClientSelected(id);
+          case 5:
+            return _context1.a(2);
+        }
+      }, _callee1);
+    }))();
+  }), "clearCustomerSelection", function clearCustomerSelection() {
+    this.selectedClientId = "";
+    this.customerSelectKey += 1;
+    this.client_name = '';
+    this.selectedClientPoints = 0;
+    this.points_to_convert = 0;
+    this.discount_from_points = 0;
+    this.used_points = 0;
+    this.clientIsEligible = false;
+    this.pointsConverted = false;
+    this.selectedClientCreditLimit = 0;
+    this.selectedClientNetBalance = 0;
+  }), "selectNewCustomer", function selectNewCustomer(newClient) {
+    var _this32 = this;
+    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10() {
+      var raw, id, response, fallback, index, customer, _t8;
+      return _regenerator().w(function (_context10) {
+        while (1) switch (_context10.p = _context10.n) {
+          case 0:
+            // Support APIs returning either the client directly or { client: ... }.
+            raw = newClient && newClient.client ? newClient.client : newClient;
+            id = Number(raw && raw.id);
+            if (!(!Number.isFinite(id) || id <= 0)) {
+              _context10.n = 1;
+              break;
+            }
+            console.error('Unable to select newly-created customer: invalid id', newClient);
+            return _context10.a(2, false);
+          case 1:
+            _context10.p = 1;
+            _context10.n = 2;
+            return axios.get('get_clients_without_paginate');
+          case 2:
+            response = _context10.v;
+            if (Array.isArray(response.data)) {
+              _this32.clients = response.data;
+            } else if (response.data && Array.isArray(response.data.clients)) {
+              _this32.clients = response.data.clients;
+            }
+            _context10.n = 4;
+            break;
+          case 3:
+            _context10.p = 3;
+            _t8 = _context10.v;
+            // Fallback if the refresh fails.
+            fallback = {
+              id: id,
+              name: raw.name || '',
+              phone: raw.phone || '',
+              email: raw.email || ''
+            };
+            index = _this32.clients.findIndex(function (c) {
+              return Number(c.id) === id;
+            });
+            if (index === -1) _this32.clients.push(fallback);else _this32.$set(_this32.clients, index, fallback);
+          case 4:
+            // Normalize IDs because API responses can contain string IDs.
+            _this32.clients = _this32.clients.map(function (c) {
+              return _objectSpread(_objectSpread({}, c), {}, {
+                id: Number(c.id)
+              });
+            });
+            if (!_this32.clients.some(function (c) {
+              return Number(c.id) === id;
+            })) {
+              _this32.clients.push({
+                id: id,
+                name: raw.name || '',
+                phone: raw.phone || '',
+                email: raw.email || ''
+              });
+            }
+            customer = _this32.clients.find(function (c) {
+              return Number(c.id) === id;
+            });
+            _this32.client_name = customer ? customer.name : raw.name || '';
+
+            // The option MUST exist before setting the selected value.
+            // Then remount both desktop/mobile selects so vue-select cannot retain
+            // its previous internal value.
+            _context10.n = 5;
+            return _this32.$nextTick();
+          case 5:
+            _this32.selectedClientId = id;
+            _this32.client_name = customer ? customer.name : raw.name || '';
+            _this32.customerSelectKey += 1;
+            _context10.n = 6;
+            return _this32.$nextTick();
+          case 6:
+            _context10.n = 7;
+            return _this32.onClientSelected(id);
+          case 7:
+            _context10.n = 8;
+            return _this32.$nextTick();
+          case 8:
+            _this32.$forceUpdate();
+            return _context10.a(2, true);
+        }
+      }, _callee10, null, [[1, 3]]);
+    }))();
+  }), "onClientSelected", function onClientSelected(selectedClientId) {
+    var _this33 = this;
+    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11() {
+      var id, client, response, data, _response, _data, _t9, _t0;
+      return _regenerator().w(function (_context11) {
+        while (1) switch (_context11.p = _context11.n) {
+          case 0:
+            console.log("onClientSelected:", selectedClientId);
+
+            // v-select can send null when it is clearing/changing internally
+            if (!(selectedClientId === null || selectedClientId === undefined || selectedClientId === "")) {
+              _context11.n = 1;
+              break;
+            }
+            return _context11.a(2);
+          case 1:
+            id = Number(selectedClientId); // Find customer using numeric comparison
+            client = _this33.clients.find(function (c) {
+              return Number(c.id) === id;
+            });
+            console.log("Selected customer:", client);
+
+            // Do NOT clear selectedClientId if customer isn't found
+            // because another v-select may still be updating.
+            if (client) {
+              _context11.n = 2;
+              break;
+            }
+            console.warn("Customer not found in clients:", id);
+            return _context11.a(2);
+          case 2:
+            // Set selected customer
+            _this33.selectedClientId = id;
+            _this33.client_name = client.name;
+
+            // Reset customer-related values
+            _this33.selectedClientPoints = 0;
+            _this33.points_to_convert = 0;
+            _this33.discount_from_points = 0;
+            _this33.used_points = 0;
+            _this33.clientIsEligible = false;
+            _this33.pointsConverted = false;
+            _this33.sale.discount = 0;
+            _this33.selectedClientCreditLimit = 0;
+            _this33.selectedClientNetBalance = 0;
+
+            // Get loyalty points
+            _context11.p = 3;
+            _context11.n = 4;
+            return axios.get("/get_points_client/".concat(id));
+          case 4:
+            response = _context11.v;
+            data = response.data;
+            if (data.is_royalty_eligible) {
+              _this33.selectedClientPoints = data.points;
+              _this33.clientIsEligible = true;
+            } else {
+              _this33.selectedClientPoints = 0;
+              _this33.clientIsEligible = false;
+            }
+            _context11.n = 6;
+            break;
+          case 5:
+            _context11.p = 5;
+            _t9 = _context11.v;
+            console.error("Error fetching client points:", _t9);
+          case 6:
+            _context11.p = 6;
+            _context11.n = 7;
+            return axios.get("/clients/".concat(id, "/brief"));
+          case 7:
+            _response = _context11.v;
+            _data = _response.data;
+            _this33.selectedClientCreditLimit = parseFloat(_data.credit_limit || 0);
+            _this33.selectedClientNetBalance = parseFloat(_data.netBalance || 0);
+            _context11.n = 9;
+            break;
+          case 8:
+            _context11.p = 8;
+            _t0 = _context11.v;
+            console.error("Error fetching client credit limit:", _t0);
+            _this33.selectedClientCreditLimit = 0;
+            _this33.selectedClientNetBalance = 0;
+          case 9:
+            _this33.CalculTotal();
+          case 10:
+            return _context11.a(2);
+        }
+      }, _callee11, null, [[6, 8], [3, 5]]);
+    }))();
+  }), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "convertPointsToDiscount", function convertPointsToDiscount() {
+    if (this.pointsConverted) {
+      var current = Number(this.sale.discount || 0);
+      var toRemove = Number(this.discount_from_points || 0);
+      // For fixed discounts, revert the combined fixed discount amount
+      if (String(this.sale.discount_Method || '2') !== '1') {
+        this.sale.discount = Math.max(0, parseFloat((current - toRemove).toFixed(2)));
+      }
+      this.discount_from_points = 0;
+      this.used_points = 0;
+      this.points_to_convert = 0;
+      this.pointsConverted = false;
+    } else {
+      var maxPoints = Number(this.selectedClientPoints) || 0;
+      var pts = Number(this.points_to_convert);
+      if (!Number.isFinite(pts) || pts <= 0) {
+        this.makeToast('warning', this.$t ? this.$t('Please_enter_points_to_convert') : 'Please enter points to convert', this.$t ? this.$t('Warning') : 'Warning');
+        return;
+      }
+      if (pts > maxPoints) pts = maxPoints;
+      var discount = parseFloat((pts * this.point_to_amount_rate).toFixed(2));
+      this.discount_from_points = discount;
+      // Don't merge points into sale.discount - keep them separate so input shows only manual discount
+      // Points discount is stored in discount_from_points and applied separately in calculations
+      this.used_points = pts;
+      this.pointsConverted = true;
+    }
+    this.CalculTotal();
+  }), "onPointsToConvertInput", function onPointsToConvertInput() {
+    var max = Number(this.selectedClientPoints) || 0;
+    var val = Number(this.points_to_convert);
+    if (!Number.isFinite(val)) val = 0;
+    if (val < 0) val = 0;
+    // enforce integer points
+    val = Math.floor(val);
+    if (val > max) {
+      val = max;
+      this.makeToast('warning', this.$t ? this.$t('Entered_points_exceed_available') : 'Entered points exceed available', this.$t ? this.$t('Warning') : 'Warning');
+    }
+    this.points_to_convert = val;
+  }), "Invoice_POS", function Invoice_POS(id) {
+    var _this34 = this;
+    // Determine preferred invoice format from settings; default to thermal
+    var format = 'thermal';
+    try {
+      // Prefer explicit invoice_format cached from POS bootstrap
+      if (typeof this.invoice_format === 'string' && ['thermal', 'a4'].includes(this.invoice_format)) {
+        format = this.invoice_format;
+      } else {
+        var s = this.invoice_pos && this.invoice_pos.setting ? this.invoice_pos.setting : null;
+        if (s && typeof s.invoice_format === 'string' && ['thermal', 'a4'].includes(s.invoice_format)) {
+          format = s.invoice_format;
+        }
+      }
+    } catch (e) {}
+
+    // If A4 is selected, print using the existing A4 PDF endpoint (`/api/sale_pdf/{id}`)
+    // but keep the UX similar to the thermal POS invoice:
+    // - open a print popup window
+    // - show the PDF inside it
+    // - trigger print
+    // - reload after Print/Cancel when "After this sale" is selected
+    if (format === 'a4') {
+      if (typeof window !== 'undefined') {
+        var vm = this;
+        var reloadAfterSale = !!vm.onlineReloadAfterSale;
+
+        // Create (or refresh) a same-origin hook so the popup can request a reload immediately
+        // after Print/Cancel without relying on the POS window focus changing.
+        try {
+          window.__posReloadAfterA4Print = function () {
+            try {
+              if (vm.onlineReloadAfterSale && window.location && typeof window.location.reload === 'function') {
+                vm.onlineReloadAfterSale = false;
+                vm.onlineReloadModalVisible = false;
+                try {
+                  window.location.reload();
+                } catch (e) {}
+              }
+            } catch (e) {}
+          };
+        } catch (e) {}
+
+        // Open the popup immediately (before async axios resolves) so it is not blocked,
+        // and so the user always sees the print window (like the thermal POS invoice).
+        var sw = 1200,
+          sh = 800;
+        try {
+          sw = window.screen && window.screen.availWidth ? window.screen.availWidth : sw;
+          sh = window.screen && window.screen.availHeight ? window.screen.availHeight : sh;
+        } catch (e) {}
+        var width = Math.max(700, Math.min(1200, Math.floor(sw * 0.9)));
+        var height = Math.max(600, Math.min(900, Math.floor(sh * 0.9)));
+        var left = Math.max(0, Math.floor((sw - width) / 2));
+        var top = Math.max(0, Math.floor((sh - height) / 2));
+        var features = "height=".concat(height, ",width=").concat(width, ",left=").concat(left, ",top=").concat(top, ",toolbar=0,location=0,menubar=0,status=0,scrollbars=1,resizable=1");
+        var win = window.open('', 'A4Invoice', features);
+        if (!win) {
+          return;
+        }
+
+        // Bootstrap the popup with a loading screen and print/reload wiring.
+        try {
+          win.document.open();
+          win.document.write('<!doctype html><html><head><title>Print</title>');
+          win.document.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
+          win.document.write('<style>html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#fff;}');
+          win.document.write('#loading{height:100%;display:flex;align-items:center;justify-content:center;font-family:Arial;color:#444;}');
+          win.document.write('embed,object,iframe{width:100%;height:100%;border:0;display:none;}</style>');
+          win.document.write('</head><body>');
+          win.document.write('<div id="loading">Loading invoice…</div>');
+          win.document.write('<object id="pdfObject" type="application/pdf"></object>');
+          win.document.write('<embed id="pdfEmbed" type="application/pdf" />');
+          win.document.write('<iframe id="pdfFrame"></iframe>');
+          win.document.write('<script>(function(){');
+          win.document.write('var reloadAfterSale=' + (reloadAfterSale ? 'true' : 'false') + ';');
+          win.document.write('var printed=false;');
+          win.document.write('function done(){try{if(window.opener){try{if(reloadAfterSale){try{window.opener.__posReloadAfterA4Print && window.opener.__posReloadAfterA4Print();}catch(e){}}}catch(e){}}}catch(e){} try{window.close();}catch(e){} }');
+          win.document.write('window.onafterprint=function(){done();};');
+          // Do NOT close on initial focus; only after printing was initiated.
+          win.document.write('window.addEventListener("focus", function(){try{if(printed){setTimeout(done, 150);}}catch(e){}});');
+          win.document.write('function doPrint(){ if(printed) return; printed=true; try{window.focus();}catch(e){} try{window.print();}catch(e){} }');
+          win.document.write('window.__setPdf=function(src){');
+          win.document.write('try{document.getElementById("loading").style.display="none";}catch(e){}');
+          // Prefer object (native viewer). If it fails, embed/iframe can still show.
+          win.document.write('try{var o=document.getElementById("pdfObject"); if(o){o.data=src; o.style.display="block";}}catch(e){}');
+          win.document.write('try{var e=document.getElementById("pdfEmbed"); if(e){e.src=src;}}catch(e){}');
+          win.document.write('try{var f=document.getElementById("pdfFrame"); if(f){f.src=src; f.onload=function(){setTimeout(doPrint,300);};}}catch(e){}');
+          // Timed fallbacks: PDFs can take time to render before print dialog appears.
+          win.document.write('setTimeout(doPrint, 900); setTimeout(doPrint, 1800); setTimeout(doPrint, 2800);');
+          win.document.write('};');
+          win.document.write('window.__setError=function(msg){try{document.getElementById("loading").innerText=msg||"Failed to load invoice";}catch(e){}};');
+          win.document.write('})();<\/script>');
+          win.document.write('</body></html>');
+          win.document.close();
+        } catch (e) {}
+
+        // Fetch the existing A4 layout as HTML using the current Bearer token (axios default header),
+        // then inject it into the already-open popup so we can call window.print() reliably
+        // (same pattern as the POS thermal invoice).
+        axios.get("sale_print_html/".concat(id), {
+          responseType: 'text',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(function (response) {
+          try {
+            var html = typeof response.data === 'string' ? response.data : response.request && typeof response.request.responseText === 'string' ? response.request.responseText : '';
+            if (!html) {
+              try {
+                win.__setError && win.__setError('Empty invoice HTML');
+              } catch (_) {}
+              return;
+            }
+            // Replace popup content with the A4 HTML and trigger print (mirrors index_sale.print_it)
+            try {
+              win.document.open();
+              win.document.write(html);
+              win.document.close();
+            } catch (e) {
+              try {
+                win.__setError && win.__setError('Failed to render invoice');
+              } catch (_) {}
+              return;
+            }
+            // Ensure the popup preview (screen) and print dialog use the same A4 sizing.
+            // We do NOT modify the template content; we only inject extra CSS rules.
+            try {
+              var style = win.document.createElement('style');
+              style.type = 'text/css';
+              style.innerHTML = '@media screen {' + '  body { width: 210mm; margin: 0 auto; }' + '}' + '@media print {' + '  @page { size: A4; margin: 10mm 15mm; }' + '  body { width: auto; margin: 0; }' + '}';
+              (win.document.head || win.document.getElementsByTagName("head")[0]).appendChild(style);
+            } catch (e) {}
+
+            // Close/hide the preview popup after the user clicks Print or Cancel
+            // (mirroring the thermal invoice flow).
+            var closed = false;
+            var closePreview = function closePreview() {
+              if (closed) return;
+              closed = true;
+              try {
+                win.close();
+              } catch (_) {}
+            };
+            // Browsers do not expose a reliable "print job finished" event.
+            // `afterprint` fires when the print dialog closes (Print OR Cancel).
+            // Heuristic:
+            // - If the dialog closes almost immediately (< 800ms) we treat it as Cancel and close at once.
+            // - Otherwise we assume "Print" and keep the preview a bit longer (2s) before closing.
+            var CANCEL_THRESHOLD_MS = 800;
+            var PRINT_CLOSE_DELAY_MS = 2000;
+            // Track whether we actually initiated printing, and whether the popup lost focus
+            // (print dialog typically causes a blur). This prevents premature closing.
+            var printInitiated = false;
+            var blurredAfterPrint = false;
+            var printStartAt = 0;
+            try {
+              win.onafterprint = function () {
+                var elapsed = printStartAt ? Date.now() - printStartAt : 0;
+                var delay = elapsed > CANCEL_THRESHOLD_MS ? PRINT_CLOSE_DELAY_MS : 0;
+                setTimeout(function () {
+                  try {
+                    if (reloadAfterSale && window.__posReloadAfterA4Print) {
+                      window.__posReloadAfterA4Print();
+                    }
+                  } catch (e) {}
+                  closePreview();
+                }, delay);
+              };
+            } catch (e) {}
+            // Fallback: some browsers don't fire afterprint; close only after a blur->focus cycle
+            // that happens AFTER print() was called (i.e. after Print/Cancel dialog closes).
+            try {
+              var onBlur = function onBlur() {
+                try {
+                  if (printInitiated) blurredAfterPrint = true;
+                } catch (e) {}
+              };
+              var onFocus = function onFocus() {
+                try {
+                  if (!printInitiated || !blurredAfterPrint) return;
+                } catch (e) {
+                  return;
+                }
+                var elapsed = printStartAt ? Date.now() - printStartAt : 0;
+                var delay = elapsed > CANCEL_THRESHOLD_MS ? PRINT_CLOSE_DELAY_MS : 0;
+                setTimeout(function () {
+                  try {
+                    if (reloadAfterSale && window.__posReloadAfterA4Print) {
+                      window.__posReloadAfterA4Print();
+                    }
+                  } catch (e) {}
+                  closePreview();
+                }, delay);
+              };
+              win.addEventListener && win.addEventListener('blur', onBlur);
+              win.addEventListener && win.addEventListener('focus', onFocus);
+            } catch (e) {}
+
+            // Give browser a moment to render, then show system print dialog
+            setTimeout(function () {
+              try {
+                win.focus();
+              } catch (_) {}
+              try {
+                printInitiated = true;
+                printStartAt = Date.now();
+              } catch (e) {}
+              try {
+                win.print();
+              } catch (_) {}
+            }, 700);
+          } catch (e) {
+            try {
+              win.__setError && win.__setError('Failed to load invoice');
+            } catch (_) {}
+          }
+        })["catch"](function () {
+          try {
+            win.__setError && win.__setError('Failed to load invoice');
+          } catch (_) {}
+        });
+      }
+      return;
+    }
+
+    // Default: thermal POS invoice (existing behavior)
+    axios.get("sales_print_invoice/".concat(id)).then(function (response) {
+      _this34.invoice_pos.sale = response.data.sale || {};
+      // Backward compatibility: ensure discount_Method defaults to '2' (fixed) if not present
+      if (_this34.invoice_pos.sale && !_this34.invoice_pos.sale.discount_Method) {
+        _this34.invoice_pos.sale.discount_Method = '2';
+      }
+      _this34.invoice_pos.details = response.data.details;
+      _this34.invoice_pos.setting = response.data.setting;
+      _this34.invoice_pos.symbol = response.data.symbol;
+      _this34.invoice_pos.zatca_qr = response.data.zatca_qr;
+      _this34.payments = response.data.payments;
+      if (response.data.pos_settings) {
+        // Merge with existing pos_settings to preserve defaults
+        _this34.pos_settings = _objectSpread(_objectSpread({}, _this34.pos_settings), response.data.pos_settings);
+        // Convert integer values to boolean for proper condition checking
+        if (typeof _this34.pos_settings.quick_add_customer === 'number') {
+          _this34.pos_settings.quick_add_customer = _this34.pos_settings.quick_add_customer === 1;
+        }
+      }
+      // Mirror index_sale behavior: show modal first, then optionally auto-print
+      setTimeout(function () {
+        try {
+          _this34.$bvModal.show('Show_invoice');
+        } catch (e) {}
+        _this34.$nextTick(function () {
+          return _this34.renderZatcaQrPos();
+        });
+      }, 500);
+
+      // Respect "Print Invoice automatically" POS setting for online sales.
+      // Fallback default is enabled (1) if the flag is missing.
+      try {
+        var rawPrintable = _this34.pos_settings && _this34.pos_settings.is_printable !== undefined ? _this34.pos_settings.is_printable : response.data.pos_settings && response.data.pos_settings.is_printable !== undefined ? response.data.pos_settings.is_printable : 1;
+        var autoPrintable = rawPrintable === true || rawPrintable === 1 || rawPrintable === '1';
+        if (autoPrintable) {
+          setTimeout(function () {
+            try {
+              if (typeof window !== 'undefined' && (window.innerWidth <= 768 || window.matchMedia('(max-width: 768px)').matches)) {
+                _this34.print_pos_mobile();
+              } else {
+                _this34.print_pos();
+              }
+            } catch (e) {
+              try {
+                _this34.print_pos();
+              } catch (_) {}
+            }
+          }, 1000);
+        }
+      } catch (e) {}
+    });
+  }), "renderZatcaQrPos", function renderZatcaQrPos() {
+    var _this35 = this;
+    try {
+      if (!this.invoice_pos || !this.invoice_pos.setting || !this.invoice_pos.setting.zatca_enabled || !this.invoice_pos.zatca_qr) return;
+      var mount = this.$refs.zatcaQrcodePos;
+      if (!mount) return;
+      mount.innerHTML = '';
+      var draw = function draw() {
+        try {
+          if (!window.QRCode) return;
+          var text = String(_this35.invoice_pos.zatca_qr || '');
+          try {
+            var m = _this35.$refs.zatcaQrcodePos;
+            if (m) m.setAttribute('title', text);
+          } catch (e) {}
+          try {
+            new window.QRCode(mount, {
+              text: text,
+              width: 180,
+              height: 180,
+              colorDark: '#000000',
+              colorLight: '#ffffff',
+              correctLevel: window.QRCode.CorrectLevel ? window.QRCode.CorrectLevel.H : undefined
+            });
+          } catch (e1) {
+            new window.QRCode(mount, text);
+          }
+          _this35.zatcaRenderedPos = true;
+          setTimeout(function () {
+            if (mount && !mount.childNodes.length && window.QRCode) {
+              try {
+                new window.QRCode(mount, text);
+              } catch (e2) {}
+            }
+            try {
+              var img = mount.querySelector('img');
+              if (img) {
+                img.style.display = '';
+                img.style.marginLeft = 'auto';
+                img.style.marginRight = 'auto';
+              }
+            } catch (e3) {}
+          }, 150);
+        } catch (e) {}
+      };
+      if (window.QRCode) {
+        draw();
+      } else {
+        var loadScript = function loadScript(src, onload, onerror) {
+          var s = document.createElement('script');
+          s.src = src;
+          s.onload = onload;
+          s.onerror = onerror;
+          document.head.appendChild(s);
+        };
+
+        // Prefer CDN, then vendor, then assets_setup
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js', function () {
+          if (window.QRCode) return draw();
+          loadScript('/vendor/qrcode/qrcode.min.js', function () {
+            if (window.QRCode) return draw();
+            loadScript('/assets_setup/js/qrcode.js', draw, draw);
+          }, function () {
+            return loadScript('/assets_setup/js/qrcode.js', draw, function () {});
+          });
+        }, function () {
+          loadScript('/vendor/qrcode/qrcode.min.js', function () {
+            if (window.QRCode) return draw();
+            loadScript('/assets_setup/js/qrcode.js', draw, function () {});
+          }, function () {
+            return loadScript('/assets_setup/js/qrcode.js', draw, function () {});
+          });
+        });
+      }
+    } catch (e) {}
+  }), "getValidationState", function getValidationState(_ref7) {
+    var dirty = _ref7.dirty,
+      validated = _ref7.validated,
+      _ref7$valid = _ref7.valid,
+      valid = _ref7$valid === void 0 ? null : _ref7$valid;
+    return dirty || validated ? valid : null;
+  }), "Submit_Customer", function Submit_Customer() {
+    var _this36 = this;
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    this.$refs.Create_Customer && this.$refs.Create_Customer.validate().then(function (success) {
+      if (!success) {
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+        _this36.makeToast("danger", _this36.$t("Please_fill_the_form_correctly"), _this36.$t("Failed"));
+      } else {
+        _this36.Create_Client();
+      }
+    })["catch"](function () {
+      // Fallback when ref not present in new design
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+    });
+  }), "Create_Client", function Create_Client() {
+    var _this37 = this;
+    axios.post("clients", {
+      name: this.client.name,
+      email: this.client.email,
+      phone: this.client.phone,
+      tax_number: this.client.tax_number,
+      country: this.client.country,
+      city: this.client.city,
+      adresse: this.client.adresse,
+      is_royalty_eligible: this.client.is_royalty_eligible
+    }).then(/*#__PURE__*/function () {
+      var _ref8 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12(response) {
+        var newClient;
+        return _regenerator().w(function (_context12) {
+          while (1) switch (_context12.n) {
+            case 0:
+              nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+              newClient = response.data;
+              _context12.n = 1;
+              return _this37.selectNewCustomer(newClient);
+            case 1:
+              _this37.makeToast("success", _this37.$t("Successfully_Created"), _this37.$t("Success"));
+              _this37.$bvModal.hide("New_Customer");
+            case 2:
+              return _context12.a(2);
+          }
+        }, _callee12);
+      }));
+      return function (_x2) {
+        return _ref8.apply(this, arguments);
+      };
+    }())["catch"](function () {
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      _this37.makeToast("danger", _this37.$t("InvalidData"), _this37.$t("Failed"));
+    });
+  }), "Submit_Quick_Add_Customer", function Submit_Quick_Add_Customer() {
+    var _this38 = this;
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    this.SubmitProcessing = true;
+    this.$refs.Quick_Add_Customer_Form && this.$refs.Quick_Add_Customer_Form.validate().then(function (success) {
+      if (!success) {
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+        _this38.SubmitProcessing = false;
+        _this38.makeToast("danger", _this38.$t("Please_fill_the_form_correctly"), _this38.$t("Failed"));
+        return;
+      }
+      if (_this38.client.id) {
+        axios.put("clients/".concat(_this38.client.id), _this38.client).then(/*#__PURE__*/function () {
+          var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee13(response) {
+            var selectedId, responseClient, fallbackClient, updatedClient, index, listResponse, freshClients, freshCustomer, _t1;
+            return _regenerator().w(function (_context13) {
+              while (1) switch (_context13.p = _context13.n) {
+                case 0:
+                  selectedId = Number(_this38.client.id); // The PUT endpoint may return the client directly, inside
+                  // `client`, or inside `data`. Support all three forms.
+                  responseClient = response.data && response.data.client ? response.data.client : response.data && response.data.data && response.data.data.id ? response.data.data : response.data;
+                  fallbackClient = _objectSpread(_objectSpread({}, _this38.client), {}, {
+                    id: selectedId
+                  });
+                  updatedClient = _objectSpread(_objectSpread({}, fallbackClient), responseClient && _typeof(responseClient) === 'object' ? responseClient : {});
+                  updatedClient.id = Number(updatedClient.id || selectedId);
+
+                  // IMPORTANT: customerOptions is computed from this.clients.
+                  // Updating only the modal/form does NOT update the select.
+                  // Replace the matching array item reactively.
+                  index = (_this38.clients || []).findIndex(function (c) {
+                    return Number(c.id) === selectedId;
+                  });
+                  if (index !== -1) {
+                    _this38.$set(_this38.clients, index, _objectSpread(_objectSpread(_objectSpread({}, _this38.clients[index]), updatedClient), {}, {
+                      id: selectedId
+                    }));
+                  } else {
+                    _this38.clients.push(_objectSpread(_objectSpread({}, updatedClient), {}, {
+                      id: selectedId
+                    }));
+                  }
+
+                  // Keep the edited customer selected.
+                  _this38.selectedClientId = selectedId;
+                  _this38.client_name = updatedClient.name || _this38.client.name || '';
+
+                  // Refresh the complete list from the server so the dropdown
+                  // contains the exact saved values, including backend changes.
+                  _context13.p = 1;
+                  _context13.n = 2;
+                  return axios.get('get_clients_without_paginate');
+                case 2:
+                  listResponse = _context13.v;
+                  freshClients = Array.isArray(listResponse.data) ? listResponse.data : listResponse.data && Array.isArray(listResponse.data.clients) ? listResponse.data.clients : null;
+                  if (freshClients) {
+                    _this38.clients = freshClients.map(function (c) {
+                      return _objectSpread(_objectSpread({}, c), {}, {
+                        id: Number(c.id)
+                      });
+                    });
+                  }
+                  _context13.n = 4;
+                  break;
+                case 3:
+                  _context13.p = 3;
+                  _t1 = _context13.v;
+                  console.warn('Customer list refresh failed after update:', _t1);
+                case 4:
+                  // Make sure the selected customer still exists after the
+                  // complete list replacement, then rebuild both v-selects.
+                  freshCustomer = (_this38.clients || []).find(function (c) {
+                    return Number(c.id) === selectedId;
+                  });
+                  if (freshCustomer) {
+                    _this38.selectedClientId = selectedId;
+                    _this38.client_name = freshCustomer.name || _this38.client_name;
+                  }
+                  _this38.customerSelectKey += 1;
+                  _context13.n = 5;
+                  return _this38.$nextTick();
+                case 5:
+                  _context13.n = 6;
+                  return _this38.onClientSelected(selectedId);
+                case 6:
+                  _context13.n = 7;
+                  return _this38.$nextTick();
+                case 7:
+                  nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+                  _this38.SubmitProcessing = false;
+                  _this38.makeToast("success", _this38.$t("Successfully_Updated"), _this38.$t("Success"));
+                  _this38.$bvModal.hide("Quick_Add_Customer");
+                case 8:
+                  return _context13.a(2);
+              }
+            }, _callee13, null, [[1, 3]]);
+          }));
+          return function (_x3) {
+            return _ref9.apply(this, arguments);
+          };
+        }())["catch"](function () {
+          nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+          _this38.SubmitProcessing = false;
+          _this38.makeToast("danger", _this38.$t("InvalidData"), _this38.$t("Failed"));
+        });
+      } else axios.post("clients", _this38.client).then(function (response) {
+        var _newClient$client;
+        var newClient = response.data;
+
+        // If there are custom field values from the quick-add form, persist them
+        var clientId = Number(newClient.id) || Number((_newClient$client = newClient.client) === null || _newClient$client === void 0 ? void 0 : _newClient$client.id);
+        var hasCustoms = clientId && _this38.quickAddCustomFieldValues && Object.keys(_this38.quickAddCustomFieldValues).length > 0;
+        var afterCustoms = /*#__PURE__*/function () {
+          var _ref0 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee14() {
+            return _regenerator().w(function (_context14) {
+              while (1) switch (_context14.n) {
+                case 0:
+                  nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+                  _this38.SubmitProcessing = false;
+                  _context14.n = 1;
+                  return _this38.selectNewCustomer(newClient);
+                case 1:
+                  console.log("FINAL selectedClientId:", _this38.selectedClientId);
+
+                  // this.makeToast(
+                  //     "success",
+                  //     this.$t("Successfully_Created"),
+                  //     this.$t("Success")
+                  // );
+
+                  _this38.$bvModal.hide("Quick_Add_Customer");
+                  _this38.reset_Form_client();
+                  _this38.quickAddCustomFieldValues = {};
+                case 2:
+                  return _context14.a(2);
+              }
+            }, _callee14);
+          }));
+          return function afterCustoms() {
+            return _ref0.apply(this, arguments);
+          };
+        }();
+        if (hasCustoms) {
+          axios.post("custom-field-values", {
+            entity_type: "App\\Models\\Client",
+            entity_id: clientId,
+            values: _this38.quickAddCustomFieldValues
+          }).then(afterCustoms)["catch"](function () {
+            return afterCustoms();
+          });
+        } else {
+          afterCustoms();
+        }
+      })["catch"](function () {
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+        _this38.SubmitProcessing = false;
+        _this38.makeToast("danger", _this38.$t("InvalidData"), _this38.$t("Failed"));
+      });
+    });
+  }), "New_Client", function New_Client() {
+    this.reset_Form_client();
+    this.$bvModal.show("New_Customer");
+  }), "Quick_Add_Client", function Quick_Add_Client() {
+    this.reset_Form_client();
+    this.$bvModal.show("Quick_Add_Customer");
+  }), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "reset_Form_client", function reset_Form_client() {
+    this.client = {
+      id: "",
+      name: "",
+      email: "",
+      phone: this.searchPhone,
+      country: "",
+      city: "",
+      tax_number: "",
+      adresse: "",
+      is_royalty_eligible: false
+    };
+  }), "Get_Client_Without_Paginate", function Get_Client_Without_Paginate() {
+    var _this39 = this;
+    axios.get("get_clients_without_paginate").then(function (_ref1) {
+      var data = _ref1.data;
+      return _this39.clients = data;
+    });
+  }), "get_today_sales", function get_today_sales() {
+    var _this40 = this;
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
+    nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
+    axios.get("get_today_sales").then(function (response) {
+      _this40.today_sales = response.data;
+      setTimeout(function () {
+        _this40.$bvModal.show("modal_today_sales");
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      }, 1000);
+    })["catch"](function () {});
+  }), "getResultValue", function getResultValue(result) {
+    return result.code + " " + "(" + result.name + ")";
+  }), "SearchProduct", function SearchProduct(result) {
+    if (this.load_product) {
+      this.load_product = false;
+      this.product = {};
+      if (result.product_type == 'is_service') {
+        this.product.quantity = 1;
+        this.product.code = result.code;
+      } else {
+        this.product.code = result.code;
+        this.product.current = result.qte_sale;
+        this.product.fix_stock = result.qte;
+        if (result.qte_sale < 1) {
+          this.product.quantity = result.qte_sale;
+        } else {
+          this.product.quantity = 1;
+        }
+      }
+      this.product.product_variant_id = result.product_variant_id;
+      this.Get_Product_Details(result.id, result.product_variant_id, result);
+      this.search_input = '';
+      if (this.$refs && this.$refs.product_autocomplete) {
+        this.$refs.product_autocomplete.value = "";
+      }
+      this.product_filter = [];
+    } else {
+      this.makeToast("warning", this.$t("Please_wait_until_the_product_is_loaded"), this.$t("Warning"));
+    }
+  }), "print_pos", function print_pos() {
+    var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    if (typeof window !== 'undefined' && (window.innerWidth <= 768 || window.matchMedia('(max-width: 768px)').matches)) {
+      return this.print_pos_mobile();
+    }
+    // Try to grab existing DOM markup; if not present, we will not print here.
     var el = document.getElementById('invoice-POS');
     if (!el) {
       return;
     }
+    var divContents = el.innerHTML;
+    var a = window.open('', '', 'height=600,width=480');
+    if (!a) {
+      return;
+    }
     var bodyClass = this.currentReceiptPaperSizeClass || '';
-    var html = "<!doctype html><html><head>\n          <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n          <link rel=\"stylesheet\" href=\"/css/pos_print.css\">\n        </head><body class=\"".concat(bodyClass, "\"><div id=\"invoice-POS\">").concat(el.innerHTML, "</div></body></html>");
-    var iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
-    iframe.style.border = '0';
-    document.body.appendChild(iframe);
-    var doc = iframe.contentWindow ? iframe.contentWindow.document : iframe.contentDocument || null;
-    if (!doc) {
-      return;
-    }
-    doc.open();
-    doc.write(html);
-    doc.close();
+    a.document.write('<html><head><link rel="stylesheet" href="/css/pos_print.css"></head><body class="' + bodyClass + '">');
+    // Wrap in #invoice-POS so print CSS applies correctly and centers content
+    a.document.write('<div id="invoice-POS">');
+    a.document.write(divContents);
+    a.document.write('</div></body></html>');
+    a.document.close();
     var vm = this;
-    var doPrint = function doPrint() {
+    var _afterPrint = function afterPrint() {
       try {
-        (iframe.contentWindow || iframe).focus();
+        window.removeEventListener('focus', _afterPrint);
       } catch (e) {}
       try {
-        (iframe.contentWindow || iframe).print();
+        a.close();
       } catch (e) {}
-      setTimeout(function () {
-        try {
-          document.body.removeChild(iframe);
-        } catch (_) {}
-        // If user chose to reload after this sale, do it once mobile printing is done.
-        if (vm.onlineReloadAfterSale && typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
-          vm.onlineReloadAfterSale = false;
-          vm.onlineReloadModalVisible = false;
-          try {
-            window.location.reload();
-          } catch (e) {}
-        }
-      }, 1500);
-    };
-
-    // Give time for stylesheet to load
-    setTimeout(doPrint, 500);
-  } catch (e) {}
-}), "printInvoiceFromData", function printInvoiceFromData(data) {
-  var _this40 = this;
-  try {
-    var s = data && data.sale ? data.sale : {};
-    var set = data && data.setting ? data.setting : {};
-    var ps = data && data.pos_settings ? data.pos_settings : null;
-    var symbol = data && data.symbol ? data.symbol : '';
-    var details = Array.isArray(data && data.details) ? data.details : [];
-    var payments = Array.isArray(data && data.payments) ? data.payments : [];
-    var zatca_qr = data && data.zatca_qr ? data.zatca_qr : '';
-
-    // Company setting fallback (needed so Address/Email/Phone show in offline receipts)
-    var cachedSetting = null;
-    try {
-      cachedSetting = _utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getCachedBootstrap ? (_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getCachedBootstrap() || {}).setting : null;
-    } catch (e) {}
-    if (!cachedSetting) {
-      try {
-        var raw = localStorage.getItem('pos_receipt_company_setting');
-        if (raw) cachedSetting = JSON.parse(raw);
-      } catch (e) {}
-    }
-    var normalizedSetting = _objectSpread(_objectSpread({}, cachedSetting || {}), set || {});
-
-    // Keep receipt behavior consistent: use the same modal/template for both online and offline.
-    try {
-      if (ps && _typeof(ps) === 'object') {
-        this.pos_settings = _objectSpread(_objectSpread({}, this.pos_settings || {}), ps);
-      }
-    } catch (e) {}
-    try {
-      this.invoice_pos.sale = s || {};
-      // Backward compatibility: ensure discount_Method defaults to '2' (fixed) if not present
-      if (this.invoice_pos.sale && !this.invoice_pos.sale.discount_Method) {
-        this.invoice_pos.sale.discount_Method = '2';
-      }
-    } catch (e) {}
-    try {
-      this.invoice_pos.details = details;
-    } catch (e) {}
-    try {
-      this.invoice_pos.setting = normalizedSetting || {};
-    } catch (e) {}
-    try {
-      this.$set(this.invoice_pos, 'symbol', symbol);
-    } catch (e) {
-      try {
-        this.invoice_pos.symbol = symbol;
-      } catch (_) {}
-    }
-    try {
-      this.invoice_pos.zatca_qr = zatca_qr;
-    } catch (e) {}
-    try {
-      this.payments = payments;
-    } catch (e) {}
-
-    // Ensure QR (if enabled) is rendered before printing
-    try {
-      this.$nextTick(function () {
-        try {
-          _this40.renderZatcaQrPos();
-        } catch (e) {}
-      });
-    } catch (e) {}
-
-    // Respect "Print Invoice automatically" POS setting for offline / data-driven printing.
-    // If auto-print is disabled, just show the invoice modal and let the user print manually.
-    var autoPrintable = true;
-    try {
-      var rawPrintable = this.pos_settings && this.pos_settings.is_printable !== undefined ? this.pos_settings.is_printable : ps && ps.is_printable !== undefined ? ps.is_printable : 1; // default enabled
-      autoPrintable = rawPrintable === true || rawPrintable === 1 || rawPrintable === '1';
-    } catch (e) {
-      autoPrintable = true;
-    }
-    var doPrint = function doPrint() {
-      try {
-        _this40.print_pos({
-          reloadAfterPrint: false
-        });
-      } catch (e) {}
-    };
-
-    // If auto-print is disabled, just ensure the invoice modal/DOM is available and skip printing.
-    if (!autoPrintable) {
-      try {
-        this.$bvModal && this.$bvModal.show && this.$bvModal.show('Show_invoice');
-      } catch (e) {}
-    } else {
-      // Wait for Vue to render invoice values into #invoice-POS
-      try {
-        this.$nextTick(function () {
-          var el = typeof document !== 'undefined' ? document.getElementById('invoice-POS') : null;
-          if (!el) {
-            // As a fallback, show the modal once so its DOM is guaranteed to exist, then print.
-            try {
-              _this40.$bvModal && _this40.$bvModal.show && _this40.$bvModal.show('Show_invoice');
-            } catch (e) {}
-            setTimeout(doPrint, 300);
-            return;
-          }
-          doPrint();
-        });
-      } catch (e) {
-        doPrint();
-      }
-    }
-  } catch (e) {
-    // In offline mode, do not reload the main page; just ignore print failures.
-  }
-}), "GetElementsPos", function GetElementsPos() {
-  var _this41 = this;
-  axios.get("pos/data_create_pos").then(function (response) {
-    _this41.clients = response.data.clients;
-    _this41.accounts = response.data.accounts;
-    _this41.warehouses = response.data.warehouses;
-    _this41.categories = response.data.categories;
-    _this41.brands = response.data.brands;
-    _this41.payment_methods = response.data.payment_methods;
-
-    // Set default ware from local storage
-    _this41.sale.warehouse_id = localStorage.getItem('selected_warehouse_id') ? parseInt(localStorage.getItem('selected_warehouse_id')) : response.data.defaultWarehouse;
-    _this41.selectedClientId = response.data.defaultClient;
-    _this41.client_name = response.data.default_client_name;
-    _this41.clientIsEligible = response.data.default_client_eligible === true || response.data.default_client_eligible === 1;
-    _this41.selectedClientPoints = _this41.clientIsEligible ? parseFloat(response.data.default_client_points) : 0;
-    _this41.point_to_amount_rate = response.data.point_to_amount_rate;
-
-    // Set default tax from settings
-    if (response.data.default_tax !== undefined && response.data.default_tax !== null) {
-      _this41.sale.tax_rate = parseFloat(response.data.default_tax) || 0;
-      _this41.CalculTotal();
-    }
-    _this41.product_perPage = response.data.products_per_page;
-    _this41.languages_available = response.data.languages_available;
-
-    // Hydrate company/receipt header info (also used for offline printing)
-    try {
-      if (response.data && response.data.setting) {
-        var merged = _objectSpread(_objectSpread({}, _this41.invoice_pos && _this41.invoice_pos.setting ? _this41.invoice_pos.setting : {}), response.data.setting);
-        _this41.invoice_pos.setting = merged;
-        // Cache preferred invoice format for POS printing
-        if (merged && typeof merged.invoice_format === 'string' && ['thermal', 'a4'].includes(merged.invoice_format)) {
-          _this41.invoice_format = merged.invoice_format;
-        } else {
-          _this41.invoice_format = 'thermal';
-        }
-        // Cache for offline usage even if the page later goes offline
-        try {
-          localStorage.setItem('pos_receipt_company_setting', JSON.stringify(merged));
-        } catch (e) {}
-      }
-    } catch (e) {}
-
-    // Ensure we always have a currency symbol fallback for receipts
-    try {
-      var sym = _this41.currentUser && _this41.currentUser.currency ? _this41.currentUser.currency : '';
-      if (!_this41.invoice_pos.symbol) {
-        try {
-          _this41.$set(_this41.invoice_pos, 'symbol', sym);
-        } catch (e) {
-          _this41.invoice_pos.symbol = sym;
-        }
-      }
-    } catch (e) {}
-
-    // Load POS settings if available
-    if (response.data.pos_settings) {
-      _this41.pos_settings = response.data.pos_settings;
-      // Convert integer values (0/1) to boolean for proper condition checking
-      if (typeof _this41.pos_settings.quick_add_customer === 'number') {
-        _this41.pos_settings.quick_add_customer = _this41.pos_settings.quick_add_customer === 1;
-      }
-      if (typeof _this41.pos_settings.barcode_scanning_sound === 'number') {
-        _this41.pos_settings.barcode_scanning_sound = _this41.pos_settings.barcode_scanning_sound === 1;
-      }
-      if (typeof _this41.pos_settings.show_product_images === 'number') {
-        _this41.pos_settings.show_product_images = _this41.pos_settings.show_product_images === 1;
-      }
-      if (typeof _this41.pos_settings.show_stock_quantity === 'number') {
-        _this41.pos_settings.show_stock_quantity = _this41.pos_settings.show_stock_quantity === 1;
-      }
-      if (typeof _this41.pos_settings.enable_hold_sales === 'number') {
-        _this41.pos_settings.enable_hold_sales = _this41.pos_settings.enable_hold_sales === 1;
-      }
-      if (typeof _this41.pos_settings.enable_customer_points === 'number') {
-        _this41.pos_settings.enable_customer_points = _this41.pos_settings.enable_customer_points === 1;
-      }
-      if (typeof _this41.pos_settings.show_categories === 'number') {
-        _this41.pos_settings.show_categories = _this41.pos_settings.show_categories === 1;
-      }
-      if (typeof _this41.pos_settings.show_brands === 'number') {
-        _this41.pos_settings.show_brands = _this41.pos_settings.show_brands === 1;
-      }
-    }
-    _this41.getProducts();
-    _this41.paginate_Brands(_this41.brand_perPage, 0);
-    _this41.paginate_Category(_this41.category_perPage, 0);
-    _this41.stripe_key = response.data.stripe_key;
-    // Cache bootstrap payload for offline usage
-    try {
-      if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheBootstrap) {
-        _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheBootstrap(response.data);
-      }
-    } catch (e) {}
-    _this41.isLoading = false;
-  })["catch"](function () {
-    // Offline/failed bootstrap: hydrate from cached data where possible
-    try {
-      var cached = _utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getCachedBootstrap ? _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getCachedBootstrap() : null;
-      if (cached) {
-        _this41.clients = cached.clients || [];
-        _this41.accounts = cached.accounts || [];
-        _this41.warehouses = cached.warehouses || [];
-        _this41.categories = cached.categories || [];
-        _this41.brands = cached.brands || [];
-        _this41.payment_methods = cached.payment_methods || [];
-        if (!_this41.sale.warehouse_id && cached.defaultWarehouse) {
-          _this41.sale.warehouse_id = cached.defaultWarehouse;
-        }
-        if (!_this41.selectedClientId && cached.defaultClient) {
-          _this41.selectedClientId = cached.defaultClient;
-        }
-        if (!_this41.client_name && cached.default_client_name) {
-          _this41.client_name = cached.default_client_name;
-        }
-        _this41.clientIsEligible = cached.default_client_eligible === true || cached.default_client_eligible === 1;
-        _this41.selectedClientPoints = _this41.clientIsEligible ? parseFloat(cached.default_client_points || 0) : 0;
-        _this41.point_to_amount_rate = cached.point_to_amount_rate || _this41.point_to_amount_rate;
-        if (cached.default_tax !== undefined && cached.default_tax !== null) {
-          _this41.sale.tax_rate = parseFloat(cached.default_tax) || 0;
-          _this41.CalculTotal();
-        }
-        if (cached.products_per_page) {
-          _this41.product_perPage = cached.products_per_page;
-        }
-        if (Array.isArray(cached.languages_available)) {
-          _this41.languages_available = cached.languages_available;
-        }
-        if (cached.stripe_key) {
-          _this41.stripe_key = cached.stripe_key;
-        }
-
-        // Hydrate cached company/receipt header info for offline receipts
-        try {
-          var cachedSetting = cached.setting || null;
-          var setting = cachedSetting;
-          if (!setting) {
-            try {
-              var raw = localStorage.getItem('pos_receipt_company_setting');
-              if (raw) setting = JSON.parse(raw);
-            } catch (e) {}
-          }
-          if (setting) {
-            _this41.invoice_pos.setting = _objectSpread(_objectSpread({}, _this41.invoice_pos && _this41.invoice_pos.setting ? _this41.invoice_pos.setting : {}), setting);
-          }
-        } catch (e) {}
-
-        // Ensure receipt symbol exists offline too
-        try {
-          var sym = _this41.currentUser && _this41.currentUser.currency ? _this41.currentUser.currency : '';
-          if (!_this41.invoice_pos.symbol) {
-            try {
-              _this41.$set(_this41.invoice_pos, 'symbol', sym);
-            } catch (e) {
-              _this41.invoice_pos.symbol = sym;
-            }
-          }
-        } catch (e) {}
-        _this41.paginate_Brands(_this41.brand_perPage, 0);
-        _this41.paginate_Category(_this41.category_perPage, 0);
-        if (_this41.sale.warehouse_id) {
-          // This call will fall back to cached snapshots in offline mode
-          _this41.getProducts();
-        } else {
-          _this41.productsReady = true;
-        }
-      } else {
-        _this41.productsReady = true;
-      }
-    } catch (e) {
-      _this41.productsReady = true;
-    }
-    _this41.isLoading = false;
-  });
-}), "onModernPaymentSuccess", function onModernPaymentSuccess(evt) {
-  var _this42 = this;
-  // If this was an offline-queued sale, build a local invoice and print it
-  try {
-    if (evt && evt.offline && evt.payload) {
-      var payload = evt.payload;
-      var now = new Date();
-      var saleDate = now.toISOString().slice(0, 19).replace('T', ' ');
-      // Generate an internal offline reference if needed, but do not print it on the receipt
-      var offlineRef = evt.offlineId ? "OFF-".concat(evt.offlineId) : "OFF-".concat(now.getTime());
-
-      // Resolve client & warehouse names from cached lists
-      var clientName = this.client_name || '';
-      try {
-        var cId = payload.client_id || this.selectedClientId;
-        var c = (this.clients || []).find(function (x) {
-          return String(x.id) === String(cId);
-        });
-        if (c && c.name) clientName = c.name;
-      } catch (e2) {}
-      var warehouseName = '';
-      try {
-        var wId = payload.warehouse_id || this.sale.warehouse_id;
-        var w = (this.warehouses || []).find(function (x) {
-          return String(x.id) === String(wId);
-        });
-        if (w && w.name) warehouseName = w.name;
-      } catch (e2) {}
-
-      // Resolve seller name from current user (prefer name, then username, then email)
-      var sellerName = '';
-      try {
-        if (this.currentUser) {
-          sellerName = this.currentUser.name || this.currentUser.username || this.currentUser.email || '';
-        }
-      } catch (e2) {}
-      var sale = {
-        // Do not set Ref so offline receipts have no "Ref: ..." line
-        client_name: clientName,
-        warehouse_name: warehouseName,
-        discount: payload.discount || 0,
-        taxe: payload.TaxNet || 0,
-        tax_rate: payload.tax_rate || 0,
-        shipping: payload.shipping || 0,
-        GrandTotal: payload.GrandTotal || 0,
-        paid_amount: Array.isArray(payload.payments) ? payload.payments.reduce(function (s, p) {
-          return s + Number(p.amount || 0);
-        }, 0) : 0,
-        date: saleDate,
-        seller_name: sellerName
-      };
-
-      // Map details into invoice shape
-      var details = Array.isArray(payload.details) ? payload.details.map(function (d) {
-        return {
-          name: d.name,
-          quantity: d.quantity,
-          unit_sale: d.unitSale || d.unit_sale || '',
-          total: d.subtotal != null ? d.subtotal : d.total != null ? d.total : (d.Net_price || 0) * (d.quantity || 0),
-          is_imei: d.is_imei,
-          imei_number: d.imei_number
-        };
-      }) : [];
-
-      // Map payments into invoice shape
-      var payments = Array.isArray(payload.payments) ? payload.payments.map(function (p) {
-        var method = (_this42.payment_methods || []).find(function (m) {
-          return String(m.id) === String(p.payment_method_id);
-        });
-        return {
-          payment_method: method ? {
-            name: method.name
-          } : null,
-          montant: Number(p.amount || 0),
-          change: 0
-        };
-      }) : [];
-
-      // Fallback settings & POS print options (reuse latest online invoice/pos settings when available)
-      var symbol = this.currentUser && this.currentUser.currency ? this.currentUser.currency : '';
-
-      // Prefer full setting object from last loaded invoice (online), else fall back to currentUser logo
-      var baseSetting = this.invoice_pos && this.invoice_pos.setting && (this.invoice_pos.setting.logo || this.invoice_pos.setting.CompanyAdress || this.invoice_pos.setting.email || this.invoice_pos.setting.CompanyPhone) ? this.invoice_pos.setting : null;
-      var setting = baseSetting || {
-        logo: this.currentUser && this.currentUser.logo || '',
-        CompanyAdress: '',
-        email: '',
-        CompanyPhone: ''
-      };
-
-      // Prefer live pos_settings (including note_customer/show_note) when available
-      var ps = this.pos_settings && Object.keys(this.pos_settings).length ? this.pos_settings : {
-        show_address: false,
-        show_email: false,
-        show_phone: false,
-        show_customer: true,
-        show_Warehouse: true,
-        show_discount: true,
-        show_tax: true,
-        show_shipping: true,
-        logo_size: 60,
-        // In absence of explicit POS settings, still show a generic note
-        show_note: true,
-        note_customer: this.$t ? this.$t('Thank_you_for_your_business') : 'Thank you for your business'
-      };
-      this.printInvoiceFromData({
-        sale: sale,
-        details: details,
-        payments: payments,
-        setting: setting,
-        pos_settings: ps,
-        symbol: symbol
-      });
-    }
-  } catch (e) {}
-
-  // After successful payment via modal, refresh drafts if needed and reset
-  if (this.draft_sale_id) {
-    try {
-      Fire.$emit('event_delete_draft_sale');
-    } catch (e) {}
-    this.draft_sale_id = '';
-  }
-  try {
-    this.Reset_Pos();
-  } catch (e) {}
-  try {
-    this.refreshOfflineSalesCount();
-  } catch (e) {}
-}), "initOfflineStatus", function initOfflineStatus() {
-  if (typeof window === 'undefined') {
-    this.isOnline = true;
-    this.offlineSyncInProgress = false;
-    this.offlineLastSyncError = null;
-    this.refreshOfflineSalesCount();
-    return;
-  }
-  try {
-    this.isOnline = window.navigator ? window.navigator.onLine !== false : true;
-  } catch (e) {
-    this.isOnline = true;
-  }
-  try {
-    window.addEventListener('online', this.handleOnline);
-    window.addEventListener('offline', this.handleOffline);
-  } catch (e) {}
-  this.refreshOfflineSalesCount();
-}), "handleOnline", function handleOnline() {
-  // When the browser reports that we're back online, check if there is an
-  // active checkout. If so, we'll offer the user a non-blocking choice to
-  // reload now or after completing the sale.
-  var hadActiveCart = this.details && this.details.length > 0;
-  this.isOnline = true;
-  // When the cart is empty, we auto-sync offline sales in the background and
-  // then reload the page afterwards (even if there were no pending sales).
-  // We still let the global offline sync handler perform the actual API work.
-  if (!hadActiveCart) {
-    try {
-      if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales) {
-        var queue = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales() || [];
-        var pendingCount = queue.filter(function (s) {
-          return s && (s.status === 'pending' || s.status === 'syncing');
-        }).length;
-        if (pendingCount > 0) {
-          var msg = pendingCount === 1 ? this.$t ? this.$t('pos.Syncing_offline_sales') : 'Syncing offline sales' : this.$t ? "".concat(this.$t('pos.Syncing_offline_sales'), " (").concat(pendingCount, ")") : "Syncing ".concat(pendingCount, " offline sales...");
-          this.makeToast && this.makeToast('info', msg, this.$t ? this.$t('Notice') : 'Notice');
-          // Ask POS to reload after global offline sync completes successfully.
-          this.reloadAfterOfflineSync = true;
-        } else {
-          // No pending offline sales: nothing to sync, so reload immediately.
-          this.reloadAfterOfflineSync = false;
-          if (typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
-            try {
-              window.location.reload();
-            } catch (e) {}
-          }
-        }
-      }
-    } catch (e) {}
-  }
-  // If there is an active checkout when the connection is restored, show a
-  // non-blocking confirmation modal offering to reload now or after
-  // completing the current sale.
-  if (hadActiveCart) {
-    this.onlineReloadModalVisible = true;
-    this.onlineReloadAfterSale = false;
-  }
-  // Do NOT call this.trySyncOfflineSales() here; globalOfflineSync will run
-  // the sync once per online event, which prevents duplicate submissions.
-}), "handleOffline", function handleOffline() {
-  this.isOnline = false;
-  try {
-    var msg = this.$t ? this.$t('pos.Offline_Mode') : 'Offline mode enabled';
-    this.makeToast && this.makeToast('warning', msg, this.$t ? this.$t('Warning') : 'Warning');
-  } catch (e) {}
-  // Any time we go offline, reset the online reload modal state.
-  this.onlineReloadModalVisible = false;
-  this.onlineReloadAfterSale = false;
-  this.reloadAfterOfflineSync = false;
-}), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "refreshOfflineSalesCount", function refreshOfflineSalesCount() {
-  try {
-    if (!_utils__WEBPACK_IMPORTED_MODULE_4__["default"] || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales) {
-      this.offlineSalesCount = 0;
-      return;
-    }
-    var list = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales() || [];
-    // Only count sales that are still pending or actively syncing.
-    this.offlineSalesCount = list.filter(function (s) {
-      return s && (s.status === 'pending' || s.status === 'syncing');
-    }).length;
-    // If there are no pending/syncing offline sales, clear any residual shadow stock
-    if (this.offlineSalesCount === 0) {
-      try {
-        if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.clearAll) {
-          _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.clearAll();
-        }
-      } catch (e2) {}
-    }
-  } catch (e) {
-    this.offlineSalesCount = 0;
-  }
-}), "handleAutoOfflineSyncResult", function handleAutoOfflineSyncResult(payload) {
-  try {
-    // Always refresh badge/count after any sync attempt
-    this.refreshOfflineSalesCount();
-  } catch (e) {}
-  if (!payload || typeof this.makeToast !== 'function') return;
-  var syncedCount = Number(payload.syncedCount || 0);
-  var lastError = payload.lastError || null;
-  if (syncedCount > 0) {
-    var successMsg = syncedCount === 1 ? '1 offline sale synced successfully' : "".concat(syncedCount, " offline sales synced successfully");
-    this.makeToast('success', successMsg, this.$t ? this.$t('Success') : 'Success');
-    // If we came back online with an empty cart and requested an
-    // auto-reload after offline sync, perform it now.
-    if (this.reloadAfterOfflineSync && this.details && this.details.length === 0) {
-      this.reloadAfterOfflineSync = false;
-      if (typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
+      // If user chose to reload after this sale, do it once printing is done.
+      if (vm.onlineReloadAfterSale && typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
+        vm.onlineReloadAfterSale = false;
+        vm.onlineReloadModalVisible = false;
         try {
           window.location.reload();
         } catch (e) {}
       }
-    }
-  } else if (lastError) {
-    var errDetail = String(lastError || '');
-    // Some old/invalid offline records may produce low‑level validation
-    // messages (e.g. "validation.required"). These are not actionable for
-    // the cashier and the records are marked as "failed" and skipped on
-    // future syncs, so we silently ignore them to avoid noisy toasts.
-    var lower = errDetail.toLowerCase();
-    var looksLikeValidationKey = lower.includes('validation.') || lower.includes('validation_required') || lower === 'validation.required';
-    if (looksLikeValidationKey) {
-      return;
-    }
-    var _short = errDetail.slice(0, 200);
-    var baseMsg = 'Failed to sync offline sales';
-    var fullMsg = _short ? "".concat(baseMsg, ": ").concat(_short) : baseMsg;
-    this.makeToast('danger', fullMsg, this.$t ? this.$t('Failed') : 'Failed');
-  }
-}), "trySyncOfflineSales", function trySyncOfflineSales() {
-  var _this43 = this;
-  return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee12() {
-    var syncedCount, queue, i, sale, basePayload, normalizedDetails, payload, response, isNetworkError, msg, _t0, _t1;
-    return _regenerator().w(function (_context12) {
-      while (1) switch (_context12.p = _context12.n) {
-        case 0:
-          if (!_this43.offlineSyncInProgress) {
-            _context12.n = 1;
-            break;
-          }
-          return _context12.a(2);
-        case 1:
-          if (!(typeof window !== 'undefined')) {
-            _context12.n = 5;
-            break;
-          }
-          _context12.p = 2;
-          if (!(window.navigator && window.navigator.onLine === false)) {
-            _context12.n = 3;
-            break;
-          }
-          _this43.isOnline = false;
-          return _context12.a(2);
-        case 3:
-          _context12.n = 5;
-          break;
-        case 4:
-          _context12.p = 4;
-          _t0 = _context12.v;
-        case 5:
-          _this43.offlineSyncInProgress = true;
-          // Notify UI (via global event bus) that POS offline sync has started
-          try {
-            if (typeof window !== 'undefined' && window.Fire && window.Fire.$emit) {
-              window.Fire.$emit('offline-sync:start');
-            }
-          } catch (e) {}
-          _this43.offlineLastSyncError = null;
-          syncedCount = 0;
-          _context12.p = 6;
-          if (!(!_utils__WEBPACK_IMPORTED_MODULE_4__["default"] || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales)) {
-            _context12.n = 7;
-            break;
-          }
-          return _context12.a(2);
-        case 7:
-          queue = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales() || [];
-          i = 0;
-        case 8:
-          if (!(i < queue.length)) {
-            _context12.n = 14;
-            break;
-          }
-          sale = queue[i]; // Skip already-synced, failed or in-progress records
-          if (!(!sale || !sale.payload || sale.status === 'synced' || sale.status === 'syncing' || sale.status === 'failed')) {
-            _context12.n = 9;
-            break;
-          }
-          return _context12.a(3, 13);
-        case 9:
-          _context12.p = 9;
-          // Mark this sale as "syncing" in the shared offline queue so that
-          // other sync workers (global/offline, other tabs) do not submit it
-          // concurrently.
-          try {
-            if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsSyncing) {
-              _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsSyncing(sale.id);
-            }
-          } catch (e) {}
-
-          // Normalize payload to ensure required keys such as sale_unit_id exist
-          basePayload = sale.payload || {};
-          normalizedDetails = Array.isArray(basePayload.details) ? basePayload.details.map(function (d) {
-            return _objectSpread(_objectSpread({}, d), {}, {
-              sale_unit_id: d && Object.prototype.hasOwnProperty.call(d, 'sale_unit_id') ? d.sale_unit_id : d && d.sale_unit_id || null
-            });
-          }) : basePayload.details;
-          payload = _objectSpread(_objectSpread({}, basePayload), {}, {
-            // Include offline_id so backend can optionally enforce idempotency
-            offline_id: sale.id,
-            details: normalizedDetails
-          }); // Use absolute API path to avoid hitting SPA routes (e.g. /app/pos/create_pos)
-          _context12.n = 10;
-          return axios.post('/pos/create_pos', payload);
-        case 10:
-          response = _context12.v;
-          if (response && response.data && response.data.success === true) {
-            _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsSynced(sale.id, response.data.id);
-            syncedCount++;
-            // On success, clear shadow stock deductions for this sale so we don't double-subtract
-            try {
-              if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions) {
-                _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions(sale.id);
-              }
-            } catch (e) {}
-          } else {
-            _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsFailed(sale.id, 'Invalid response from server', response && response.status);
-            // Restore shadow stock for this failed sale
-            try {
-              if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions) {
-                _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions(sale.id);
-              }
-            } catch (e) {}
-          }
-          _context12.n = 13;
-          break;
-        case 11:
-          _context12.p = 11;
-          _t1 = _context12.v;
-          isNetworkError = !_t1.response || _t1.message === 'Network Error';
-          if (typeof window !== 'undefined') {
-            try {
-              if (window.navigator && window.navigator.onLine === false) {
-                _this43.isOnline = false;
-              }
-            } catch (e) {}
-          }
-          if (!(isNetworkError && !_this43.isOnline)) {
-            _context12.n = 12;
-            break;
-          }
-          return _context12.a(3, 14);
-        case 12:
-          msg = _t1.response && _t1.response.data && (_t1.response.data.message || _t1.response.data.error) || _t1.message || 'Unknown error';
-          _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsFailed(sale.id, msg, _t1.response && _t1.response.status);
-          _this43.offlineLastSyncError = msg;
-          // For non-network errors, rollback local shadow stock to keep UI consistent
-          if (!isNetworkError) {
-            try {
-              if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions) {
-                _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions(sale.id);
-              }
-            } catch (e) {}
-          }
-        case 13:
-          i++;
-          _context12.n = 8;
-          break;
-        case 14:
-          _context12.p = 14;
-          _this43.offlineSyncInProgress = false;
-          _this43.refreshOfflineSalesCount();
-          // Notify UI that POS offline sync has finished
-          try {
-            if (typeof window !== 'undefined' && window.Fire && window.Fire.$emit) {
-              window.Fire.$emit('offline-sync:end', {
-                syncedCount: syncedCount,
-                lastError: _this43.offlineLastSyncError
-              });
-            }
-          } catch (e) {}
-          // Show same feedback as auto-sync handler
-          _this43.handleAutoOfflineSyncResult({
-            syncedCount: syncedCount,
-            lastError: _this43.offlineLastSyncError
-          });
-          return _context12.f(14);
-        case 15:
-          return _context12.a(2);
-      }
-    }, _callee12, null, [[9, 11], [6,, 14, 15], [2, 4]]);
-  }))();
-}), "syncOfflineSales", function syncOfflineSales() {
-  if (!this.isOnline) {
-    var msg = this.$t ? this.$t('pos.Offline_Mode') : 'You are currently offline';
-    this.makeToast && this.makeToast('warning', msg, this.$t ? this.$t('Warning') : 'Warning');
-    return;
-  }
-  this.trySyncOfflineSales();
-}), "verifyAllItemsInStock", function verifyAllItemsInStock() {
-  for (var i = 0; i < this.details.length; i++) {
-    var d = this.details[i];
-    if (d && d.product_type !== 'is_service') {
-      var available = Number(d.current || 0);
-      var qty = Number(d.quantity || 0);
-      if (isNaN(available) || isNaN(qty) || qty > available) {
-        return {
-          ok: false,
-          productName: d.name || d.code || 'item'
-        };
-      }
-    }
-  }
-  return {
-    ok: true,
-    productName: null
-  };
-}), "openModernPaymentModal", function openModernPaymentModal() {
-  // Guard: client and warehouse must be selected
-  if (!this.selectedClientId) {
-    var msg = this.$t ? this.$t('Select_Customer') : 'Please select a customer before paying.';
-    this.makeToast && this.makeToast('warning', msg, this.$t ? this.$t('Warning') : 'Warning');
-    return;
-  }
-  if (!this.sale || !this.sale.warehouse_id) {
-    var _msg = this.$t ? this.$t('SelectWarehouse') : 'Please select a warehouse before paying.';
-    this.makeToast && this.makeToast('warning', _msg, this.$t ? this.$t('Warning') : 'Warning');
-    return;
-  }
-  // Guard: stock validation before opening payment modal
-  var stockCheck = this.verifyAllItemsInStock();
-  if (!stockCheck.ok) {
-    var _msg2 = this.$t ? "".concat(this.$t('InsufficientStock'), " ").concat(stockCheck.productName) : "Insufficient stock for ".concat(stockCheck.productName);
-    this.makeToast('danger', _msg2, this.$t ? this.$t('Failed') : 'Failed');
-    return;
-  }
-  // Guard: total payable must not be negative (zero allowed)
-  if (Number(this.GrandTotal) < 0) {
-    var _msg3 = this.$t ? "".concat(this.$t('pos.Total_Payable'), " cannot be negative") : 'Total Payable cannot be negative';
-    this.makeToast('warning', _msg3, this.$t ? this.$t('Warning') : 'Warning');
-    return;
-  }
-  // Open modern payment modal with current sale data
-  this.$refs.modernPaymentModal.openModal({
-    amountDue: this.GrandTotal,
-    reference: this.sale.Ref || "POS-" + new Date().getTime(),
-    notes: this.selectedClientId ? "Payment for Customer #".concat(this.selectedClientId) : 'POS Payment'
-  });
-})))), "created", function created() {
-  var _this44 = this;
-  // Clear cached POS data on page reload when online to avoid stale/outdated data
-  // Fresh data will be fetched and cache rebuilt via GetElementsPos()
-  // Only clear when online - when offline, preserve cache as it's needed for offline functionality
-  try {
-    // Check if we're online before clearing cache
-    var isOnline = typeof window !== 'undefined' && window.navigator && window.navigator.onLine !== false;
-    if (isOnline && _utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.clearCache) {
-      _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.clearCache();
-    }
-  } catch (e) {
-    // Ignore errors during cache clearing
-  }
-  this.initOfflineStatus();
-  // Ensure offline sales badge is accurate immediately after POS refresh,
-  // even before any user interaction.
-  try {
-    this.refreshOfflineSalesCount();
-  } catch (e) {}
-  this.GetElementsPos(); // This will fetch fresh data and rebuild the cache when online
-  this.addPaymentLine();
-  // Initialize warehouse options and sync selection once data is loaded
-  this.$watch('warehouses', function (ws) {
-    _this44.warehouseOptions = (ws || []).map(function (w) {
-      return {
-        value: w.id,
-        text: w.name
-      };
-    });
-    if (!_this44.registerForm.warehouse_id && _this44.sale && _this44.sale.warehouse_id) {
-      _this44.registerForm.warehouse_id = _this44.sale.warehouse_id;
-    }
-    // Always check current register after initial data load
-    _this44.refreshCurrentRegister();
-  });
-  // refresh register when warehouse changes
-  this.$watch(function () {
-    return _this44.sale.warehouse_id;
-  }, function () {
-    _this44.registerForm.warehouse_id = _this44.sale.warehouse_id || '';
-    _this44.refreshCurrentRegister();
-  });
-  // Reset POS after successful payment from ModernPaymentModal
-  if (this.$refs && this.$refs.modernPaymentModal) {
+    };
     try {
-      this.$refs.modernPaymentModal.$on('payment-success', function () {
-        _this44.Reset_Pos();
-      });
+      window.addEventListener('focus', _afterPrint);
     } catch (e) {}
-  }
-  Fire.$on("pay_now", function () {
+    try {
+      a.onafterprint = _afterPrint;
+    } catch (e) {}
     setTimeout(function () {
-      // Guard: prevent opening legacy payment modal if total is negative
-      if (Number(_this44.GrandTotal) < 0) {
-        var msg = _this44.$t ? "".concat(_this44.$t('pos.Total_Payable'), " cannot be negative") : 'Total Payable cannot be negative';
-        _this44.makeToast('warning', msg, _this44.$t ? _this44.$t('Warning') : 'Warning');
-        // Complete the animation of the progress bar.
-        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      try {
+        a.focus();
+      } catch (e) {}
+      try {
+        a.print();
+      } catch (e) {
+        _afterPrint();
+      }
+    }, 300);
+  }), "print_pos_mobile", function print_pos_mobile() {
+    try {
+      var el = document.getElementById('invoice-POS');
+      if (!el) {
         return;
       }
-      _this44.paymentLines = [{
-        amount: parseFloat(_this44.GrandTotal.toFixed(2)),
-        payment_method_id: 2
-      }];
-      _this44.globalPaymentNote = '';
-      _this44.selectedAccount = null;
-      _this44.$bvModal.show("Add_Payment");
+      var bodyClass = this.currentReceiptPaperSizeClass || '';
+      var html = "<!doctype html><html><head>\n          <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n          <link rel=\"stylesheet\" href=\"/css/pos_print.css\">\n        </head><body class=\"".concat(bodyClass, "\"><div id=\"invoice-POS\">").concat(el.innerHTML, "</div></body></html>");
+      var iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      document.body.appendChild(iframe);
+      var doc = iframe.contentWindow ? iframe.contentWindow.document : iframe.contentDocument || null;
+      if (!doc) {
+        return;
+      }
+      doc.open();
+      doc.write(html);
+      doc.close();
+      var vm = this;
+      var doPrint = function doPrint() {
+        try {
+          (iframe.contentWindow || iframe).focus();
+        } catch (e) {}
+        try {
+          (iframe.contentWindow || iframe).print();
+        } catch (e) {}
+        setTimeout(function () {
+          try {
+            document.body.removeChild(iframe);
+          } catch (_) {}
+          // If user chose to reload after this sale, do it once mobile printing is done.
+          if (vm.onlineReloadAfterSale && typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
+            vm.onlineReloadAfterSale = false;
+            vm.onlineReloadModalVisible = false;
+            try {
+              window.location.reload();
+            } catch (e) {}
+          }
+        }, 1500);
+      };
+
+      // Give time for stylesheet to load
+      setTimeout(doPrint, 500);
+    } catch (e) {}
+  }), "printInvoiceFromData", function printInvoiceFromData(data) {
+    var _this41 = this;
+    try {
+      var s = data && data.sale ? data.sale : {};
+      var set = data && data.setting ? data.setting : {};
+      var ps = data && data.pos_settings ? data.pos_settings : null;
+      var symbol = data && data.symbol ? data.symbol : '';
+      var details = Array.isArray(data && data.details) ? data.details : [];
+      var payments = Array.isArray(data && data.payments) ? data.payments : [];
+      var zatca_qr = data && data.zatca_qr ? data.zatca_qr : '';
+
+      // Company setting fallback (needed so Address/Email/Phone show in offline receipts)
+      var cachedSetting = null;
+      try {
+        cachedSetting = _utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getCachedBootstrap ? (_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getCachedBootstrap() || {}).setting : null;
+      } catch (e) {}
+      if (!cachedSetting) {
+        try {
+          var raw = localStorage.getItem('pos_receipt_company_setting');
+          if (raw) cachedSetting = JSON.parse(raw);
+        } catch (e) {}
+      }
+      var normalizedSetting = _objectSpread(_objectSpread({}, cachedSetting || {}), set || {});
+
+      // Keep receipt behavior consistent: use the same modal/template for both online and offline.
+      try {
+        if (ps && _typeof(ps) === 'object') {
+          this.pos_settings = _objectSpread(_objectSpread({}, this.pos_settings || {}), ps);
+        }
+      } catch (e) {}
+      try {
+        this.invoice_pos.sale = s || {};
+        // Backward compatibility: ensure discount_Method defaults to '2' (fixed) if not present
+        if (this.invoice_pos.sale && !this.invoice_pos.sale.discount_Method) {
+          this.invoice_pos.sale.discount_Method = '2';
+        }
+      } catch (e) {}
+      try {
+        this.invoice_pos.details = details;
+      } catch (e) {}
+      try {
+        this.invoice_pos.setting = normalizedSetting || {};
+      } catch (e) {}
+      try {
+        this.$set(this.invoice_pos, 'symbol', symbol);
+      } catch (e) {
+        try {
+          this.invoice_pos.symbol = symbol;
+        } catch (_) {}
+      }
+      try {
+        this.invoice_pos.zatca_qr = zatca_qr;
+      } catch (e) {}
+      try {
+        this.payments = payments;
+      } catch (e) {}
+
+      // Ensure QR (if enabled) is rendered before printing
+      try {
+        this.$nextTick(function () {
+          try {
+            _this41.renderZatcaQrPos();
+          } catch (e) {}
+        });
+      } catch (e) {}
+
+      // Respect "Print Invoice automatically" POS setting for offline / data-driven printing.
+      // If auto-print is disabled, just show the invoice modal and let the user print manually.
+      var autoPrintable = true;
+      try {
+        var rawPrintable = this.pos_settings && this.pos_settings.is_printable !== undefined ? this.pos_settings.is_printable : ps && ps.is_printable !== undefined ? ps.is_printable : 1; // default enabled
+        autoPrintable = rawPrintable === true || rawPrintable === 1 || rawPrintable === '1';
+      } catch (e) {
+        autoPrintable = true;
+      }
+      var doPrint = function doPrint() {
+        try {
+          _this41.print_pos({
+            reloadAfterPrint: false
+          });
+        } catch (e) {}
+      };
+
+      // If auto-print is disabled, just ensure the invoice modal/DOM is available and skip printing.
+      if (!autoPrintable) {
+        try {
+          this.$bvModal && this.$bvModal.show && this.$bvModal.show('Show_invoice');
+        } catch (e) {}
+      } else {
+        // Wait for Vue to render invoice values into #invoice-POS
+        try {
+          this.$nextTick(function () {
+            var el = typeof document !== 'undefined' ? document.getElementById('invoice-POS') : null;
+            if (!el) {
+              // As a fallback, show the modal once so its DOM is guaranteed to exist, then print.
+              try {
+                _this41.$bvModal && _this41.$bvModal.show && _this41.$bvModal.show('Show_invoice');
+              } catch (e) {}
+              setTimeout(doPrint, 300);
+              return;
+            }
+            doPrint();
+          });
+        } catch (e) {
+          doPrint();
+        }
+      }
+    } catch (e) {
+      // In offline mode, do not reload the main page; just ignore print failures.
+    }
+  }), "GetElementsPos", function GetElementsPos() {
+    var _this42 = this;
+    axios.get("pos/data_create_pos").then(function (response) {
+      _this42.clients = response.data.clients;
+      _this42.accounts = response.data.accounts;
+      _this42.warehouses = response.data.warehouses;
+      _this42.categories = response.data.categories;
+      _this42.brands = response.data.brands;
+      _this42.payment_methods = response.data.payment_methods;
+
+      // Set default ware from local storage
+      _this42.sale.warehouse_id = localStorage.getItem('selected_warehouse_id') ? parseInt(localStorage.getItem('selected_warehouse_id')) : response.data.defaultWarehouse;
+      _this42.selectedClientId = response.data.defaultClient;
+      _this42.client_name = response.data.default_client_name;
+      _this42.clientIsEligible = response.data.default_client_eligible === true || response.data.default_client_eligible === 1;
+      _this42.selectedClientPoints = _this42.clientIsEligible ? parseFloat(response.data.default_client_points) : 0;
+      _this42.point_to_amount_rate = response.data.point_to_amount_rate;
+
+      // Set default tax from settings
+      if (response.data.default_tax !== undefined && response.data.default_tax !== null) {
+        _this42.sale.tax_rate = parseFloat(response.data.default_tax) || 0;
+        _this42.CalculTotal();
+      }
+      _this42.product_perPage = response.data.products_per_page;
+      _this42.languages_available = response.data.languages_available;
+
+      // Hydrate company/receipt header info (also used for offline printing)
+      try {
+        if (response.data && response.data.setting) {
+          var merged = _objectSpread(_objectSpread({}, _this42.invoice_pos && _this42.invoice_pos.setting ? _this42.invoice_pos.setting : {}), response.data.setting);
+          _this42.invoice_pos.setting = merged;
+          // Cache preferred invoice format for POS printing
+          if (merged && typeof merged.invoice_format === 'string' && ['thermal', 'a4'].includes(merged.invoice_format)) {
+            _this42.invoice_format = merged.invoice_format;
+          } else {
+            _this42.invoice_format = 'thermal';
+          }
+          // Cache for offline usage even if the page later goes offline
+          try {
+            localStorage.setItem('pos_receipt_company_setting', JSON.stringify(merged));
+          } catch (e) {}
+        }
+      } catch (e) {}
+
+      // Ensure we always have a currency symbol fallback for receipts
+      try {
+        var sym = _this42.currentUser && _this42.currentUser.currency ? _this42.currentUser.currency : '';
+        if (!_this42.invoice_pos.symbol) {
+          try {
+            _this42.$set(_this42.invoice_pos, 'symbol', sym);
+          } catch (e) {
+            _this42.invoice_pos.symbol = sym;
+          }
+        }
+      } catch (e) {}
+
+      // Load POS settings if available
+      if (response.data.pos_settings) {
+        _this42.pos_settings = response.data.pos_settings;
+        // Convert integer values (0/1) to boolean for proper condition checking
+        if (typeof _this42.pos_settings.quick_add_customer === 'number') {
+          _this42.pos_settings.quick_add_customer = _this42.pos_settings.quick_add_customer === 1;
+        }
+        if (typeof _this42.pos_settings.barcode_scanning_sound === 'number') {
+          _this42.pos_settings.barcode_scanning_sound = _this42.pos_settings.barcode_scanning_sound === 1;
+        }
+        if (typeof _this42.pos_settings.show_product_images === 'number') {
+          _this42.pos_settings.show_product_images = _this42.pos_settings.show_product_images === 1;
+        }
+        if (typeof _this42.pos_settings.show_stock_quantity === 'number') {
+          _this42.pos_settings.show_stock_quantity = _this42.pos_settings.show_stock_quantity === 1;
+        }
+        if (typeof _this42.pos_settings.enable_hold_sales === 'number') {
+          _this42.pos_settings.enable_hold_sales = _this42.pos_settings.enable_hold_sales === 1;
+        }
+        if (typeof _this42.pos_settings.enable_customer_points === 'number') {
+          _this42.pos_settings.enable_customer_points = _this42.pos_settings.enable_customer_points === 1;
+        }
+        if (typeof _this42.pos_settings.show_categories === 'number') {
+          _this42.pos_settings.show_categories = _this42.pos_settings.show_categories === 1;
+        }
+        if (typeof _this42.pos_settings.show_brands === 'number') {
+          _this42.pos_settings.show_brands = _this42.pos_settings.show_brands === 1;
+        }
+      }
+      _this42.getProducts();
+      _this42.paginate_Brands(_this42.brand_perPage, 0);
+      _this42.paginate_Category(_this42.category_perPage, 0);
+      _this42.stripe_key = response.data.stripe_key;
+      // Cache bootstrap payload for offline usage
+      try {
+        if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheBootstrap) {
+          _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.cacheBootstrap(response.data);
+        }
+      } catch (e) {}
+      _this42.isLoading = false;
+    })["catch"](function () {
+      // Offline/failed bootstrap: hydrate from cached data where possible
+      try {
+        var cached = _utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getCachedBootstrap ? _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getCachedBootstrap() : null;
+        if (cached) {
+          _this42.clients = cached.clients || [];
+          _this42.accounts = cached.accounts || [];
+          _this42.warehouses = cached.warehouses || [];
+          _this42.categories = cached.categories || [];
+          _this42.brands = cached.brands || [];
+          _this42.payment_methods = cached.payment_methods || [];
+          if (!_this42.sale.warehouse_id && cached.defaultWarehouse) {
+            _this42.sale.warehouse_id = cached.defaultWarehouse;
+          }
+          if (!_this42.selectedClientId && cached.defaultClient) {
+            _this42.selectedClientId = cached.defaultClient;
+          }
+          if (!_this42.client_name && cached.default_client_name) {
+            _this42.client_name = cached.default_client_name;
+          }
+          _this42.clientIsEligible = cached.default_client_eligible === true || cached.default_client_eligible === 1;
+          _this42.selectedClientPoints = _this42.clientIsEligible ? parseFloat(cached.default_client_points || 0) : 0;
+          _this42.point_to_amount_rate = cached.point_to_amount_rate || _this42.point_to_amount_rate;
+          if (cached.default_tax !== undefined && cached.default_tax !== null) {
+            _this42.sale.tax_rate = parseFloat(cached.default_tax) || 0;
+            _this42.CalculTotal();
+          }
+          if (cached.products_per_page) {
+            _this42.product_perPage = cached.products_per_page;
+          }
+          if (Array.isArray(cached.languages_available)) {
+            _this42.languages_available = cached.languages_available;
+          }
+          if (cached.stripe_key) {
+            _this42.stripe_key = cached.stripe_key;
+          }
+
+          // Hydrate cached company/receipt header info for offline receipts
+          try {
+            var cachedSetting = cached.setting || null;
+            var setting = cachedSetting;
+            if (!setting) {
+              try {
+                var raw = localStorage.getItem('pos_receipt_company_setting');
+                if (raw) setting = JSON.parse(raw);
+              } catch (e) {}
+            }
+            if (setting) {
+              _this42.invoice_pos.setting = _objectSpread(_objectSpread({}, _this42.invoice_pos && _this42.invoice_pos.setting ? _this42.invoice_pos.setting : {}), setting);
+            }
+          } catch (e) {}
+
+          // Ensure receipt symbol exists offline too
+          try {
+            var sym = _this42.currentUser && _this42.currentUser.currency ? _this42.currentUser.currency : '';
+            if (!_this42.invoice_pos.symbol) {
+              try {
+                _this42.$set(_this42.invoice_pos, 'symbol', sym);
+              } catch (e) {
+                _this42.invoice_pos.symbol = sym;
+              }
+            }
+          } catch (e) {}
+          _this42.paginate_Brands(_this42.brand_perPage, 0);
+          _this42.paginate_Category(_this42.category_perPage, 0);
+          if (_this42.sale.warehouse_id) {
+            // This call will fall back to cached snapshots in offline mode
+            _this42.getProducts();
+          } else {
+            _this42.productsReady = true;
+          }
+        } else {
+          _this42.productsReady = true;
+        }
+      } catch (e) {
+        _this42.productsReady = true;
+      }
+      _this42.isLoading = false;
+    });
+  }), "onModernPaymentSuccess", function onModernPaymentSuccess(evt) {
+    var _this43 = this;
+    // If this was an offline-queued sale, build a local invoice and print it
+    try {
+      if (evt && evt.offline && evt.payload) {
+        var payload = evt.payload;
+        var now = new Date();
+        var saleDate = now.toISOString().slice(0, 19).replace('T', ' ');
+        // Generate an internal offline reference if needed, but do not print it on the receipt
+        var offlineRef = evt.offlineId ? "OFF-".concat(evt.offlineId) : "OFF-".concat(now.getTime());
+
+        // Resolve client & warehouse names from cached lists
+        var clientName = this.client_name || '';
+        try {
+          var cId = payload.client_id || this.selectedClientId;
+          var c = (this.clients || []).find(function (x) {
+            return String(x.id) === String(cId);
+          });
+          if (c && c.name) clientName = c.name;
+        } catch (e2) {}
+        var warehouseName = '';
+        try {
+          var wId = payload.warehouse_id || this.sale.warehouse_id;
+          var w = (this.warehouses || []).find(function (x) {
+            return String(x.id) === String(wId);
+          });
+          if (w && w.name) warehouseName = w.name;
+        } catch (e2) {}
+
+        // Resolve seller name from current user (prefer name, then username, then email)
+        var sellerName = '';
+        try {
+          if (this.currentUser) {
+            sellerName = this.currentUser.name || this.currentUser.username || this.currentUser.email || '';
+          }
+        } catch (e2) {}
+        var sale = {
+          // Do not set Ref so offline receipts have no "Ref: ..." line
+          client_name: clientName,
+          warehouse_name: warehouseName,
+          discount: payload.discount || 0,
+          taxe: payload.TaxNet || 0,
+          tax_rate: payload.tax_rate || 0,
+          shipping: payload.shipping || 0,
+          GrandTotal: payload.GrandTotal || 0,
+          paid_amount: Array.isArray(payload.payments) ? payload.payments.reduce(function (s, p) {
+            return s + Number(p.amount || 0);
+          }, 0) : 0,
+          date: saleDate,
+          seller_name: sellerName
+        };
+
+        // Map details into invoice shape
+        var details = Array.isArray(payload.details) ? payload.details.map(function (d) {
+          return {
+            name: d.name,
+            quantity: d.quantity,
+            unit_sale: d.unitSale || d.unit_sale || '',
+            total: d.subtotal != null ? d.subtotal : d.total != null ? d.total : (d.Net_price || 0) * (d.quantity || 0),
+            is_imei: d.is_imei,
+            imei_number: d.imei_number
+          };
+        }) : [];
+
+        // Map payments into invoice shape
+        var payments = Array.isArray(payload.payments) ? payload.payments.map(function (p) {
+          var method = (_this43.payment_methods || []).find(function (m) {
+            return String(m.id) === String(p.payment_method_id);
+          });
+          return {
+            payment_method: method ? {
+              name: method.name
+            } : null,
+            montant: Number(p.amount || 0),
+            change: 0
+          };
+        }) : [];
+
+        // Fallback settings & POS print options (reuse latest online invoice/pos settings when available)
+        var symbol = this.currentUser && this.currentUser.currency ? this.currentUser.currency : '';
+
+        // Prefer full setting object from last loaded invoice (online), else fall back to currentUser logo
+        var baseSetting = this.invoice_pos && this.invoice_pos.setting && (this.invoice_pos.setting.logo || this.invoice_pos.setting.CompanyAdress || this.invoice_pos.setting.email || this.invoice_pos.setting.CompanyPhone) ? this.invoice_pos.setting : null;
+        var setting = baseSetting || {
+          logo: this.currentUser && this.currentUser.logo || '',
+          CompanyAdress: '',
+          email: '',
+          CompanyPhone: ''
+        };
+
+        // Prefer live pos_settings (including note_customer/show_note) when available
+        var ps = this.pos_settings && Object.keys(this.pos_settings).length ? this.pos_settings : {
+          show_address: false,
+          show_email: false,
+          show_phone: false,
+          show_customer: true,
+          show_Warehouse: true,
+          show_discount: true,
+          show_tax: true,
+          show_shipping: true,
+          logo_size: 60,
+          // In absence of explicit POS settings, still show a generic note
+          show_note: true,
+          note_customer: this.$t ? this.$t('Thank_you_for_your_business') : 'Thank you for your business'
+        };
+        this.printInvoiceFromData({
+          sale: sale,
+          details: details,
+          payments: payments,
+          setting: setting,
+          pos_settings: ps,
+          symbol: symbol
+        });
+      }
+    } catch (e) {}
+
+    // After successful payment via modal, refresh drafts if needed and reset
+    if (this.draft_sale_id) {
+      try {
+        Fire.$emit('event_delete_draft_sale');
+      } catch (e) {}
+      this.draft_sale_id = '';
+    }
+    try {
+      this.Reset_Pos();
+    } catch (e) {}
+    try {
+      this.refreshOfflineSalesCount();
+    } catch (e) {}
+  }), _defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_defineProperty(_objectSpread2, "initOfflineStatus", function initOfflineStatus() {
+    if (typeof window === 'undefined') {
+      this.isOnline = true;
+      this.offlineSyncInProgress = false;
+      this.offlineLastSyncError = null;
+      this.refreshOfflineSalesCount();
+      return;
+    }
+    try {
+      this.isOnline = window.navigator ? window.navigator.onLine !== false : true;
+    } catch (e) {
+      this.isOnline = true;
+    }
+    try {
+      window.addEventListener('online', this.handleOnline);
+      window.addEventListener('offline', this.handleOffline);
+    } catch (e) {}
+    this.refreshOfflineSalesCount();
+  }), "handleOnline", function handleOnline() {
+    // When the browser reports that we're back online, check if there is an
+    // active checkout. If so, we'll offer the user a non-blocking choice to
+    // reload now or after completing the sale.
+    var hadActiveCart = this.details && this.details.length > 0;
+    this.isOnline = true;
+    // When the cart is empty, we auto-sync offline sales in the background and
+    // then reload the page afterwards (even if there were no pending sales).
+    // We still let the global offline sync handler perform the actual API work.
+    if (!hadActiveCart) {
+      try {
+        if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales) {
+          var queue = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales() || [];
+          var pendingCount = queue.filter(function (s) {
+            return s && (s.status === 'pending' || s.status === 'syncing');
+          }).length;
+          if (pendingCount > 0) {
+            var msg = pendingCount === 1 ? this.$t ? this.$t('pos.Syncing_offline_sales') : 'Syncing offline sales' : this.$t ? "".concat(this.$t('pos.Syncing_offline_sales'), " (").concat(pendingCount, ")") : "Syncing ".concat(pendingCount, " offline sales...");
+            this.makeToast && this.makeToast('info', msg, this.$t ? this.$t('Notice') : 'Notice');
+            // Ask POS to reload after global offline sync completes successfully.
+            this.reloadAfterOfflineSync = true;
+          } else {
+            // No pending offline sales: nothing to sync, so reload immediately.
+            this.reloadAfterOfflineSync = false;
+            if (typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
+              try {
+                window.location.reload();
+              } catch (e) {}
+            }
+          }
+        }
+      } catch (e) {}
+    }
+    // If there is an active checkout when the connection is restored, show a
+    // non-blocking confirmation modal offering to reload now or after
+    // completing the current sale.
+    if (hadActiveCart) {
+      this.onlineReloadModalVisible = true;
+      this.onlineReloadAfterSale = false;
+    }
+    // Do NOT call this.trySyncOfflineSales() here; globalOfflineSync will run
+    // the sync once per online event, which prevents duplicate submissions.
+  }), "handleOffline", function handleOffline() {
+    this.isOnline = false;
+    try {
+      var msg = this.$t ? this.$t('pos.Offline_Mode') : 'Offline mode enabled';
+      this.makeToast && this.makeToast('warning', msg, this.$t ? this.$t('Warning') : 'Warning');
+    } catch (e) {}
+    // Any time we go offline, reset the online reload modal state.
+    this.onlineReloadModalVisible = false;
+    this.onlineReloadAfterSale = false;
+    this.reloadAfterOfflineSync = false;
+  }), "refreshOfflineSalesCount", function refreshOfflineSalesCount() {
+    try {
+      if (!_utils__WEBPACK_IMPORTED_MODULE_4__["default"] || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales) {
+        this.offlineSalesCount = 0;
+        return;
+      }
+      var list = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales() || [];
+      // Only count sales that are still pending or actively syncing.
+      this.offlineSalesCount = list.filter(function (s) {
+        return s && (s.status === 'pending' || s.status === 'syncing');
+      }).length;
+      // If there are no pending/syncing offline sales, clear any residual shadow stock
+      if (this.offlineSalesCount === 0) {
+        try {
+          if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.clearAll) {
+            _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.clearAll();
+          }
+        } catch (e2) {}
+      }
+    } catch (e) {
+      this.offlineSalesCount = 0;
+    }
+  }), "handleAutoOfflineSyncResult", function handleAutoOfflineSyncResult(payload) {
+    try {
+      // Always refresh badge/count after any sync attempt
+      this.refreshOfflineSalesCount();
+    } catch (e) {}
+    if (!payload || typeof this.makeToast !== 'function') return;
+    var syncedCount = Number(payload.syncedCount || 0);
+    var lastError = payload.lastError || null;
+    if (syncedCount > 0) {
+      var successMsg = syncedCount === 1 ? '1 offline sale synced successfully' : "".concat(syncedCount, " offline sales synced successfully");
+      this.makeToast('success', successMsg, this.$t ? this.$t('Success') : 'Success');
+      // If we came back online with an empty cart and requested an
+      // auto-reload after offline sync, perform it now.
+      if (this.reloadAfterOfflineSync && this.details && this.details.length === 0) {
+        this.reloadAfterOfflineSync = false;
+        if (typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
+          try {
+            window.location.reload();
+          } catch (e) {}
+        }
+      }
+    } else if (lastError) {
+      var errDetail = String(lastError || '');
+      // Some old/invalid offline records may produce low‑level validation
+      // messages (e.g. "validation.required"). These are not actionable for
+      // the cashier and the records are marked as "failed" and skipped on
+      // future syncs, so we silently ignore them to avoid noisy toasts.
+      var lower = errDetail.toLowerCase();
+      var looksLikeValidationKey = lower.includes('validation.') || lower.includes('validation_required') || lower === 'validation.required';
+      if (looksLikeValidationKey) {
+        return;
+      }
+      var _short = errDetail.slice(0, 200);
+      var baseMsg = 'Failed to sync offline sales';
+      var fullMsg = _short ? "".concat(baseMsg, ": ").concat(_short) : baseMsg;
+      this.makeToast('danger', fullMsg, this.$t ? this.$t('Failed') : 'Failed');
+    }
+  }), "trySyncOfflineSales", function trySyncOfflineSales() {
+    var _this44 = this;
+    return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee15() {
+      var syncedCount, queue, i, sale, basePayload, normalizedDetails, payload, response, isNetworkError, msg, _t10, _t11;
+      return _regenerator().w(function (_context15) {
+        while (1) switch (_context15.p = _context15.n) {
+          case 0:
+            if (!_this44.offlineSyncInProgress) {
+              _context15.n = 1;
+              break;
+            }
+            return _context15.a(2);
+          case 1:
+            if (!(typeof window !== 'undefined')) {
+              _context15.n = 5;
+              break;
+            }
+            _context15.p = 2;
+            if (!(window.navigator && window.navigator.onLine === false)) {
+              _context15.n = 3;
+              break;
+            }
+            _this44.isOnline = false;
+            return _context15.a(2);
+          case 3:
+            _context15.n = 5;
+            break;
+          case 4:
+            _context15.p = 4;
+            _t10 = _context15.v;
+          case 5:
+            _this44.offlineSyncInProgress = true;
+            // Notify UI (via global event bus) that POS offline sync has started
+            try {
+              if (typeof window !== 'undefined' && window.Fire && window.Fire.$emit) {
+                window.Fire.$emit('offline-sync:start');
+              }
+            } catch (e) {}
+            _this44.offlineLastSyncError = null;
+            syncedCount = 0;
+            _context15.p = 6;
+            if (!(!_utils__WEBPACK_IMPORTED_MODULE_4__["default"] || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos || !_utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales)) {
+              _context15.n = 7;
+              break;
+            }
+            return _context15.a(2);
+          case 7:
+            queue = _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.getOfflineSales() || [];
+            i = 0;
+          case 8:
+            if (!(i < queue.length)) {
+              _context15.n = 14;
+              break;
+            }
+            sale = queue[i]; // Skip already-synced, failed or in-progress records
+            if (!(!sale || !sale.payload || sale.status === 'synced' || sale.status === 'syncing' || sale.status === 'failed')) {
+              _context15.n = 9;
+              break;
+            }
+            return _context15.a(3, 13);
+          case 9:
+            _context15.p = 9;
+            // Mark this sale as "syncing" in the shared offline queue so that
+            // other sync workers (global/offline, other tabs) do not submit it
+            // concurrently.
+            try {
+              if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsSyncing) {
+                _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsSyncing(sale.id);
+              }
+            } catch (e) {}
+
+            // Normalize payload to ensure required keys such as sale_unit_id exist
+            basePayload = sale.payload || {};
+            normalizedDetails = Array.isArray(basePayload.details) ? basePayload.details.map(function (d) {
+              return _objectSpread(_objectSpread({}, d), {}, {
+                sale_unit_id: d && Object.prototype.hasOwnProperty.call(d, 'sale_unit_id') ? d.sale_unit_id : d && d.sale_unit_id || null
+              });
+            }) : basePayload.details;
+            payload = _objectSpread(_objectSpread({}, basePayload), {}, {
+              // Include offline_id so backend can optionally enforce idempotency
+              offline_id: sale.id,
+              details: normalizedDetails
+            }); // Use absolute API path to avoid hitting SPA routes (e.g. /app/pos/create_pos)
+            _context15.n = 10;
+            return axios.post('/pos/create_pos', payload);
+          case 10:
+            response = _context15.v;
+            if (response && response.data && response.data.success === true) {
+              _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsSynced(sale.id, response.data.id);
+              syncedCount++;
+              // On success, clear shadow stock deductions for this sale so we don't double-subtract
+              try {
+                if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions) {
+                  _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions(sale.id);
+                }
+              } catch (e) {}
+            } else {
+              _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsFailed(sale.id, 'Invalid response from server', response && response.status);
+              // Restore shadow stock for this failed sale
+              try {
+                if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions) {
+                  _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions(sale.id);
+                }
+              } catch (e) {}
+            }
+            _context15.n = 13;
+            break;
+          case 11:
+            _context15.p = 11;
+            _t11 = _context15.v;
+            isNetworkError = !_t11.response || _t11.message === 'Network Error';
+            if (typeof window !== 'undefined') {
+              try {
+                if (window.navigator && window.navigator.onLine === false) {
+                  _this44.isOnline = false;
+                }
+              } catch (e) {}
+            }
+            if (!(isNetworkError && !_this44.isOnline)) {
+              _context15.n = 12;
+              break;
+            }
+            return _context15.a(3, 14);
+          case 12:
+            msg = _t11.response && _t11.response.data && (_t11.response.data.message || _t11.response.data.error) || _t11.message || 'Unknown error';
+            _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsFailed(sale.id, msg, _t11.response && _t11.response.status);
+            _this44.offlineLastSyncError = msg;
+            // For non-network errors, rollback local shadow stock to keep UI consistent
+            if (!isNetworkError) {
+              try {
+                if (_utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions) {
+                  _utils__WEBPACK_IMPORTED_MODULE_4__["default"].shadowStock.revertDeductions(sale.id);
+                }
+              } catch (e) {}
+            }
+          case 13:
+            i++;
+            _context15.n = 8;
+            break;
+          case 14:
+            _context15.p = 14;
+            _this44.offlineSyncInProgress = false;
+            _this44.refreshOfflineSalesCount();
+            // Notify UI that POS offline sync has finished
+            try {
+              if (typeof window !== 'undefined' && window.Fire && window.Fire.$emit) {
+                window.Fire.$emit('offline-sync:end', {
+                  syncedCount: syncedCount,
+                  lastError: _this44.offlineLastSyncError
+                });
+              }
+            } catch (e) {}
+            // Show same feedback as auto-sync handler
+            _this44.handleAutoOfflineSyncResult({
+              syncedCount: syncedCount,
+              lastError: _this44.offlineLastSyncError
+            });
+            return _context15.f(14);
+          case 15:
+            return _context15.a(2);
+        }
+      }, _callee15, null, [[9, 11], [6,, 14, 15], [2, 4]]);
+    }))();
+  }), "syncOfflineSales", function syncOfflineSales() {
+    if (!this.isOnline) {
+      var msg = this.$t ? this.$t('pos.Offline_Mode') : 'You are currently offline';
+      this.makeToast && this.makeToast('warning', msg, this.$t ? this.$t('Warning') : 'Warning');
+      return;
+    }
+    this.trySyncOfflineSales();
+  }), "verifyAllItemsInStock", function verifyAllItemsInStock() {
+    for (var i = 0; i < this.details.length; i++) {
+      var d = this.details[i];
+      if (d && d.product_type !== 'is_service') {
+        var available = Number(d.current || 0);
+        var qty = Number(d.quantity || 0);
+        if (isNaN(available) || isNaN(qty) || qty > available) {
+          return {
+            ok: false,
+            productName: d.name || d.code || 'item'
+          };
+        }
+      }
+    }
+    return {
+      ok: true,
+      productName: null
+    };
+  }), "openModernPaymentModal", function openModernPaymentModal() {
+    // Guard: client and warehouse must be selected
+    if (!this.selectedClientId) {
+      var msg = this.$t ? this.$t('Select_Customer') : 'Please select a customer before paying.';
+      this.makeToast && this.makeToast('warning', msg, this.$t ? this.$t('Warning') : 'Warning');
+      return;
+    }
+    if (!this.sale || !this.sale.warehouse_id) {
+      var _msg = this.$t ? this.$t('SelectWarehouse') : 'Please select a warehouse before paying.';
+      this.makeToast && this.makeToast('warning', _msg, this.$t ? this.$t('Warning') : 'Warning');
+      return;
+    }
+    // Guard: stock validation before opening payment modal
+    var stockCheck = this.verifyAllItemsInStock();
+    if (!stockCheck.ok) {
+      var _msg2 = this.$t ? "".concat(this.$t('InsufficientStock'), " ").concat(stockCheck.productName) : "Insufficient stock for ".concat(stockCheck.productName);
+      this.makeToast('danger', _msg2, this.$t ? this.$t('Failed') : 'Failed');
+      return;
+    }
+    // Guard: total payable must not be negative (zero allowed)
+    if (Number(this.GrandTotal) < 0) {
+      var _msg3 = this.$t ? "".concat(this.$t('pos.Total_Payable'), " cannot be negative") : 'Total Payable cannot be negative';
+      this.makeToast('warning', _msg3, this.$t ? this.$t('Warning') : 'Warning');
+      return;
+    }
+    // Open modern payment modal with current sale data
+    this.$refs.modernPaymentModal.openModal({
+      amountDue: this.GrandTotal,
+      reference: this.sale.Ref || "POS-" + new Date().getTime(),
+      notes: this.selectedClientId ? "Payment for Customer #".concat(this.selectedClientId) : 'POS Payment'
+    });
+  }))),
+  created: function created() {
+    var _this45 = this;
+    // Clear cached POS data on page reload when online to avoid stale/outdated data
+    // Fresh data will be fetched and cache rebuilt via GetElementsPos()
+    // Only clear when online - when offline, preserve cache as it's needed for offline functionality
+    try {
+      // Check if we're online before clearing cache
+      var isOnline = typeof window !== 'undefined' && window.navigator && window.navigator.onLine !== false;
+      if (isOnline && _utils__WEBPACK_IMPORTED_MODULE_4__["default"] && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos && _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.clearCache) {
+        _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.clearCache();
+      }
+    } catch (e) {
+      // Ignore errors during cache clearing
+    }
+    this.initOfflineStatus();
+    // Ensure offline sales badge is accurate immediately after POS refresh,
+    // even before any user interaction.
+    try {
+      this.refreshOfflineSalesCount();
+    } catch (e) {}
+    this.GetElementsPos(); // This will fetch fresh data and rebuild the cache when online
+    this.addPaymentLine();
+    // Initialize warehouse options and sync selection once data is loaded
+    this.$watch('warehouses', function (ws) {
+      _this45.warehouseOptions = (ws || []).map(function (w) {
+        return {
+          value: w.id,
+          text: w.name
+        };
+      });
+      if (!_this45.registerForm.warehouse_id && _this45.sale && _this45.sale.warehouse_id) {
+        _this45.registerForm.warehouse_id = _this45.sale.warehouse_id;
+      }
+      // Always check current register after initial data load
+      _this45.refreshCurrentRegister();
+    });
+    // refresh register when warehouse changes
+    this.$watch(function () {
+      return _this45.sale.warehouse_id;
+    }, function () {
+      _this45.registerForm.warehouse_id = _this45.sale.warehouse_id || '';
+      _this45.refreshCurrentRegister();
+    });
+    // Reset POS after successful payment from ModernPaymentModal
+    if (this.$refs && this.$refs.modernPaymentModal) {
+      try {
+        this.$refs.modernPaymentModal.$on('payment-success', function () {
+          _this45.Reset_Pos();
+        });
+      } catch (e) {}
+    }
+    Fire.$on("pay_now", function () {
+      setTimeout(function () {
+        // Guard: prevent opening legacy payment modal if total is negative
+        if (Number(_this45.GrandTotal) < 0) {
+          var msg = _this45.$t ? "".concat(_this45.$t('pos.Total_Payable'), " cannot be negative") : 'Total Payable cannot be negative';
+          _this45.makeToast('warning', msg, _this45.$t ? _this45.$t('Warning') : 'Warning');
+          // Complete the animation of the progress bar.
+          nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+          return;
+        }
+        _this45.paymentLines = [{
+          amount: parseFloat(_this45.GrandTotal.toFixed(2)),
+          payment_method_id: 2
+        }];
+        _this45.globalPaymentNote = '';
+        _this45.selectedAccount = null;
+        _this45.$bvModal.show("Add_Payment");
+        // Complete the animation of theprogress bar.
+        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      }, 500);
+    });
+    Fire.$on("event_delete_draft_sale", function () {
+      // Calculate if current page would be empty after deletion
+      var itemsOnCurrentPage = _this45.draft_sales.length;
+      var pageToLoad = _this45.draft_sales_page;
+
+      // If we're deleting the last item on a page that's not page 1, go to previous page
+      if (itemsOnCurrentPage === 1 && _this45.draft_sales_page > 1) {
+        pageToLoad = _this45.draft_sales_page - 1;
+        _this45.draft_sales_page = pageToLoad;
+      }
+      _this45.get_Draft_Sales(pageToLoad);
       // Complete the animation of theprogress bar.
-      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-    }, 500);
-  });
-  Fire.$on("event_delete_draft_sale", function () {
-    // Calculate if current page would be empty after deletion
-    var itemsOnCurrentPage = _this44.draft_sales.length;
-    var pageToLoad = _this44.draft_sales_page;
+      setTimeout(function () {
+        return nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      }, 500);
+    });
 
-    // If we're deleting the last item on a page that's not page 1, go to previous page
-    if (itemsOnCurrentPage === 1 && _this44.draft_sales_page > 1) {
-      pageToLoad = _this44.draft_sales_page - 1;
-      _this44.draft_sales_page = pageToLoad;
-    }
-    _this44.get_Draft_Sales(pageToLoad);
-    // Complete the animation of theprogress bar.
-    setTimeout(function () {
-      return nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-    }, 500);
-  });
-
-  // Listen for global auto-sync result so we can display the same
-  // feedback as when the user clicks the offline sync button.
-  try {
-    if (typeof window !== 'undefined' && window.Fire && window.Fire.$on) {
-      window.Fire.$on('offline-sync:auto-result', this.handleAutoOfflineSyncResult);
-    }
-  } catch (e) {}
-}), "beforeDestroy", function beforeDestroy() {
-  try {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('online', this.handleOnline);
-      window.removeEventListener('offline', this.handleOffline);
-    }
-  } catch (e) {}
-  // Clean up global auto-sync listener
-  try {
-    if (typeof window !== 'undefined' && window.Fire && window.Fire.$off) {
-      window.Fire.$off('offline-sync:auto-result', this.handleAutoOfflineSyncResult);
-    }
-  } catch (e) {}
-}));
+    // Listen for global auto-sync result so we can display the same
+    // feedback as when the user clicks the offline sync button.
+    try {
+      if (typeof window !== 'undefined' && window.Fire && window.Fire.$on) {
+        window.Fire.$on('offline-sync:auto-result', this.handleAutoOfflineSyncResult);
+      }
+    } catch (e) {}
+  },
+  beforeDestroy: function beforeDestroy() {
+    try {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('online', this.handleOnline);
+        window.removeEventListener('offline', this.handleOffline);
+      }
+    } catch (e) {}
+    // Clean up global auto-sync listener
+    try {
+      if (typeof window !== 'undefined' && window.Fire && window.Fire.$off) {
+        window.Fire.$off('offline-sync:auto-result', this.handleAutoOfflineSyncResult);
+      }
+    } catch (e) {}
+  }
+});
 
 /***/ },
 
@@ -6765,12 +6972,13 @@ var render = function render() {
       expression: "sale.warehouse_id"
     }
   }), _vm._v(" "), _c("v-select", {
+    key: _vm.customerSelectKey,
     "class": ["customer-select-header", {
       "has-selected-customer": _vm.selectedClientId
     }],
     attrs: {
-      reduce: function reduce(label) {
-        return label.value;
+      reduce: function reduce(option) {
+        return option.value;
       },
       placeholder: _vm.$t("Select_Customer"),
       options: _vm.customerOptions,
@@ -6779,10 +6987,9 @@ var render = function render() {
       clearable: true
     },
     on: {
-      search: _vm.onCustomerSearch,
-      input: function input($event) {
-        return _vm.onClientSelected(_vm.selectedClientId);
-      }
+      input: _vm.handleCustomerInput,
+      clear: _vm.clearCustomerSelection,
+      search: _vm.onCustomerSearch
     },
     scopedSlots: _vm._u([{
       key: "no-options",
@@ -7190,12 +7397,13 @@ var render = function render() {
   })], 1), _vm._v(" "), _c("div", {
     staticClass: "mobile-row"
   }, [_c("v-select", {
+    key: _vm.customerSelectKey,
     "class": ["customer-select-header", {
       "has-selected-customer": _vm.selectedClientId
     }],
     attrs: {
-      reduce: function reduce(label) {
-        return label.value;
+      reduce: function reduce(option) {
+        return option.value;
       },
       placeholder: _vm.$t("Select_Customer"),
       options: _vm.customerOptions,
@@ -7204,9 +7412,9 @@ var render = function render() {
       clearable: true
     },
     on: {
-      input: function input($event) {
-        return _vm.onClientSelected(_vm.selectedClientId);
-      }
+      input: _vm.handleCustomerInput,
+      clear: _vm.clearCustomerSelection,
+      search: _vm.onCustomerSearch
     },
     scopedSlots: _vm._u([{
       key: "no-options",

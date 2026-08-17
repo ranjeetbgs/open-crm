@@ -65,6 +65,7 @@
             <span v-else>{{$t('Open Register')}}</span>
           </b-button>
         </div>
+
         <v-select
           v-model="sale.warehouse_id"
           class="warehouse-select"
@@ -75,18 +76,22 @@
           @input="Selected_Warehouse(sale.warehouse_id)"
         />
         <v-select
-          v-model="selectedClientId"
-          :class="['customer-select-header', { 'has-selected-customer': selectedClientId }]"
-          :reduce="label => label.value"
-          :placeholder="$t('Select_Customer')"
-          :options="customerOptions"
-          :filterable="true"
-          :filter-by="filterCustomerByPhone"
-          :clearable="true"
-          @search="onCustomerSearch"
-          @input="onClientSelected(selectedClientId)"
-        >
-
+    :key="customerSelectKey"
+    v-model="selectedClientId"
+    @input="handleCustomerInput"
+    @clear="clearCustomerSelection"
+    :class="[
+        'customer-select-header',
+        { 'has-selected-customer': selectedClientId }
+    ]"
+    :reduce="option => option.value"
+    :placeholder="$t('Select_Customer')"
+    :options="customerOptions"
+    :filterable="true"
+    :filter-by="filterCustomerByPhone"
+    :clearable="true"
+    @search="onCustomerSearch"
+>
          <template #no-options>
         <a style="cursor: pointer;"
             class="add-customer-link"
@@ -327,16 +332,22 @@
       <!-- Row 4: Customer (100%) -->
       <div class="mobile-row">
         <v-select
-          v-model="selectedClientId"
-          :class="['customer-select-header', { 'has-selected-customer': selectedClientId }]"
-          :reduce="label => label.value"
-          :placeholder="$t('Select_Customer')"
-          :options="customerOptions"
-          :filterable="true"
-          :filter-by="filterCustomerByPhone"
-          :clearable="true"
-          @input="onClientSelected(selectedClientId)"
-        >
+    :key="customerSelectKey"
+    v-model="selectedClientId"
+    @input="handleCustomerInput"
+    @clear="clearCustomerSelection"
+    :class="[
+        'customer-select-header',
+        { 'has-selected-customer': selectedClientId }
+    ]"
+    :reduce="option => option.value"
+    :placeholder="$t('Select_Customer')"
+    :options="customerOptions"
+    :filterable="true"
+    :filter-by="filterCustomerByPhone"
+    :clearable="true"
+    @search="onCustomerSearch"
+>
         <template #no-options>
         <a
             class="add-customer-link"
@@ -2101,6 +2112,9 @@ export default {
       cashMove: { type: 'in', amount: 0, notes: '' },
       warehouseOptions: [],
       selectedClientId: "",
+      // Increment this whenever the customer options/value changes so both
+      // desktop and mobile vue-select instances are remounted with the new value.
+      customerSelectKey: 0,
       productsReady: false,
       uiLoadingProductId: null,
       detailLoading: false,
@@ -2130,7 +2144,7 @@ export default {
     currentClient()
     {
       const customer = this.clients.find(
-      c => c.id === this.selectedClientId
+      c => Number(c.id) === Number(this.selectedClientId)
     );
 
     if(customer?.is_royalty_eligible)this.sale.discount = 20;
@@ -2182,14 +2196,14 @@ export default {
 
     // Customer options for v-select with phone search capability
     customerOptions() {
-      return this.clients.map(client => ({
-        label: client.name + " ("+client.phone+")" ,
-        value: client.id,
+    return this.clients.map(client => ({
+        label: `${client.name} (${client.phone || ''})`,
+        value: Number(client.id),
         phone: client.phone || '',
         email: client.email || '',
         name: client.name || ''
-      }));
-    },
+    }));
+},
 
     // Check if Quick Add Customer is enabled (handles both boolean and integer values)
     isQuickAddCustomerEnabled() {
@@ -2429,20 +2443,15 @@ export default {
     // When the warehouse changes (including being cleared), clear the current
     // checkout so we never mix products/stock from different warehouses.
     'sale.warehouse_id'(newVal, oldVal) {
-      // Only react when there was a previously selected warehouse and it
-      // actually changed.
       if (!oldVal || oldVal === newVal) {
         return;
       }
 
-      // Clear cart lines and totals but keep current client and general UI state.
       this.details = [];
       this.product = {};
       this.GrandTotal = 0;
       this.total = 0;
 
-      // Notify any external listeners (dashboard widgets, etc.) that the
-      // checkout has been cleared.
       try {
         this._cd_emit && this._cd_emit({
           currency: (this.currentUser && this.currentUser.currency) || '',
@@ -2453,13 +2462,11 @@ export default {
         }, true);
       } catch (e) {}
     },
-  },
-  watch: {
     'invoice_pos.zatca_qr'(val){
       if(val){
         this.$nextTick(() => this.renderZatcaQrPos());
       }
-    }
+    },
   },
   mounted() {
     this.changeSidebarProperties();
@@ -2475,23 +2482,30 @@ export default {
   },
 
   editCustomer() {
-    const customer = this.clients.find(
-      c => c.id === this.selectedClientId
+    const selectedId = Number(this.selectedClientId);
+    const customer = (this.clients || []).find(
+      c => Number(c.id) === selectedId
     );
-     
 
     if (!customer) return;
 
-    // open same modal used for add
+    this.selectedClientId = selectedId;
+
+    // Copy the selected customer into the edit form.
+    this.client = {
+      ...customer,
+      id: selectedId,
+      name: customer.name || '',
+      email: customer.email || '',
+      phone: customer.phone || '',
+      country: customer.country || '',
+      city: customer.city || '',
+      tax_number: customer.tax_number || '',
+      adresse: customer.adresse || '',
+      is_royalty_eligible: customer.is_royalty_eligible === true || customer.is_royalty_eligible === 1
+    };
+
     this.$bvModal.show('Quick_Add_Customer');
-
-    this.client = {...customer
-      };
-
-    // pass data
-    // this.editingCustomer = { ...customer };
-
-    // this.isEditMode = true;
   },
     // Custom filter function for customer v-select to search by name and phone
     filterCustomerByPhone(option, label, search) {
@@ -4716,7 +4730,32 @@ export default {
       }, 1000);
     },
 
-    async onClientSelected(selectedClientId) {
+    async handleCustomerInput(value) {
+      // vue-select can emit null while rebuilding its option list. Ignore
+      // those transient events; actual clearing is handled by @clear.
+      if (value === null || value === undefined || value === "") return;
+
+      const id = Number(value);
+      if (!Number.isFinite(id)) return;
+
+      const client = this.clients.find(c => Number(c.id) === id);
+      if (!client) return;
+
+      this.selectedClientId = id;
+      this.client_name = client.name || '';
+
+      // Force both mounted desktop/mobile selects to use the same selected ID.
+      this.customerSelectKey += 1;
+      await this.$nextTick();
+
+      // Do the customer side effects here instead of a watcher. This avoids
+      // a watcher racing vue-select while the options are being rebuilt.
+      await this.onClientSelected(id);
+    },
+
+    clearCustomerSelection() {
+      this.selectedClientId = "";
+      this.customerSelectKey += 1;
       this.client_name = '';
       this.selectedClientPoints = 0;
       this.points_to_convert = 0;
@@ -4724,56 +4763,167 @@ export default {
       this.used_points = 0;
       this.clientIsEligible = false;
       this.pointsConverted = false;
-      this.sale.discount = 0;
       this.selectedClientCreditLimit = 0;
       this.selectedClientNetBalance = 0;
+    },
 
-      if (!selectedClientId) {
-        this.selectedClientId = "";
-        this.CalculTotal();
-        return;
+    async selectNewCustomer(newClient) {
+      // Support APIs returning either the client directly or { client: ... }.
+      const raw = newClient && newClient.client ? newClient.client : newClient;
+      const id = Number(raw && raw.id);
+
+      if (!Number.isFinite(id) || id <= 0) {
+        console.error('Unable to select newly-created customer: invalid id', newClient);
+        return false;
       }
 
-      const client = this.clients.find(c => c.id === selectedClientId);
-      if (client) {
-        this.client_name = client.name;
-        this.selectedClientId = selectedClientId;
+      // Refresh the full customer list first. The new ID must exist in
+      // customerOptions before vue-select can display it.
+      try {
+        const response = await axios.get('get_clients_without_paginate');
+        if (Array.isArray(response.data)) {
+          this.clients = response.data;
+        } else if (response.data && Array.isArray(response.data.clients)) {
+          this.clients = response.data.clients;
+        }
+      } catch (e) {
+        // Fallback if the refresh fails.
+        const fallback = {
+          id,
+          name: raw.name || '',
+          phone: raw.phone || '',
+          email: raw.email || ''
+        };
+        const index = this.clients.findIndex(c => Number(c.id) === id);
+        if (index === -1) this.clients.push(fallback);
+        else this.$set(this.clients, index, fallback);
+      }
 
-        try {
-          const response = await axios.get(`/get_points_client/${selectedClientId}`);
-          const data = response.data;
+      // Normalize IDs because API responses can contain string IDs.
+      this.clients = this.clients.map(c => ({ ...c, id: Number(c.id) }));
 
-          if (data.is_royalty_eligible) {
+      if (!this.clients.some(c => Number(c.id) === id)) {
+        this.clients.push({
+          id,
+          name: raw.name || '',
+          phone: raw.phone || '',
+          email: raw.email || ''
+        });
+      }
+
+      const customer = this.clients.find(c => Number(c.id) === id);
+      this.client_name = customer ? customer.name : (raw.name || '');
+
+      // The option MUST exist before setting the selected value.
+      // Then remount both desktop/mobile selects so vue-select cannot retain
+      // its previous internal value.
+      await this.$nextTick();
+
+      this.selectedClientId = id;
+      this.client_name = customer ? customer.name : (raw.name || '');
+      this.customerSelectKey += 1;
+
+      await this.$nextTick();
+
+      // Always load points/credit, including when the same ID was already selected.
+      await this.onClientSelected(id);
+
+      await this.$nextTick();
+      this.$forceUpdate();
+
+      return true;
+    },
+
+   async onClientSelected(selectedClientId) {
+
+    console.log("onClientSelected:", selectedClientId);
+
+    // v-select can send null when it is clearing/changing internally
+    if (selectedClientId === null || selectedClientId === undefined || selectedClientId === "") {
+        return;
+    }
+
+    const id = Number(selectedClientId);
+
+    // Find customer using numeric comparison
+    const client = this.clients.find(
+        c => Number(c.id) === id
+    );
+
+    console.log("Selected customer:", client);
+
+    // Do NOT clear selectedClientId if customer isn't found
+    // because another v-select may still be updating.
+    if (!client) {
+        console.warn("Customer not found in clients:", id);
+        return;
+    }
+
+    // Set selected customer
+    this.selectedClientId = id;
+    this.client_name = client.name;
+
+    // Reset customer-related values
+    this.selectedClientPoints = 0;
+    this.points_to_convert = 0;
+    this.discount_from_points = 0;
+    this.used_points = 0;
+    this.clientIsEligible = false;
+    this.pointsConverted = false;
+    this.sale.discount = 0;
+    this.selectedClientCreditLimit = 0;
+    this.selectedClientNetBalance = 0;
+
+    // Get loyalty points
+    try {
+        const response = await axios.get(
+            `/get_points_client/${id}`
+        );
+
+        const data = response.data;
+
+        if (data.is_royalty_eligible) {
             this.selectedClientPoints = data.points;
             this.clientIsEligible = true;
-          } else {
+        } else {
             this.selectedClientPoints = 0;
             this.clientIsEligible = false;
-          }
-        } catch (error) {
-          console.error('Error fetching client points:', error);
         }
 
-        // Fetch client credit limit and current balance
-        try {
-          const briefResponse = await axios.get(`/clients/${selectedClientId}/brief`);
-          const briefData = briefResponse.data;
-          this.selectedClientCreditLimit = parseFloat(briefData.credit_limit || 0);
-          this.selectedClientNetBalance = parseFloat(briefData.netBalance || 0);
-        } catch (error) {
-          console.error('Error fetching client credit limit:', error);
-          this.selectedClientCreditLimit = 0;
-          this.selectedClientNetBalance = 0;
-        }
+    } catch (error) {
+        console.error(
+            "Error fetching client points:",
+            error
+        );
+    }
 
-      } else {
-        this.selectedClientId = "";
+    // Get credit information
+    try {
+        const response = await axios.get(
+            `/clients/${id}/brief`
+        );
+
+        const data = response.data;
+
+        this.selectedClientCreditLimit =
+            parseFloat(data.credit_limit || 0);
+
+        this.selectedClientNetBalance =
+            parseFloat(data.netBalance || 0);
+
+    } catch (error) {
+
+        console.error(
+            "Error fetching client credit limit:",
+            error
+        );
+
         this.selectedClientCreditLimit = 0;
         this.selectedClientNetBalance = 0;
-      }
+    }
 
-      this.CalculTotal();
-    },
+    this.CalculTotal();
+},
 
     convertPointsToDiscount() {
       if (this.pointsConverted) {
@@ -5184,6 +5334,7 @@ export default {
       });
     },
     Create_Client() {
+      
       axios
         .post("clients", {
           name: this.client.name,
@@ -5199,26 +5350,7 @@ export default {
     NProgress.done();
 
     const newClient = response.data;
-
-    const newCustomer = {
-        id: Number(newClient.id),
-        name: newClient.name,
-        phone: newClient.phone || '',
-        email: newClient.email || '',
-    };
-
-    // Add new customer
-    this.clients.push(newCustomer);
-
-    // Select new customer
-    this.selectedClientId = newCustomer.id;
-    this.client_name = newCustomer.name;
-
-    // Load customer details
-    await this.onClientSelected(newCustomer.id);
-
-    // Wait for v-select to update
-    await this.$nextTick();
+    await this.selectNewCustomer(newClient);
 
     this.makeToast(
         "success",
@@ -5233,7 +5365,6 @@ export default {
         });
     },
     Submit_Quick_Add_Customer() {
-      
       NProgress.start();
       NProgress.set(0.1);
       this.SubmitProcessing = true;
@@ -5249,25 +5380,114 @@ export default {
           return;
         }
 
-          if(this.client.id) axios
-          .put(`clients/${this.client.id}`, 
-            this.client
-          ).then(response => {
-              NProgress.done();
-              this.SubmitProcessing = false;
-              this.makeToast(
-                "success",
-                this.$t("Successfully_Updated"),
-                this.$t("Success")
-              );
-              
-              this.$bvModal.hide("Quick_Add_Customer");
+          if (this.client.id) {
+            axios
+              .put(`clients/${this.client.id}`, this.client)
+              .then(async response => {
+                const selectedId = Number(this.client.id);
 
-              //window.location.reload();
-             // this.GetElementsPos(); 
+                // The PUT endpoint may return the client directly, inside
+                // `client`, or inside `data`. Support all three forms.
+                const responseClient = response.data && response.data.client
+                  ? response.data.client
+                  : (response.data && response.data.data && response.data.data.id
+                      ? response.data.data
+                      : response.data);
 
-            }
-          );
+                const fallbackClient = {
+                  ...this.client,
+                  id: selectedId
+                };
+
+                const updatedClient = {
+                  ...fallbackClient,
+                  ...(responseClient && typeof responseClient === 'object' ? responseClient : {})
+                };
+                updatedClient.id = Number(updatedClient.id || selectedId);
+
+                // IMPORTANT: customerOptions is computed from this.clients.
+                // Updating only the modal/form does NOT update the select.
+                // Replace the matching array item reactively.
+                const index = (this.clients || []).findIndex(
+                  c => Number(c.id) === selectedId
+                );
+
+                if (index !== -1) {
+                  this.$set(this.clients, index, {
+                    ...this.clients[index],
+                    ...updatedClient,
+                    id: selectedId
+                  });
+                } else {
+                  this.clients.push({
+                    ...updatedClient,
+                    id: selectedId
+                  });
+                }
+
+                // Keep the edited customer selected.
+                this.selectedClientId = selectedId;
+                this.client_name = updatedClient.name || this.client.name || '';
+
+                // Refresh the complete list from the server so the dropdown
+                // contains the exact saved values, including backend changes.
+                try {
+                  const listResponse = await axios.get('get_clients_without_paginate');
+                  const freshClients = Array.isArray(listResponse.data)
+                    ? listResponse.data
+                    : (listResponse.data && Array.isArray(listResponse.data.clients)
+                        ? listResponse.data.clients
+                        : null);
+
+                  if (freshClients) {
+                    this.clients = freshClients.map(c => ({
+                      ...c,
+                      id: Number(c.id)
+                    }));
+                  }
+                } catch (refreshError) {
+                  console.warn('Customer list refresh failed after update:', refreshError);
+                }
+
+                // Make sure the selected customer still exists after the
+                // complete list replacement, then rebuild both v-selects.
+                const freshCustomer = (this.clients || []).find(
+                  c => Number(c.id) === selectedId
+                );
+
+                if (freshCustomer) {
+                  this.selectedClientId = selectedId;
+                  this.client_name = freshCustomer.name || this.client_name;
+                }
+
+                this.customerSelectKey += 1;
+                await this.$nextTick();
+
+                // Reload customer-dependent data using the updated customer.
+                await this.onClientSelected(selectedId);
+
+                await this.$nextTick();
+
+                NProgress.done();
+                this.SubmitProcessing = false;
+                this.makeToast(
+                  "success",
+                  this.$t("Successfully_Updated"),
+                  this.$t("Success")
+                );
+
+                this.$bvModal.hide("Quick_Add_Customer");
+              })
+              .catch(() => {
+                NProgress.done();
+                this.SubmitProcessing = false;
+                this.makeToast(
+                  "danger",
+                  this.$t("InvalidData"),
+                  this.$t("Failed")
+                );
+              });
+          }
 
           else axios
           .post("clients", 
@@ -5279,46 +5499,25 @@ export default {
             const clientId = Number(newClient.id) || Number(newClient.client?.id);
             const hasCustoms = clientId && this.quickAddCustomFieldValues && Object.keys(this.quickAddCustomFieldValues).length > 0;
 
-            const afterCustoms = async () => {
+       const afterCustoms = async () => {
+
     NProgress.done();
     this.SubmitProcessing = false;
 
-    const newCustomer = {
-        id: Number(newClient.id),
-        name: newClient.name,
-        phone: newClient.phone || '',
-        email: newClient.email || '',
-    };
+    await this.selectNewCustomer(newClient);
 
-    // Add customer to the current clients list
-    const existingIndex = this.clients.findIndex(
-        client => client.id == newCustomer.id
+    console.log(
+        "FINAL selectedClientId:",
+        this.selectedClientId
     );
 
-    if (existingIndex === -1) {
-        this.clients.push(newCustomer);
-    } else {
-        this.$set(this.clients, existingIndex, newCustomer);
-    }
+    // this.makeToast(
+    //     "success",
+    //     this.$t("Successfully_Created"),
+    //     this.$t("Success")
+    // );
 
-    // IMPORTANT: select the newly created customer
-    this.selectedClientId = newCustomer.id;
-    this.client_name = newCustomer.name;
-
-    // Run customer selection logic
-    await this.onClientSelected(newCustomer.id);
-
-    // Allow Vue to update v-select
-    await this.$nextTick();
-
-    // Close modal
     this.$bvModal.hide("Quick_Add_Customer");
-
-    this.makeToast(
-        "success",
-        this.$t("Successfully_Created"),
-        this.$t("Success")
-    );
 
     this.reset_Form_client();
     this.quickAddCustomFieldValues = {};
