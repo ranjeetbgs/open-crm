@@ -163,34 +163,20 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         tdClass: "text-left",
         thClass: "text-left"
       }, {
-        label: this.$t("Points"),
-        field: "points",
+        label: this.$t("Card Number"),
+        field: "card_number",
         tdClass: "text-left",
         thClass: "text-left"
       }, {
-        label: this.$t("Credit_Limit"),
-        field: "credit_limit",
-        type: "decimal",
+        label: this.$t("No of Invoices"),
+        field: "invoice_count",
+        type: "number",
         tdClass: "text-left",
         thClass: "text-left",
         sortable: false
       }, {
-        label: this.$t("Opening_Balance"),
-        field: "opening_balance",
-        type: "decimal",
-        tdClass: "text-left",
-        thClass: "text-left",
-        sortable: false
-      }, {
-        label: this.$t("Total_Sale_Due"),
-        field: "due",
-        type: "decimal",
-        tdClass: "text-left",
-        thClass: "text-left",
-        sortable: false
-      }, {
-        label: this.$t("Total_Sell_Return_Due"),
-        field: "return_Due",
+        label: this.$t("Total_Sale"),
+        field: "total_amount",
         type: "decimal",
         tdClass: "text-left",
         thClass: "text-left",
@@ -199,6 +185,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     }
   }),
   methods: {
+    rowStyleClass: function rowStyleClass(row) {
+      return Number(row && row.is_royalty_eligible) === 1 ? "premium-customer-row" : "";
+    },
     openPointsModal: function openPointsModal(customer) {
       this.adjustPointsForm.customer_id = customer.id;
       this.adjustPointsForm.points = customer.points; // preload existing
@@ -1010,6 +999,7 @@ var render = function render() {
       columns: _vm.columns,
       totalRows: _vm.totalRows,
       rows: _vm.clients,
+      "row-style-class": _vm.rowStyleClass,
       "search-options": {
         enabled: true,
         placeholder: _vm.$t("Search_this_table")
@@ -1036,11 +1026,13 @@ var render = function render() {
     scopedSlots: _vm._u([{
       key: "table-row",
       fn: function fn(props) {
-        return [props.column.field == "opening_balance" ? _c("span", [_c("span", {
-          "class": props.row.opening_balance > 0 ? "text-danger font-weight-bold" : ""
-        }, [_vm._v("\n            " + _vm._s(_vm.formatPriceWithSymbol(_vm.currentUser.currency, props.row.opening_balance || 0, 2)) + "\n          ")])]) : props.column.field == "credit_limit" ? _c("span", [_c("span", {
-          staticClass: "text-info font-weight-bold"
-        }, [_vm._v("\n            " + _vm._s(props.row.credit_limit && props.row.credit_limit > 0 ? _vm.formatPriceWithSymbol(_vm.currentUser.currency, props.row.credit_limit, 2) : _vm.$t("No_limit")) + "\n          ")])]) : props.column.field == "actions" ? _c("span", [_c("div", [_c("b-dropdown", {
+        return [props.column.field == "name" ? _c("span", [_c("span", {
+          staticClass: "premium-customer-name"
+        }, [_vm._v("\n            " + _vm._s(props.row.name) + "\n            "), Number(props.row.is_royalty_eligible) === 1 ? _c("span", {
+          staticClass: "premium-customer-badge"
+        }, [_c("i", {
+          staticClass: "i-Diamond mr-1"
+        }), _vm._v(" PRO\n            ")]) : _vm._e()])]) : props.column.field == "total_amount" ? _c("span", [_vm._v("\n            " + _vm._s(_vm.formatPriceWithSymbol(_vm.currentUser.currency, props.row.total_amount || 0, 2)) + "\n          \n        ")]) : props.column.field == "actions" ? _c("span", [_c("div", [_c("b-dropdown", {
           attrs: {
             id: "dropdown-right",
             variant: "primary",
@@ -2482,7 +2474,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.border-left-primary[data-v-06204732] {\n  border-left: 4px solid #007bff !important;\n}\n.border-left-warning[data-v-06204732] {\n  border-left: 4px solid #ffc107 !important;\n}\n.border-left-danger[data-v-06204732] {\n  border-left: 4px solid #dc3545 !important;\n}\n.border-left-success[data-v-06204732] {\n  border-left: 4px solid #28a745 !important;\n}\n.shadow-sm[data-v-06204732] {\n  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;\n}\n.card[data-v-06204732] {\n  transition: transform 0.2s;\n}\n.card[data-v-06204732]:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n/* Premium customer row */\n[data-v-06204732] .premium-customer-row > td {\n  background: linear-gradient(90deg, #fffaf0 0%, #fffdf7 100%) !important;\n  border-top: 1px solid #f0d58a !important;\n  border-bottom: 1px solid #f0d58a !important;\n  font-weight: 500;\n  position: relative;\n}\n[data-v-06204732] .premium-customer-row > td:first-child {\n  border-left: 5px solid #d4af37 !important;\n  box-shadow: inset 3px 0 0 rgba(212, 175, 55, 0.12);\n}\n[data-v-06204732] .premium-customer-row:hover > td {\n  background: linear-gradient(90deg, #fff3d4 0%, #fffaf0 100%) !important;\n}\n.premium-customer-name[data-v-06204732] {\n  font-weight: 700;\n  color: #6b5314;\n}\n.premium-customer-badge[data-v-06204732] {\n  display: inline-flex;\n  align-items: center;\n  margin-left: 8px;\n  padding: 3px 8px;\n  border-radius: 12px;\n  background: linear-gradient(135deg, #d4af37, #b8860b);\n  color: #fff;\n  font-size: xx-small;\n  font-weight: 400;\n  letter-spacing: 0.5px;\n  line-height: 1.2;\n  vertical-align: middle;\n  box-shadow: 0 2px 5px rgba(184, 134, 11, 0.25);\n}\n.premium-customer-badge i[data-v-06204732] {\n  font-size: 11px;\n}\n.border-left-primary[data-v-06204732] {\n  border-left: 4px solid #007bff !important;\n}\n.border-left-warning[data-v-06204732] {\n  border-left: 4px solid #ffc107 !important;\n}\n.border-left-danger[data-v-06204732] {\n  border-left: 4px solid #dc3545 !important;\n}\n.border-left-success[data-v-06204732] {\n  border-left: 4px solid #28a745 !important;\n}\n.shadow-sm[data-v-06204732] {\n  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;\n}\n.card[data-v-06204732] {\n  transition: transform 0.2s;\n}\n.card[data-v-06204732]:hover {\n  transform: translateY(-2px);\n  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;\n}\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 

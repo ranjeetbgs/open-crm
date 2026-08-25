@@ -29,6 +29,7 @@ class ClientController extends BaseController
 
     public function index(request $request)
     {
+     
         $this->authorizeForUser($request->user('api'), 'view', Client::class);
         // How many items do you want to display.
         $perPage = $request->limit;
@@ -80,20 +81,14 @@ class ClientController extends BaseController
 
         foreach ($clients as $client) {
 
-            $client_exist = EcommerceClient::where('deleted_at', '=', null)
-                ->where('client_id', $client->id)->exists();
-
-            if ($client_exist) {
-                $item['client_ecommerce'] = 'yes';
-            } else {
-                $item['client_ecommerce'] = 'no';
-            }
-
-            $item['total_amount'] = DB::table('sales')
+            
+            $sales = DB::table('sales')
                 ->where('deleted_at', '=', null)
                 ->where('statut', 'completed')
-                ->where('client_id', $client->id)
-                ->sum('GrandTotal');
+                ->where('client_id', $client->id);
+
+            $item['total_amount'] = $sales->sum('GrandTotal');
+            $item['invoice_count'] = $sales->count();
 
             $item['total_paid'] = DB::table('sales')
                 ->where('deleted_at', '=', null)
@@ -116,6 +111,7 @@ class ClientController extends BaseController
             $item['return_Due'] = $item['total_amount_return'] - $item['total_paid_return'];
 
             $item['id'] = $client->id;
+            $item['date'] = $client;
             $item['name'] = $client->name;
             $item['phone'] = $client->phone;
             $item['tax_number'] = $client->tax_number;
@@ -125,6 +121,7 @@ class ClientController extends BaseController
             $item['city'] = $client->city;
             $item['adresse'] = $client->adresse;
             $item['is_royalty_eligible'] = $client->is_royalty_eligible;
+            $item['card_number'] = $client->card_number;
             $item['points'] = $client->points;
             $item['opening_balance'] = $client->opening_balance ?? 0;
             $item['credit_limit'] = $client->credit_limit ?? 0;

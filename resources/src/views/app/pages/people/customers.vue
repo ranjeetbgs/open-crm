@@ -17,6 +17,7 @@
         :columns="columns"
         :totalRows="totalRows"
         :rows="clients"
+        :row-style-class="rowStyleClass"
         @on-page-change="onPageChange"
         @on-per-page-change="onPerPageChange"
         @on-sort-change="onSortChange"
@@ -79,18 +80,23 @@
         </div>
 
         <template slot="table-row" slot-scope="props">
-          <span v-if="props.column.field == 'opening_balance'">
-            <span :class="props.row.opening_balance > 0 ? 'text-danger font-weight-bold' : ''">
-              {{ formatPriceWithSymbol(currentUser.currency, props.row.opening_balance || 0, 2) }}
+          <span v-if="props.column.field == 'name'">
+            <span class="premium-customer-name">
+              {{ props.row.name }}
+              <span
+                v-if="Number(props.row.is_royalty_eligible) === 1"
+                class="premium-customer-badge"
+              >
+                <i class="i-Diamond mr-1"></i> PRO
+              </span>
             </span>
           </span>
-          <span v-else-if="props.column.field == 'credit_limit'">
-            <span class="text-info font-weight-bold">
-              {{ (props.row.credit_limit && props.row.credit_limit > 0)
-                  ? formatPriceWithSymbol(currentUser.currency, props.row.credit_limit, 2)
-                  : $t('No_limit') }}
-            </span>
+
+          <span v-else-if="props.column.field == 'total_amount'">
+              {{ formatPriceWithSymbol(currentUser.currency, props.row.total_amount || 0, 2) }}
+            
           </span>
+         
           <span v-else-if="props.column.field == 'actions'">
             <div>
               <b-dropdown
@@ -991,49 +997,41 @@ export default {
         },
       
         {
-          label: this.$t("Points"),
-          field: "points",
+          label: this.$t("Card Number"),
+          field: "card_number",
           tdClass: "text-left",
           thClass: "text-left"
         },
           {
-          label: this.$t("Credit_Limit"),
-          field: "credit_limit",
-          type: "decimal",
+          label: this.$t("No of Invoices"),
+          field: "invoice_count",
+          type: "number",
           tdClass: "text-left",
           thClass: "text-left",
           sortable: false
         },
-        {
-          label: this.$t("Opening_Balance"),
-          field: "opening_balance",
-          type: "decimal",
-          tdClass: "text-left",
-          thClass: "text-left",
-          sortable: false
-        },
+       
       
         {
-          label: this.$t("Total_Sale_Due"),
-          field: "due",
+          label: this.$t("Total_Sale"),
+          field: "total_amount",
           type: "decimal",
           tdClass: "text-left",
           thClass: "text-left",
           sortable: false
         },
-        {
-          label: this.$t("Total_Sell_Return_Due"),
-          field: "return_Due",
-          type: "decimal",
-          tdClass: "text-left",
-          thClass: "text-left",
-          sortable: false
-        }
+       
       ];
     }
   },
 
   methods: {
+
+    rowStyleClass(row) {
+      return Number(row && row.is_royalty_eligible) === 1
+        ? "premium-customer-row"
+        : "";
+    },
 
     openPointsModal(customer) {
       this.adjustPointsForm.customer_id = customer.id;
@@ -1990,6 +1988,49 @@ export default {
 </script>
 
 <style scoped>
+/* Premium customer row */
+::v-deep .premium-customer-row > td {
+  background: linear-gradient(90deg, #fffaf0 0%, #fffdf7 100%) !important;
+  border-top: 1px solid #f0d58a !important;
+  border-bottom: 1px solid #f0d58a !important;
+  font-weight: 500;
+  position: relative;
+}
+
+::v-deep .premium-customer-row > td:first-child {
+  border-left: 5px solid #d4af37 !important;
+  box-shadow: inset 3px 0 0 rgba(212, 175, 55, 0.12);
+}
+
+::v-deep .premium-customer-row:hover > td {
+  background: linear-gradient(90deg, #fff3d4 0%, #fffaf0 100%) !important;
+}
+
+.premium-customer-name {
+  font-weight: 700;
+  color: #6b5314;
+}
+
+.premium-customer-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #d4af37, #b8860b);
+  color: #fff;
+  font-size: xx-small;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  vertical-align: middle;
+  box-shadow: 0 2px 5px rgba(184, 134, 11, 0.25);
+}
+
+.premium-customer-badge i {
+  font-size: 11px;
+}
+
 .border-left-primary {
   border-left: 4px solid #007bff !important;
 }
