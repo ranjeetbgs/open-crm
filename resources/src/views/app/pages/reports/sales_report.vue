@@ -286,15 +286,10 @@ components: { DateRangePicker },
           tdClass: "text-left",
           thClass: "text-left"
         },
-        {
-          label:  this.$t("Seller"),
-          field: "seller",
-          tdClass: "text-left",
-          thClass: "text-left"
-        },
+      
 
         {
-          label: this.$t("Reference"),
+          label: this.$t("Invoice No"),
           field: "Ref",
           tdClass: "text-left",
           thClass: "text-left"
@@ -307,14 +302,33 @@ components: { DateRangePicker },
           thClass: "text-left"
         },
         {
-          label: this.$t("warehouse"),
+          label: this.$t("Branch"),
           field: "warehouse_name",
           tdClass: "text-left",
           thClass: "text-left"
         },
         {
-          label: this.$t("Status"),
-          field: "statut",
+          label: this.$t("Taxable Value"),
+          field: "taxable_value",
+          tdClass: "text-left",
+          thClass: "text-left"
+        },
+        {
+          label: this.$t("CGST"),
+          field: "cgst",
+          tdClass: "text-left",
+          thClass: "text-left",
+          
+        },
+        {
+          label: this.$t("SGST"),
+          field: "sgst",
+          tdClass: "text-left",
+          thClass: "text-left"
+        },
+       {
+          label: this.$t("Loyalty"),
+          field: "shipping",
           tdClass: "text-left",
           thClass: "text-left"
         },
@@ -326,6 +340,7 @@ components: { DateRangePicker },
           tdClass: "text-left",
           thClass: "text-left"
         },
+        
         {
           label: this.$t("Paid"),
           field: "paid_amount",
@@ -346,9 +361,21 @@ components: { DateRangePicker },
           tdClass: "text-left",
           thClass: "text-left"
         },
+          {
+          label:  this.$t("Seller"),
+          field: "seller",
+          tdClass: "text-left",
+          thClass: "text-left"
+        },
         {
           label: this.$t("AddedBy"),
           field: "user_name",
+          tdClass: "text-left",
+          thClass: "text-left"
+        },
+         {
+          label: this.$t("Status"),
+          field: "statut",
           tdClass: "text-left",
           thClass: "text-left"
         }
