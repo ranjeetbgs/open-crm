@@ -117,6 +117,11 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         tdClass: "text-left",
         thClass: "text-left"
       }, {
+        label: this.$t("Mobile"),
+        field: "client_tele",
+        tdClass: "text-left",
+        thClass: "text-left"
+      }, {
         label: this.$t("Branch"),
         field: "warehouse_name",
         tdClass: "text-left",

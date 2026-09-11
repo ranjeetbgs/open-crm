@@ -302,6 +302,12 @@ components: { DateRangePicker },
           thClass: "text-left"
         },
         {
+          label: this.$t("Mobile"),
+          field: "client_tele",
+          tdClass: "text-left",
+          thClass: "text-left"
+        },
+        {
           label: this.$t("Branch"),
           field: "warehouse_name",
           tdClass: "text-left",

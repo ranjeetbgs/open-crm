@@ -710,6 +710,7 @@ class ReportController extends BaseController
         foreach ($Sales as $Sale) {
 
             $item['id'] = $Sale['id'];
+            $item['uuid'] = $Sale['sale_uuid'];
             $item['date'] = $Sale['date'];
             $item['Ref'] = $Sale['Ref'];
             $item['statut'] = $Sale['statut'];
@@ -722,9 +723,10 @@ class ReportController extends BaseController
             $item['client_tele'] = $Sale['client']['phone'];
             $item['client_code'] = $Sale['client']['code'];
             $item['client_adr'] = $Sale['client']['adresse'];
-            $item['sgst'] = round( ($Sale['GrandTotal'] / 103*3)/2 , 2);
-            $item['cgst'] = round( ($Sale['GrandTotal'] / 103*3)/2 , 2);
-            $item['taxable_value'] =number_format( $Sale['GrandTotal'] - ($Sale['GrandTotal'] / 103*3),2);
+            $item['total_excluding_shipping'] = $Sale['GrandTotal']-$Sale['shipping'];
+            $item['sgst'] = round( ($item['total_excluding_shipping'] / 103*3)/2 , 2);
+            $item['cgst'] =  $item['sgst'];
+            $item['taxable_value'] =number_format( $item['total_excluding_shipping'] - ($item['total_excluding_shipping'] / 103*3),2);
             $item['GrandTotal'] = $Sale['GrandTotal'];
             $item['paid_amount'] = $Sale['paid_amount'];
             $item['due'] = $Sale['GrandTotal'] - $Sale['paid_amount'];
