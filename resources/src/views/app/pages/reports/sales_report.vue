@@ -332,6 +332,12 @@ components: { DateRangePicker },
           tdClass: "text-left",
           thClass: "text-left"
         },
+        {
+          label: this.$t("Total (Excl loyalty)"),
+          field: "total_excluding_shipping",
+          tdClass: "text-left",
+          thClass: "text-left"
+        },
        {
           label: this.$t("Loyalty"),
           field: "shipping",

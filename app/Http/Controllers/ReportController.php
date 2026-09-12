@@ -728,6 +728,7 @@ class ReportController extends BaseController
             $item['cgst'] =  $item['sgst'];
             $item['taxable_value'] =number_format( $item['total_excluding_shipping'] - ($item['total_excluding_shipping'] / 103*3),2);
             $item['GrandTotal'] = $Sale['GrandTotal'];
+             $item['total_excluding_shipping'] = number_format( $item['total_excluding_shipping'] ,2);
             $item['paid_amount'] = $Sale['paid_amount'];
             $item['due'] = $Sale['GrandTotal'] - $Sale['paid_amount'];
             $item['payment_status'] = $Sale['payment_statut'];
