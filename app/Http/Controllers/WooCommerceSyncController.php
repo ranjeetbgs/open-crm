@@ -365,7 +365,7 @@ class WooCommerceSyncController extends BaseController
         foreach($wc_products as $wc_product)
             {
                 Product::whereNull('deleted_at')->where('woocommerce_id',$wc_product['id'])->first()
-                ->warehouses()->where('warehouse_id',1)->update(['qte'=>$wc_product['stock_quantity']]);
+                ->warehouses()->where('warehouse_id',4)->update(['qte'=>$wc_product['stock_quantity']]);
             }
 
 
