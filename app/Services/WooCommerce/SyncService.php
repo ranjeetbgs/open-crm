@@ -164,7 +164,7 @@ class SyncService
                         'name' => (string) ($product->name ?? ''),
                         'type' => $isVariant ? 'variable' : 'simple',
                         'sku' => (string) ($product->code ?? ''),
-                        'status' => 'publish',
+                        'status' => 'draft',//'publish',
                     ];
 
                     if (! $isVariant) {
