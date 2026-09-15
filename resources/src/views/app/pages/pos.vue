@@ -2147,7 +2147,10 @@ export default {
       c => Number(c.id) === Number(this.selectedClientId)
     );
 
+// console.log(this.sale.discount);
     if(customer?.is_royalty_eligible)this.sale.discount = 20;
+
+    this.sale.discount;
      
     return customer;
 

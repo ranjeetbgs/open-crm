@@ -115,6 +115,7 @@ class WooCommerceSyncController extends BaseController
 
     public function syncProducts(Request $request)
     {
+        
         $this->authorizeForUser($request->user('api'), 'view', WooCommerceSetting::class);
 
         $settings = WooCommerceSetting::first();
@@ -123,7 +124,7 @@ class WooCommerceSyncController extends BaseController
         }
         $sync = SyncService::fromSettings($settings);
         // Enforce push-only (Stocky → WooCommerce)
-        $onlyUnsynced = (bool) $request->boolean('only_unsynced', false);
+        $onlyUnsynced = (bool) $request->boolean('only_unsynced', true);
         $result = $sync->pushProducts($onlyUnsynced);
         $settings->last_sync_at = now();
         $settings->save();

@@ -1738,7 +1738,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       var customer = this.clients.find(function (c) {
         return Number(c.id) === Number(_this.selectedClientId);
       });
+
+      // console.log(this.sale.discount);
       if (customer !== null && customer !== void 0 && customer.is_royalty_eligible) this.sale.discount = 20;
+      this.sale.discount;
       return customer;
     },
     // Receipt subtotal (sum of invoice detail totals; before order tax/discount/shipping)
