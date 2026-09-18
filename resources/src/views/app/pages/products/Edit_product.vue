@@ -436,6 +436,7 @@
                           label="Price"
                           :placeholder="$t('Enter_Product_Price')"
                           v-model="product.price"
+                          @input="updateProductCost"
                         ></b-form-input>
 
                         <b-form-invalid-feedback id="ProductPrice-feedback">{{ validationContext.errors[0] }}</b-form-invalid-feedback>
@@ -931,6 +932,17 @@ export default {
   },
 
   methods: {
+
+    updateProductCost(value) {
+  const retailPrice = parseFloat(value);
+
+  if (!isNaN(retailPrice) && retailPrice >= 0) {
+    this.product.cost = (retailPrice * 0.35).toFixed(2);
+  } else {
+    this.product.cost = "";
+  }
+},
+
 
       //------------------------------Formetted Numbers -------------------------\\
       formatNumber(number, dec) {
