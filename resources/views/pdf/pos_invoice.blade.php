@@ -31,8 +31,9 @@
 
     <style>
         @page {
-            size: A4;
-            margin: 10mm 15mm;
+             size: 10cm 20cm portrait;
+        margin: 0;
+            
         }
 
         * {

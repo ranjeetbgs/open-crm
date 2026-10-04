@@ -1309,7 +1309,6 @@ class SalesController extends BaseController
 
     public function InvoicePdfByUUID(Request $request, $uuid)
     {
-
     $sale = Sale::where('sale_uuid', $uuid)
             ->where('deleted_at', '=', null)
             ->firstOrFail();

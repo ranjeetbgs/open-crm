@@ -509,7 +509,8 @@ class PosController extends BaseController
     'name' => $sale['client']->name,
     'mobile' => $sale['client']->phone,
     'invoice_id'=> $sale->Ref,
-    "amount"=> $sale->paid_amount
+    "amount"=> $sale->paid_amount,
+    "invoice_pdf_url"=> route('invoice-pdf-by-uuid',['uuid' => $sale->sale_uuid])
 ]);
 
         return $sale;

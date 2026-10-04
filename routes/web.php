@@ -50,7 +50,7 @@ Route::get('test',function(){
 });
 
 
-Route::get('receipt/{uuid}','SalesController@InvoicePdfByUUID');
+Route::get('receipt/{uuid}','SalesController@InvoicePdfByUUID')->name('invoice-pdf-by-uuid');
 
 Route::get('password/find/{token}', 'PasswordResetController@find');
 
