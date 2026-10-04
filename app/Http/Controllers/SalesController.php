@@ -1319,7 +1319,7 @@ class SalesController extends BaseController
     //  dd($data);
       $pdf = Pdf::loadView('pdf.pos_invoice', $data);
 
-      return $pdf->stream('invoice.pdf');
+      return $pdf->download('invoice.pdf');
 
         return $this->Print_Invoice_POS($request, 262);
 
