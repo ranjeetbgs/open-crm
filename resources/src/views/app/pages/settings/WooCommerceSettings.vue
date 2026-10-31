@@ -10,7 +10,7 @@
             <b-badge :variant="connectionBadgeVariant">{{ connectionBadgeText }}</b-badge>
           </div>
           <div>
-            <b-button variant="danger" size="sm" :disabled="resetting" @click="resetSync">
+            <b-button v-if="0" variant="danger" size="sm" :disabled="resetting" @click="resetSync">
               <span v-if="!resetting">{{ $t('Reset_Sync_State') }}</span>
               <span v-else>{{ $t('Resetting') }}...</span>
             </b-button>

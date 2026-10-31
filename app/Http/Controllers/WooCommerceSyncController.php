@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Models\Client;
+use Illuminate\Support\Str;
 
 class WooCommerceSyncController extends BaseController
 {
@@ -132,29 +133,68 @@ class WooCommerceSyncController extends BaseController
         return response()->json(['ok' => true, 'result' => $result]);
     }
 
+    // public function syncStock(Request $request)
+    // {
+    //     $this->authorizeForUser($request->user('api'), 'view', WooCommerceSetting::class);
+
+    //     $settings = WooCommerceSetting::first();
+    //     if (! $settings) {
+    //         return response()->json(['ok' => false, 'error' => 'WooCommerce not configured'], 422);
+    //     }
+
+    //     // Start queued job and return a progress token
+    //     $token = 'woo_stock_sync_'.uniqid();
+    //     Cache::put($token, [
+    //         'total_products' => 0,
+    //         'synced_products' => 0,
+    //         'failed_products' => 0,
+    //         'percentage' => 0,
+    //         'started_at' => now()->toDateTimeString(),
+    //         'finished' => false,
+    //     ], 3600);
+    //     WooCommerceStockSyncJob::dispatch($token); 
+
+    //     return response()->json(['ok' => true, 'token' => $token]);
+    // }
+
+
     public function syncStock(Request $request)
-    {
-        $this->authorizeForUser($request->user('api'), 'view', WooCommerceSetting::class);
+{
+    $this->authorizeForUser(
+        $request->user('api'),
+        'view',
+        WooCommerceSetting::class
+    );
 
-        $settings = WooCommerceSetting::first();
-        if (! $settings) {
-            return response()->json(['ok' => false, 'error' => 'WooCommerce not configured'], 422);
-        }
-
-        // Start queued job and return a progress token
-        $token = 'woo_stock_sync_'.uniqid();
-        Cache::put($token, [
-            'total_products' => 0,
-            'synced_products' => 0,
-            'failed_products' => 0,
-            'percentage' => 0,
-            'started_at' => now()->toDateTimeString(),
-            'finished' => false,
-        ], 3600);
-        WooCommerceStockSyncJob::dispatch($token);
-
-        return response()->json(['ok' => true, 'token' => $token]);
+    if (! WooCommerceSetting::exists()) {
+        return response()->json([
+            'ok' => false,
+            'error' => 'WooCommerce not configured',
+        ], 422);
     }
+
+    $token = 'woo_stock_sync_' . Str::uuid();
+
+    Cache::put($token, [
+        'total_products' => 0,
+        'synced_products' => 0,
+        'failed_products' => 0,
+        'skipped_products' => 0,
+        'percentage' => 0,
+        'started_at' => now()->toDateTimeString(),
+        'finished' => false,
+        'error' => null,
+    ], 3600);
+
+    WooCommerceStockSyncJob::dispatch($token);
+
+    return response()->json([
+        'ok' => true,
+        'token' => $token,
+        'message' => 'Stock sync started.',
+    ], 202);
+}
+
 
     /**
      * GET /api/woocommerce/sync-stock/progress?token=...
@@ -255,6 +295,7 @@ class WooCommerceSyncController extends BaseController
      */
     public function resetSync(Request $request)
     {
+         return response()->json(['success' => false]);
         $this->authorizeForUser($request->user('api'), 'view', WooCommerceSetting::class);
 
         DB::transaction(function () {

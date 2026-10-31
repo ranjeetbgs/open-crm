@@ -108,13 +108,13 @@ class SyncService
         $updated = 0;
         $errors = 0;
         $processed = 0;
-
+        set_time_limit(1800);
         $query = Product::whereNull('deleted_at');
-        if ($onlyUnsynced) {
+        if ($onlyUnsynced) { 
             $query->whereNull('woocommerce_id');
         }
 
-        $query->orderBy('id')->chunk(100, function ($products) use (&$created, &$updated, &$errors, &$processed, $progress) {
+        $query->chunkById(100, function ($products) use (&$created, &$updated, &$errors, &$processed, $progress) {
             foreach ($products as $product) {
                 try {
                     // If we don't have a mapping yet, try to link by SKU to avoid duplicates when switching stores
@@ -999,4 +999,9 @@ class SyncService
 
         return ['created' => $created, 'updated' => $updated, 'errors' => $errors];
     }
+
+
+
+
+    
 }

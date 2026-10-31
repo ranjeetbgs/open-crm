@@ -170,16 +170,7 @@ var render = function render() {
     attrs: {
       variant: _vm.connectionBadgeVariant
     }
-  }, [_vm._v(_vm._s(_vm.connectionBadgeText))])], 1), _vm._v(" "), _c("div", [_c("b-button", {
-    attrs: {
-      variant: "danger",
-      size: "sm",
-      disabled: _vm.resetting
-    },
-    on: {
-      click: _vm.resetSync
-    }
-  }, [!_vm.resetting ? _c("span", [_vm._v(_vm._s(_vm.$t("Reset_Sync_State")))]) : _c("span", [_vm._v(_vm._s(_vm.$t("Resetting")) + "...")])])], 1)]), _vm._v(" "), _c("b-tabs", {
+  }, [_vm._v(_vm._s(_vm.connectionBadgeText))])], 1), _vm._v(" "), _c("div", [ false ? 0 : _vm._e()], 1)]), _vm._v(" "), _c("b-tabs", {
     attrs: {
       "content-class": "mt-3 position-relative"
     },
