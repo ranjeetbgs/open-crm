@@ -1430,7 +1430,10 @@
         <b-col md="12">
           <b-form-group>
             <div class="loyalty-eligible-row">
-              <b-form-checkbox v-model="client.is_royalty_eligible" switch class="mb-0 loyalty-switch">
+              <b-form-checkbox v-model="client.is_royalty_eligible" 
+              @change="updateLoyaltyCardPrice"
+              
+              switch class="mb-0 loyalty-switch">
                 {{ $t('Loyalty_Eligible') }}
               </b-form-checkbox>
               <small class="loyalty-help text-muted">{{ $t('Loyalty_Points_Help') }}</small>
@@ -1556,7 +1559,9 @@
 
           <b-col md="6" sm="12" class="mt-4 mb-4">
             <div class="psx-form-check">
-              <input type="checkbox" v-model="client.is_royalty_eligible" class="psx-checkbox psx-form-check-input" id="is_royalty_eligible">
+              <input type="checkbox" 
+              @change="updateLoyaltyCardPrice"
+              v-model="client.is_royalty_eligible" class="psx-checkbox psx-form-check-input" id="is_royalty_eligible">
               <label class="psx-form-check-label" for="is_royalty_eligible">
                 <h5>{{ $t('Is_Royalty_Eligible') }}</h5>
               </label>
@@ -2476,6 +2481,16 @@ export default {
     this.paginate_products(this.product_perPage, 0);
   },
   methods: {
+
+    updateLoyaltyCardPrice() {
+    if (this.client && this.client.is_royalty_eligible) {
+        this.sale.shipping = 99;
+    } else {
+        this.sale.shipping = 0;
+    }
+
+    this.CalculTotal();
+},
 
 
    
@@ -4843,11 +4858,7 @@ async selectNewCustomer(responseData) {
     // Load points and credit information.
     await this.onClientSelected(id);
 
-    // Set Loyalty Card price for newly created customer
-    this.sale.shipping = 99;
-
-    // Recalculate sale total
-    this.CalculTotal();
+    
 
     await this.$nextTick();
 

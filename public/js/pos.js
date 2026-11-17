@@ -2035,6 +2035,14 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     this.paginate_products(this.product_perPage, 0);
   },
   methods: _objectSpread(_objectSpread({
+    updateLoyaltyCardPrice: function updateLoyaltyCardPrice() {
+      if (this.client && this.client.is_royalty_eligible) {
+        this.sale.shipping = 99;
+      } else {
+        this.sale.shipping = 0;
+      }
+      this.CalculTotal();
+    },
     onCustomerSearch: function onCustomerSearch(search) {
       if (search && search.trim() !== "") this.searchPhone = search;
     },
@@ -4276,11 +4284,6 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             _context10.n = 4;
             return _this32.onClientSelected(id);
           case 4:
-            // Set Loyalty Card price for newly created customer
-            _this32.sale.shipping = 99;
-
-            // Recalculate sale total
-            _this32.CalculTotal();
             _context10.n = 5;
             return _this32.$nextTick();
           case 5:
@@ -9723,6 +9726,9 @@ var render = function render() {
     attrs: {
       "switch": ""
     },
+    on: {
+      change: _vm.updateLoyaltyCardPrice
+    },
     model: {
       value: _vm.client.is_royalty_eligible,
       callback: function callback($$v) {
@@ -9989,7 +9995,7 @@ var render = function render() {
       checked: Array.isArray(_vm.client.is_royalty_eligible) ? _vm._i(_vm.client.is_royalty_eligible, null) > -1 : _vm.client.is_royalty_eligible
     },
     on: {
-      change: function change($event) {
+      change: [function ($event) {
         var $$a = _vm.client.is_royalty_eligible,
           $$el = $event.target,
           $$c = $$el.checked ? true : false;
@@ -10004,7 +10010,7 @@ var render = function render() {
         } else {
           _vm.$set(_vm.client, "is_royalty_eligible", $$c);
         }
-      }
+      }, _vm.updateLoyaltyCardPrice]
     }
   }), _vm._v(" "), _c("label", {
     staticClass: "psx-form-check-label",
