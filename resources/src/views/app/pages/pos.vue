@@ -4770,72 +4770,93 @@ export default {
       this.selectedClientNetBalance = 0;
     },
 
-    async selectNewCustomer(newClient) {
-      // Support APIs returning either the client directly or { client: ... }.
-      const raw = newClient && newClient.client ? newClient.client : newClient;
-      const id = Number(raw && raw.id);
+    
+async selectNewCustomer(responseData) {
+    // Support common Laravel API response structures.
+    const candidates = [
+        responseData,
+        responseData?.client,
+        responseData?.data,
+        responseData?.data?.client,
+        responseData?.data?.data
+    ];
 
-      if (!Number.isFinite(id) || id <= 0) {
-        console.error('Unable to select newly-created customer: invalid id', newClient);
+    const raw = candidates.find(item =>
+        item && typeof item === 'object' && item.id
+    );
+
+    if (!raw) {
+        console.error('Customer created, but response ID was not found:', responseData);
+        this.makeToast(
+            'danger',
+            'Customer was created, but its ID could not be read.',
+            'Error'
+        );
         return false;
-      }
+    }
 
-      // Refresh the full customer list first. The new ID must exist in
-      // customerOptions before vue-select can display it.
-      try {
-        const response = await axios.get('get_clients_without_paginate');
-        if (Array.isArray(response.data)) {
-          this.clients = response.data;
-        } else if (response.data && Array.isArray(response.data.clients)) {
-          this.clients = response.data.clients;
-        }
-      } catch (e) {
-        // Fallback if the refresh fails.
-        const fallback = {
-          id,
-          name: raw.name || '',
-          phone: raw.phone || '',
-          email: raw.email || ''
-        };
-        const index = this.clients.findIndex(c => Number(c.id) === id);
-        if (index === -1) this.clients.push(fallback);
-        else this.$set(this.clients, index, fallback);
-      }
+    const id = Number(raw.id);
 
-      // Normalize IDs because API responses can contain string IDs.
-      this.clients = this.clients.map(c => ({ ...c, id: Number(c.id) }));
+    if (!Number.isFinite(id) || id <= 0) {
+        console.error('Invalid customer ID:', raw);
+        return false;
+    }
 
-      if (!this.clients.some(c => Number(c.id) === id)) {
-        this.clients.push({
-          id,
-          name: raw.name || '',
-          phone: raw.phone || '',
-          email: raw.email || ''
+    // Keep the form values as fallback if the API returns only an ID.
+    const customer = {
+        ...this.client,
+        ...raw,
+        id: id,
+        name: raw.name || this.client.name || '',
+        phone: raw.phone || this.client.phone || '',
+        email: raw.email || this.client.email || ''
+    };
+
+    // Ensure clients is an array.
+    if (!Array.isArray(this.clients)) {
+        this.clients = [];
+    }
+
+    // Insert or update the customer reactively.
+    const index = this.clients.findIndex(
+        c => Number(c.id) === id
+    );
+
+    if (index !== -1) {
+        this.$set(this.clients, index, {
+            ...this.clients[index],
+            ...customer
         });
-      }
+    } else {
+        this.clients.push(customer);
+    }
 
-      const customer = this.clients.find(c => Number(c.id) === id);
-      this.client_name = customer ? customer.name : (raw.name || '');
+    // Select the new customer.
+    this.client_name = customer.name;
+    this.selectedClientId = id;
 
-      // The option MUST exist before setting the selected value.
-      // Then remount both desktop/mobile selects so vue-select cannot retain
-      // its previous internal value.
-      await this.$nextTick();
+    // Rebuild desktop and mobile v-select components.
+    this.customerSelectKey += 1;
 
-      this.selectedClientId = id;
-      this.client_name = customer ? customer.name : (raw.name || '');
-      this.customerSelectKey += 1;
+    await this.$nextTick();
 
-      await this.$nextTick();
+    // Load points and credit information.
+    await this.onClientSelected(id);
 
-      // Always load points/credit, including when the same ID was already selected.
-      await this.onClientSelected(id);
+    // Set Loyalty Card price for newly created customer
+    this.sale.shipping = 99;
 
-      await this.$nextTick();
-      this.$forceUpdate();
+    // Recalculate sale total
+    this.CalculTotal();
 
-      return true;
-    },
+    await this.$nextTick();
+
+    console.log('New customer added to Vue clients:', customer);
+    console.log('Selected customer ID:', this.selectedClientId);
+
+    return true;
+},
+
 
    async onClientSelected(selectedClientId) {
 
@@ -5367,181 +5388,255 @@ export default {
           this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
         });
     },
-    Submit_Quick_Add_Customer() {
-      NProgress.start();
-      NProgress.set(0.1);
-      this.SubmitProcessing = true;
-      this.$refs.Quick_Add_Customer_Form && this.$refs.Quick_Add_Customer_Form.validate().then(success => {
-        if (!success) {
-          NProgress.done();
-          this.SubmitProcessing = false;
-          this.makeToast(
-            "danger",
-            this.$t("Please_fill_the_form_correctly"),
-            this.$t("Failed")
+    
+Submit_Quick_Add_Customer() {
+  NProgress.start();
+  NProgress.set(0.1);
+  this.SubmitProcessing = true;
+
+  const form = this.$refs.Quick_Add_Customer_Form;
+
+  if (!form) {
+    NProgress.done();
+    this.SubmitProcessing = false;
+    return;
+  }
+
+  form.validate().then(success => {
+    if (!success) {
+      NProgress.done();
+      this.SubmitProcessing = false;
+
+      this.makeToast(
+        "danger",
+        this.$t("Please_fill_the_form_correctly"),
+        this.$t("Failed")
+      );
+
+      return;
+    }
+
+    // ==========================================
+    // UPDATE EXISTING CUSTOMER
+    // ==========================================
+
+    if (this.client.id) {
+      const selectedId = Number(this.client.id);
+
+      // Copy form data before sending the request.
+      const payload = {
+        ...this.client,
+        id: selectedId
+      };
+
+      axios
+        .put(`clients/${selectedId}`, payload)
+        .then(async response => {
+
+          const responseData = response.data || {};
+
+          // Support different Laravel response structures.
+          const responseCustomer =
+            responseData.client ||
+            (responseData.data && responseData.data.client) ||
+            (responseData.data && responseData.data.id
+              ? responseData.data
+              : {});
+
+          // Use submitted form values if API does not return
+          // the updated customer object.
+          const updatedCustomer = {
+            ...payload,
+            ...(responseCustomer || {}),
+            id: selectedId
+          };
+
+          // Find customer in the existing Vue array.
+          const customerIndex = this.clients.findIndex(
+            customer => Number(customer.id) === selectedId
           );
-          return;
-        }
 
-          if (this.client.id) {
-            axios
-              .put(`clients/${this.client.id}`, this.client)
-              .then(async response => {
-                const selectedId = Number(this.client.id);
-
-                // The PUT endpoint may return the client directly, inside
-                // `client`, or inside `data`. Support all three forms.
-                const responseClient = response.data && response.data.client
-                  ? response.data.client
-                  : (response.data && response.data.data && response.data.data.id
-                      ? response.data.data
-                      : response.data);
-
-                const fallbackClient = {
-                  ...this.client,
-                  id: selectedId
-                };
-
-                const updatedClient = {
-                  ...fallbackClient,
-                  ...(responseClient && typeof responseClient === 'object' ? responseClient : {})
-                };
-                updatedClient.id = Number(updatedClient.id || selectedId);
-
-                // IMPORTANT: customerOptions is computed from this.clients.
-                // Updating only the modal/form does NOT update the select.
-                // Replace the matching array item reactively.
-                const index = (this.clients || []).findIndex(
-                  c => Number(c.id) === selectedId
-                );
-
-                if (index !== -1) {
-                  this.$set(this.clients, index, {
-                    ...this.clients[index],
-                    ...updatedClient,
-                    id: selectedId
-                  });
-                } else {
-                  this.clients.push({
-                    ...updatedClient,
-                    id: selectedId
-                  });
-                }
-
-                // Keep the edited customer selected.
-                this.selectedClientId = selectedId;
-                this.client_name = updatedClient.name || this.client.name || '';
-
-                // Refresh the complete list from the server so the dropdown
-                // contains the exact saved values, including backend changes.
-                try {
-                  const listResponse = await axios.get('get_clients_without_paginate');
-                  const freshClients = Array.isArray(listResponse.data)
-                    ? listResponse.data
-                    : (listResponse.data && Array.isArray(listResponse.data.clients)
-                        ? listResponse.data.clients
-                        : null);
-
-                  if (freshClients) {
-                    this.clients = freshClients.map(c => ({
-                      ...c,
-                      id: Number(c.id)
-                    }));
-                  }
-                } catch (refreshError) {
-                  console.warn('Customer list refresh failed after update:', refreshError);
-                }
-
-                // Make sure the selected customer still exists after the
-                // complete list replacement, then rebuild both v-selects.
-                const freshCustomer = (this.clients || []).find(
-                  c => Number(c.id) === selectedId
-                );
-
-                if (freshCustomer) {
-                  this.selectedClientId = selectedId;
-                  this.client_name = freshCustomer.name || this.client_name;
-                }
-
-                this.customerSelectKey += 1;
-                await this.$nextTick();
-
-                // Reload customer-dependent data using the updated customer.
-                await this.onClientSelected(selectedId);
-
-                await this.$nextTick();
-
-                NProgress.done();
-                this.SubmitProcessing = false;
-                this.makeToast(
-                  "success",
-                  this.$t("Successfully_Updated"),
-                  this.$t("Success")
-                );
-
-                this.$bvModal.hide("Quick_Add_Customer");
-              })
-              .catch(() => {
-                NProgress.done();
-                this.SubmitProcessing = false;
-                this.makeToast(
-                  "danger",
-                  this.$t("InvalidData"),
-                  this.$t("Failed")
-                );
-              });
+          // Update customer reactively.
+          if (customerIndex !== -1) {
+            this.$set(this.clients, customerIndex, {
+              ...this.clients[customerIndex],
+              ...updatedCustomer,
+              id: selectedId
+            });
+          } else {
+            this.clients.push(updatedCustomer);
           }
 
-          else axios
-          .post("clients", 
-            this.client
-          ).then(response => {
-            const newClient = response.data;
+          // Keep the edited customer selected.
+          this.selectedClientId = selectedId;
+          this.client_name = updatedCustomer.name || "";
 
-            // If there are custom field values from the quick-add form, persist them
-            const clientId = Number(newClient.id) || Number(newClient.client?.id);
-            const hasCustoms = clientId && this.quickAddCustomFieldValues && Object.keys(this.quickAddCustomFieldValues).length > 0;
+          // Refresh desktop and mobile v-select.
+          this.customerSelectKey++;
 
-       const afterCustoms = async () => {
+          await this.$nextTick();
+
+          // Refresh customer-dependent information.
+          await this.onClientSelected(selectedId);
+
+          await this.$nextTick();
+
+          // Close progress.
+          NProgress.done();
+          this.SubmitProcessing = false;
+
+          this.makeToast(
+            "success",
+            this.$t("Successfully_Updated"),
+            this.$t("Success")
+          );
+
+          // Close modal.
+          this.$bvModal.hide("Quick_Add_Customer");
+
+        })
+        .catch(error => {
+
+          console.error("Customer update error:", error);
+
+          NProgress.done();
+          this.SubmitProcessing = false;
+
+          const responseData =
+            error.response && error.response.data
+              ? error.response.data
+              : {};
+
+          let errorMessage =
+            responseData.message ||
+            this.$t("InvalidData");
+
+          // Display Laravel validation errors.
+          if (responseData.errors) {
+            const validationErrors = Object.values(
+              responseData.errors
+            ).reduce((messages, value) => {
+              return messages.concat(
+                Array.isArray(value) ? value : [value]
+              );
+            }, []);
+
+            if (validationErrors.length) {
+              errorMessage = validationErrors.join("\n");
+            }
+          }
+
+          this.makeToast(
+            "danger",
+            errorMessage,
+            this.$t("Failed")
+          );
+        });
+
+    }
+
+    // ==========================================
+    // CREATE NEW CUSTOMER
+    // ==========================================
+
+    else {
+
+      axios
+        .post("clients", this.client)
+        .then(response => {
+
+          const newClient = response.data;
+
+          // Get newly created customer ID.
+          const clientId =
+            Number(newClient.id) ||
+            Number(newClient.client?.id);
+
+          // Check custom field values.
+          const hasCustoms =
+            clientId &&
+            this.quickAddCustomFieldValues &&
+            Object.keys(this.quickAddCustomFieldValues).length > 0;
+
+          const afterCustoms = async () => {
+
+            NProgress.done();
+            this.SubmitProcessing = false;
+
+            // Select newly created customer.
+            await this.selectNewCustomer(newClient);
+
+            console.log(
+              "FINAL selectedClientId:",
+              this.selectedClientId
+            );
+
+            // Close modal.
+            this.$bvModal.hide("Quick_Add_Customer");
+
+            // Reset customer form.
+            this.reset_Form_client();
+
+            // Reset custom fields.
+            this.quickAddCustomFieldValues = {};
+
+          };
+
+          // Save custom field values if available.
+          if (hasCustoms) {
+
+            axios
+              .post("custom-field-values", {
+                entity_type: "App\\Models\\Client",
+                entity_id: clientId,
+                values: this.quickAddCustomFieldValues
+              })
+              .then(afterCustoms)
+              .catch(error => {
+                console.error(
+                  "Custom field save error:",
+                  error
+                );
+
+                afterCustoms();
+              });
+
+          } else {
+            afterCustoms();
+          }
+
+        })
+        .catch(error => {
+
+          console.error("Customer creation error:", error);
+
+          NProgress.done();
+          this.SubmitProcessing = false;
+
+          const errorMessage =
+            error.response?.data?.message ||
+            this.$t("InvalidData");
+
+          this.makeToast(
+            "danger",
+            errorMessage,
+            this.$t("Failed")
+          );
+
+        });
+
+    }
+
+  }).catch(error => {
+
+    console.error("Customer form validation error:", error);
 
     NProgress.done();
     this.SubmitProcessing = false;
 
-    await this.selectNewCustomer(newClient);
+  });
+},
 
-    console.log(
-        "FINAL selectedClientId:",
-        this.selectedClientId
-    );
-
-    // this.makeToast(
-    //     "success",
-    //     this.$t("Successfully_Created"),
-    //     this.$t("Success")
-    // );
-
-    this.$bvModal.hide("Quick_Add_Customer");
-
-    this.reset_Form_client();
-    this.quickAddCustomFieldValues = {};
-};
-            if (hasCustoms) {
-              axios.post("custom-field-values", {
-                entity_type: "App\\Models\\Client",
-                entity_id: clientId,
-                values: this.quickAddCustomFieldValues
-              }).then(afterCustoms).catch(() => afterCustoms());
-            } else {
-              afterCustoms();
-            }
-          })
-          .catch(() => {
-            NProgress.done();
-            this.SubmitProcessing = false;
-            this.makeToast("danger", this.$t("InvalidData"), this.$t("Failed"));
-          });
-      });
-    },
     New_Client() {
       this.reset_Form_client();
       this.$bvModal.show("New_Customer");

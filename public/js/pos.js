@@ -4214,98 +4214,86 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     this.pointsConverted = false;
     this.selectedClientCreditLimit = 0;
     this.selectedClientNetBalance = 0;
-  }), "selectNewCustomer", function selectNewCustomer(newClient) {
+  }), "selectNewCustomer", function selectNewCustomer(responseData) {
     var _this32 = this;
     return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee10() {
-      var raw, id, response, fallback, index, customer, _t8;
+      var _responseData$data, _responseData$data2;
+      var candidates, raw, id, customer, index;
       return _regenerator().w(function (_context10) {
-        while (1) switch (_context10.p = _context10.n) {
+        while (1) switch (_context10.n) {
           case 0:
-            // Support APIs returning either the client directly or { client: ... }.
-            raw = newClient && newClient.client ? newClient.client : newClient;
-            id = Number(raw && raw.id);
-            if (!(!Number.isFinite(id) || id <= 0)) {
+            // Support common Laravel API response structures.
+            candidates = [responseData, responseData === null || responseData === void 0 ? void 0 : responseData.client, responseData === null || responseData === void 0 ? void 0 : responseData.data, responseData === null || responseData === void 0 || (_responseData$data = responseData.data) === null || _responseData$data === void 0 ? void 0 : _responseData$data.client, responseData === null || responseData === void 0 || (_responseData$data2 = responseData.data) === null || _responseData$data2 === void 0 ? void 0 : _responseData$data2.data];
+            raw = candidates.find(function (item) {
+              return item && _typeof(item) === 'object' && item.id;
+            });
+            if (raw) {
               _context10.n = 1;
               break;
             }
-            console.error('Unable to select newly-created customer: invalid id', newClient);
+            console.error('Customer created, but response ID was not found:', responseData);
+            _this32.makeToast('danger', 'Customer was created, but its ID could not be read.', 'Error');
             return _context10.a(2, false);
           case 1:
-            _context10.p = 1;
-            _context10.n = 2;
-            return axios.get('get_clients_without_paginate');
-          case 2:
-            response = _context10.v;
-            if (Array.isArray(response.data)) {
-              _this32.clients = response.data;
-            } else if (response.data && Array.isArray(response.data.clients)) {
-              _this32.clients = response.data.clients;
+            id = Number(raw.id);
+            if (!(!Number.isFinite(id) || id <= 0)) {
+              _context10.n = 2;
+              break;
             }
-            _context10.n = 4;
-            break;
-          case 3:
-            _context10.p = 3;
-            _t8 = _context10.v;
-            // Fallback if the refresh fails.
-            fallback = {
+            console.error('Invalid customer ID:', raw);
+            return _context10.a(2, false);
+          case 2:
+            // Keep the form values as fallback if the API returns only an ID.
+            customer = _objectSpread(_objectSpread(_objectSpread({}, _this32.client), raw), {}, {
               id: id,
-              name: raw.name || '',
-              phone: raw.phone || '',
-              email: raw.email || ''
-            };
+              name: raw.name || _this32.client.name || '',
+              phone: raw.phone || _this32.client.phone || '',
+              email: raw.email || _this32.client.email || ''
+            }); // Ensure clients is an array.
+            if (!Array.isArray(_this32.clients)) {
+              _this32.clients = [];
+            }
+
+            // Insert or update the customer reactively.
             index = _this32.clients.findIndex(function (c) {
               return Number(c.id) === id;
             });
-            if (index === -1) _this32.clients.push(fallback);else _this32.$set(_this32.clients, index, fallback);
-          case 4:
-            // Normalize IDs because API responses can contain string IDs.
-            _this32.clients = _this32.clients.map(function (c) {
-              return _objectSpread(_objectSpread({}, c), {}, {
-                id: Number(c.id)
-              });
-            });
-            if (!_this32.clients.some(function (c) {
-              return Number(c.id) === id;
-            })) {
-              _this32.clients.push({
-                id: id,
-                name: raw.name || '',
-                phone: raw.phone || '',
-                email: raw.email || ''
-              });
+            if (index !== -1) {
+              _this32.$set(_this32.clients, index, _objectSpread(_objectSpread({}, _this32.clients[index]), customer));
+            } else {
+              _this32.clients.push(customer);
             }
-            customer = _this32.clients.find(function (c) {
-              return Number(c.id) === id;
-            });
-            _this32.client_name = customer ? customer.name : raw.name || '';
 
-            // The option MUST exist before setting the selected value.
-            // Then remount both desktop/mobile selects so vue-select cannot retain
-            // its previous internal value.
+            // Select the new customer.
+            _this32.client_name = customer.name;
+            _this32.selectedClientId = id;
+
+            // Rebuild desktop and mobile v-select components.
+            _this32.customerSelectKey += 1;
+            _context10.n = 3;
+            return _this32.$nextTick();
+          case 3:
+            _context10.n = 4;
+            return _this32.onClientSelected(id);
+          case 4:
+            // Set Loyalty Card price for newly created customer
+            _this32.sale.shipping = 99;
+
+            // Recalculate sale total
+            _this32.CalculTotal();
             _context10.n = 5;
             return _this32.$nextTick();
           case 5:
-            _this32.selectedClientId = id;
-            _this32.client_name = customer ? customer.name : raw.name || '';
-            _this32.customerSelectKey += 1;
-            _context10.n = 6;
-            return _this32.$nextTick();
-          case 6:
-            _context10.n = 7;
-            return _this32.onClientSelected(id);
-          case 7:
-            _context10.n = 8;
-            return _this32.$nextTick();
-          case 8:
-            _this32.$forceUpdate();
+            console.log('New customer added to Vue clients:', customer);
+            console.log('Selected customer ID:', _this32.selectedClientId);
             return _context10.a(2, true);
         }
-      }, _callee10, null, [[1, 3]]);
+      }, _callee10);
     }))();
   }), "onClientSelected", function onClientSelected(selectedClientId) {
     var _this33 = this;
     return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee11() {
-      var id, client, response, data, _response, _data, _t9, _t0;
+      var id, client, response, data, _response, _data, _t8, _t9;
       return _regenerator().w(function (_context11) {
         while (1) switch (_context11.p = _context11.n) {
           case 0:
@@ -4366,8 +4354,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             break;
           case 5:
             _context11.p = 5;
-            _t9 = _context11.v;
-            console.error("Error fetching client points:", _t9);
+            _t8 = _context11.v;
+            console.error("Error fetching client points:", _t8);
           case 6:
             _context11.p = 6;
             _context11.n = 7;
@@ -4381,8 +4369,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             break;
           case 8:
             _context11.p = 8;
-            _t0 = _context11.v;
-            console.error("Error fetching client credit limit:", _t0);
+            _t9 = _context11.v;
+            console.error("Error fetching client credit limit:", _t9);
             _this33.selectedClientCreditLimit = 0;
             _this33.selectedClientNetBalance = 0;
           case 9:
@@ -4847,160 +4835,175 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     nprogress__WEBPACK_IMPORTED_MODULE_0___default().start();
     nprogress__WEBPACK_IMPORTED_MODULE_0___default().set(0.1);
     this.SubmitProcessing = true;
-    this.$refs.Quick_Add_Customer_Form && this.$refs.Quick_Add_Customer_Form.validate().then(function (success) {
+    var form = this.$refs.Quick_Add_Customer_Form;
+    if (!form) {
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      this.SubmitProcessing = false;
+      return;
+    }
+    form.validate().then(function (success) {
       if (!success) {
         nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
         _this38.SubmitProcessing = false;
         _this38.makeToast("danger", _this38.$t("Please_fill_the_form_correctly"), _this38.$t("Failed"));
         return;
       }
-      if (_this38.client.id) {
-        axios.put("clients/".concat(_this38.client.id), _this38.client).then(/*#__PURE__*/function () {
-          var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee13(response) {
-            var selectedId, responseClient, fallbackClient, updatedClient, index, listResponse, freshClients, freshCustomer, _t1;
-            return _regenerator().w(function (_context13) {
-              while (1) switch (_context13.p = _context13.n) {
-                case 0:
-                  selectedId = Number(_this38.client.id); // The PUT endpoint may return the client directly, inside
-                  // `client`, or inside `data`. Support all three forms.
-                  responseClient = response.data && response.data.client ? response.data.client : response.data && response.data.data && response.data.data.id ? response.data.data : response.data;
-                  fallbackClient = _objectSpread(_objectSpread({}, _this38.client), {}, {
-                    id: selectedId
-                  });
-                  updatedClient = _objectSpread(_objectSpread({}, fallbackClient), responseClient && _typeof(responseClient) === 'object' ? responseClient : {});
-                  updatedClient.id = Number(updatedClient.id || selectedId);
 
-                  // IMPORTANT: customerOptions is computed from this.clients.
-                  // Updating only the modal/form does NOT update the select.
-                  // Replace the matching array item reactively.
-                  index = (_this38.clients || []).findIndex(function (c) {
-                    return Number(c.id) === selectedId;
-                  });
-                  if (index !== -1) {
-                    _this38.$set(_this38.clients, index, _objectSpread(_objectSpread(_objectSpread({}, _this38.clients[index]), updatedClient), {}, {
+      // ==========================================
+      // UPDATE EXISTING CUSTOMER
+      // ==========================================
+
+      if (_this38.client.id) {
+        var selectedId = Number(_this38.client.id);
+
+        // Copy form data before sending the request.
+        var payload = _objectSpread(_objectSpread({}, _this38.client), {}, {
+          id: selectedId
+        });
+        axios.put("clients/".concat(selectedId), payload).then(/*#__PURE__*/function () {
+          var _ref9 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee13(response) {
+            var responseData, responseCustomer, updatedCustomer, customerIndex;
+            return _regenerator().w(function (_context13) {
+              while (1) switch (_context13.n) {
+                case 0:
+                  responseData = response.data || {}; // Support different Laravel response structures.
+                  responseCustomer = responseData.client || responseData.data && responseData.data.client || (responseData.data && responseData.data.id ? responseData.data : {}); // Use submitted form values if API does not return
+                  // the updated customer object.
+                  updatedCustomer = _objectSpread(_objectSpread(_objectSpread({}, payload), responseCustomer || {}), {}, {
+                    id: selectedId
+                  }); // Find customer in the existing Vue array.
+                  customerIndex = _this38.clients.findIndex(function (customer) {
+                    return Number(customer.id) === selectedId;
+                  }); // Update customer reactively.
+                  if (customerIndex !== -1) {
+                    _this38.$set(_this38.clients, customerIndex, _objectSpread(_objectSpread(_objectSpread({}, _this38.clients[customerIndex]), updatedCustomer), {}, {
                       id: selectedId
                     }));
                   } else {
-                    _this38.clients.push(_objectSpread(_objectSpread({}, updatedClient), {}, {
-                      id: selectedId
-                    }));
+                    _this38.clients.push(updatedCustomer);
                   }
 
                   // Keep the edited customer selected.
                   _this38.selectedClientId = selectedId;
-                  _this38.client_name = updatedClient.name || _this38.client.name || '';
+                  _this38.client_name = updatedCustomer.name || "";
 
-                  // Refresh the complete list from the server so the dropdown
-                  // contains the exact saved values, including backend changes.
-                  _context13.p = 1;
+                  // Refresh desktop and mobile v-select.
+                  _this38.customerSelectKey++;
+                  _context13.n = 1;
+                  return _this38.$nextTick();
+                case 1:
                   _context13.n = 2;
-                  return axios.get('get_clients_without_paginate');
-                case 2:
-                  listResponse = _context13.v;
-                  freshClients = Array.isArray(listResponse.data) ? listResponse.data : listResponse.data && Array.isArray(listResponse.data.clients) ? listResponse.data.clients : null;
-                  if (freshClients) {
-                    _this38.clients = freshClients.map(function (c) {
-                      return _objectSpread(_objectSpread({}, c), {}, {
-                        id: Number(c.id)
-                      });
-                    });
-                  }
-                  _context13.n = 4;
-                  break;
-                case 3:
-                  _context13.p = 3;
-                  _t1 = _context13.v;
-                  console.warn('Customer list refresh failed after update:', _t1);
-                case 4:
-                  // Make sure the selected customer still exists after the
-                  // complete list replacement, then rebuild both v-selects.
-                  freshCustomer = (_this38.clients || []).find(function (c) {
-                    return Number(c.id) === selectedId;
-                  });
-                  if (freshCustomer) {
-                    _this38.selectedClientId = selectedId;
-                    _this38.client_name = freshCustomer.name || _this38.client_name;
-                  }
-                  _this38.customerSelectKey += 1;
-                  _context13.n = 5;
-                  return _this38.$nextTick();
-                case 5:
-                  _context13.n = 6;
                   return _this38.onClientSelected(selectedId);
-                case 6:
-                  _context13.n = 7;
+                case 2:
+                  _context13.n = 3;
                   return _this38.$nextTick();
-                case 7:
+                case 3:
+                  // Close progress.
                   nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
                   _this38.SubmitProcessing = false;
                   _this38.makeToast("success", _this38.$t("Successfully_Updated"), _this38.$t("Success"));
+
+                  // Close modal.
                   _this38.$bvModal.hide("Quick_Add_Customer");
-                case 8:
+                case 4:
                   return _context13.a(2);
               }
-            }, _callee13, null, [[1, 3]]);
+            }, _callee13);
           }));
           return function (_x3) {
             return _ref9.apply(this, arguments);
           };
-        }())["catch"](function () {
+        }())["catch"](function (error) {
+          console.error("Customer update error:", error);
           nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
           _this38.SubmitProcessing = false;
-          _this38.makeToast("danger", _this38.$t("InvalidData"), _this38.$t("Failed"));
+          var responseData = error.response && error.response.data ? error.response.data : {};
+          var errorMessage = responseData.message || _this38.$t("InvalidData");
+
+          // Display Laravel validation errors.
+          if (responseData.errors) {
+            var validationErrors = Object.values(responseData.errors).reduce(function (messages, value) {
+              return messages.concat(Array.isArray(value) ? value : [value]);
+            }, []);
+            if (validationErrors.length) {
+              errorMessage = validationErrors.join("\n");
+            }
+          }
+          _this38.makeToast("danger", errorMessage, _this38.$t("Failed"));
         });
-      } else axios.post("clients", _this38.client).then(function (response) {
-        var _newClient$client;
-        var newClient = response.data;
+      }
 
-        // If there are custom field values from the quick-add form, persist them
-        var clientId = Number(newClient.id) || Number((_newClient$client = newClient.client) === null || _newClient$client === void 0 ? void 0 : _newClient$client.id);
-        var hasCustoms = clientId && _this38.quickAddCustomFieldValues && Object.keys(_this38.quickAddCustomFieldValues).length > 0;
-        var afterCustoms = /*#__PURE__*/function () {
-          var _ref0 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee14() {
-            return _regenerator().w(function (_context14) {
-              while (1) switch (_context14.n) {
-                case 0:
-                  nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-                  _this38.SubmitProcessing = false;
-                  _context14.n = 1;
-                  return _this38.selectNewCustomer(newClient);
-                case 1:
-                  console.log("FINAL selectedClientId:", _this38.selectedClientId);
+      // ==========================================
+      // CREATE NEW CUSTOMER
+      // ==========================================
+      else {
+        axios.post("clients", _this38.client).then(function (response) {
+          var _newClient$client;
+          var newClient = response.data;
 
-                  // this.makeToast(
-                  //     "success",
-                  //     this.$t("Successfully_Created"),
-                  //     this.$t("Success")
-                  // );
+          // Get newly created customer ID.
+          var clientId = Number(newClient.id) || Number((_newClient$client = newClient.client) === null || _newClient$client === void 0 ? void 0 : _newClient$client.id);
 
-                  _this38.$bvModal.hide("Quick_Add_Customer");
-                  _this38.reset_Form_client();
-                  _this38.quickAddCustomFieldValues = {};
-                case 2:
-                  return _context14.a(2);
-              }
-            }, _callee14);
-          }));
-          return function afterCustoms() {
-            return _ref0.apply(this, arguments);
-          };
-        }();
-        if (hasCustoms) {
-          axios.post("custom-field-values", {
-            entity_type: "App\\Models\\Client",
-            entity_id: clientId,
-            values: _this38.quickAddCustomFieldValues
-          }).then(afterCustoms)["catch"](function () {
-            return afterCustoms();
-          });
-        } else {
-          afterCustoms();
-        }
-      })["catch"](function () {
-        nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
-        _this38.SubmitProcessing = false;
-        _this38.makeToast("danger", _this38.$t("InvalidData"), _this38.$t("Failed"));
-      });
+          // Check custom field values.
+          var hasCustoms = clientId && _this38.quickAddCustomFieldValues && Object.keys(_this38.quickAddCustomFieldValues).length > 0;
+          var afterCustoms = /*#__PURE__*/function () {
+            var _ref0 = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee14() {
+              return _regenerator().w(function (_context14) {
+                while (1) switch (_context14.n) {
+                  case 0:
+                    nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+                    _this38.SubmitProcessing = false;
+
+                    // Select newly created customer.
+                    _context14.n = 1;
+                    return _this38.selectNewCustomer(newClient);
+                  case 1:
+                    console.log("FINAL selectedClientId:", _this38.selectedClientId);
+
+                    // Close modal.
+                    _this38.$bvModal.hide("Quick_Add_Customer");
+
+                    // Reset customer form.
+                    _this38.reset_Form_client();
+
+                    // Reset custom fields.
+                    _this38.quickAddCustomFieldValues = {};
+                  case 2:
+                    return _context14.a(2);
+                }
+              }, _callee14);
+            }));
+            return function afterCustoms() {
+              return _ref0.apply(this, arguments);
+            };
+          }();
+
+          // Save custom field values if available.
+          if (hasCustoms) {
+            axios.post("custom-field-values", {
+              entity_type: "App\\Models\\Client",
+              entity_id: clientId,
+              values: _this38.quickAddCustomFieldValues
+            }).then(afterCustoms)["catch"](function (error) {
+              console.error("Custom field save error:", error);
+              afterCustoms();
+            });
+          } else {
+            afterCustoms();
+          }
+        })["catch"](function (error) {
+          var _error$response;
+          console.error("Customer creation error:", error);
+          nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+          _this38.SubmitProcessing = false;
+          var errorMessage = ((_error$response = error.response) === null || _error$response === void 0 || (_error$response = _error$response.data) === null || _error$response === void 0 ? void 0 : _error$response.message) || _this38.$t("InvalidData");
+          _this38.makeToast("danger", errorMessage, _this38.$t("Failed"));
+        });
+      }
+    })["catch"](function (error) {
+      console.error("Customer form validation error:", error);
+      nprogress__WEBPACK_IMPORTED_MODULE_0___default().done();
+      _this38.SubmitProcessing = false;
     });
   }), "New_Client", function New_Client() {
     this.reset_Form_client();
@@ -5716,7 +5719,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   }), "trySyncOfflineSales", function trySyncOfflineSales() {
     var _this44 = this;
     return _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee15() {
-      var syncedCount, queue, i, sale, basePayload, normalizedDetails, payload, response, isNetworkError, msg, _t10, _t11;
+      var syncedCount, queue, i, sale, basePayload, normalizedDetails, payload, response, isNetworkError, msg, _t0, _t1;
       return _regenerator().w(function (_context15) {
         while (1) switch (_context15.p = _context15.n) {
           case 0:
@@ -5742,7 +5745,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             break;
           case 4:
             _context15.p = 4;
-            _t10 = _context15.v;
+            _t0 = _context15.v;
           case 5:
             _this44.offlineSyncInProgress = true;
             // Notify UI (via global event bus) that POS offline sync has started
@@ -5822,8 +5825,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             break;
           case 11:
             _context15.p = 11;
-            _t11 = _context15.v;
-            isNetworkError = !_t11.response || _t11.message === 'Network Error';
+            _t1 = _context15.v;
+            isNetworkError = !_t1.response || _t1.message === 'Network Error';
             if (typeof window !== 'undefined') {
               try {
                 if (window.navigator && window.navigator.onLine === false) {
@@ -5837,8 +5840,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
             }
             return _context15.a(3, 14);
           case 12:
-            msg = _t11.response && _t11.response.data && (_t11.response.data.message || _t11.response.data.error) || _t11.message || 'Unknown error';
-            _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsFailed(sale.id, msg, _t11.response && _t11.response.status);
+            msg = _t1.response && _t1.response.data && (_t1.response.data.message || _t1.response.data.error) || _t1.message || 'Unknown error';
+            _utils__WEBPACK_IMPORTED_MODULE_4__["default"].offlinePos.markSaleAsFailed(sale.id, msg, _t1.response && _t1.response.status);
             _this44.offlineLastSyncError = msg;
             // For non-network errors, rollback local shadow stock to keep UI consistent
             if (!isNetworkError) {
